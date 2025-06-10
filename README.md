@@ -1,1 +1,1 @@
-# styleU
+to start service run "make run"
