@@ -1,34 +1,52 @@
 import httpx
-from fastapi import UploadFile, File
+from fastapi import UploadFile, File, HTTPException
 
 from config import (
-    PREDICT_BODY_TYPE_URL,
+    PREDICT_BODY_TYPE_ML_URL,
+    PREDICT_BODY_TYPE_LLM_URL,
     PREDICT_COLOR_TYPE_URL,
 )
 
 
 async def analyze_body_type(
-    gender: str,
     height: float,
-    weight: float,
-    chest: float,
+    bust: float,
     waist: float,
     hip: float,
 ):
-    return {}
-    '''
-    async with httpx.AsyncClient() as client:
-        response = await client.post(PREDICT_BODY_TYPE_URL, json={
-            "gender": gender,
-            "height": height,
-            "weight": weight,
-            "chest": chest,
-            "waist": waist,
-            "hip": hip
-        })
-        response.raise_for_status()
-        return response.json()
-    '''
+    try:
+        async with httpx.AsyncClient() as client:
+            ml_response = await client.post(
+                PREDICT_BODY_TYPE_ML_URL, 
+                json={
+                    "bust": bust,
+                    "waist": waist,
+                    "hips": hip,
+                    "height": height,
+                }
+            )
+            ml_response.raise_for_status()
+            body_type = ml_response.json()["body_type"]
+
+            llm_response = await client.post(
+                PREDICT_BODY_TYPE_LLM_URL, 
+                json={
+                    "body_type": body_type,
+                }
+            )
+            llm_response.raise_for_status()
+            recommendation = llm_response.json()
+
+            return {
+                "body_type": body_type,
+                "recommendation": recommendation,
+            }
+    except httpx.RequestError as e:
+        raise HTTPException(status_code=502, detail=f"Request error: {str(e)}")
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(status_code=e.response.status_code, detail=f"Service error: {e.response.text}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
 
 
 async def analyze_color_type(

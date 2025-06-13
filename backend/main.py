@@ -59,10 +59,8 @@ def login():
         Analyzes the user's body type based on physical parameters.
 
         Request Body (JSON)
-        - gender: "male" or "female" (string)
         - height: Height in centimeters, e.g. 170 (float, range: 0–300)
-        - weight: Weight in kilograms, e.g. 60 (float, range: 0–500)
-        - chest: Chest circumference in centimeters (float, range: 0–300)
+        - bust: Chest circumference in centimeters (float, range: 0–300)
         - waist: Waist circumference in centimeters (float, range: 0–300)
         - hip: Hip circumference in centimeters (float, range: 0–300)
 
@@ -76,10 +74,8 @@ def login():
 async def analyze_figure(request: FigureRequest):
     try:
         result = await analyze_body_type(
-            gender=request.gender.value,
             height=request.height,
-            weight=request.weight,
-            chest=request.chest,
+            bust=request.bust,
             waist=request.waist,
             hip=request.hip,
         )
