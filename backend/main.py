@@ -77,7 +77,7 @@ async def analyze_figure(request: FigureRequest):
             height=request.height,
             bust=request.bust,
             waist=request.waist,
-            hip=request.hip,
+            hips=request.hips,
         )
         return JSONResponse(content=result)
     except Exception as e:
