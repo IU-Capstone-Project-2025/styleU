@@ -13,3 +13,19 @@ To start the service, run:
 
 ```bash
 make run
+```
+To start the ML service, run:
+```
+cd ml-service
+uvicorn app.main:app --reload --port 8000
+```
+To start LLM service, first download LLM model:
+```
+curl -fsSL https://ollama.com/install.sh | sh
+ollama pull mistral
+```
+And then run:
+```
+cd llm-service
+uvicorn app.main:app --reload --port 8001
+```

@@ -5,9 +5,34 @@ services:
       dockerfile: backend/Dockerfile
     ports:
       - "5000:5000" 
+    networks:
+      - internal
+
   frontend:
     build:
       context: .
       dockerfile: frontend/Dockerfile
     ports:
-      - "5173:5173" 
+      - "5173:5173"
+    networks:
+      - internal
+
+  # llm:
+  #   build:
+  #     context: .
+  #     dockerfile: llm-service/Dockerfile
+  #   ports:
+  #     - "8001:8001" 
+  #   networks:
+  #     - internal
+
+  # ml:
+  #   build:
+  #     context: .
+  #     dockerfile: ml-service/Dockerfile
+  #   ports:
+  #     - "8000:8000"
+  #   networks:
+  #     - internal
+networks:
+  internal:
