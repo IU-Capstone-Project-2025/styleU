@@ -7,9 +7,17 @@ from skimage.color import rgb2hsv
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "../model/random_forest_model.pkl")
 model = joblib.load(MODEL_PATH)
 
+label_map = {
+    'autumn': 0,
+    'spring': 1,
+    'summer': 2,
+    'winter': 3
+}
+inv_label_map = {v: k for k, v in label_map.items()}
+
 def predict_color_type(features: list[float]) -> str:
     prediction = model.predict([features])[0]
-    return prediction
+    return inv_label_map[prediction]
 
 def get_features_from_image(image_path: str) -> list[float]:
     X = []
