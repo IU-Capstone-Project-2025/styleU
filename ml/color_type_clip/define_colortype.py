@@ -1,32 +1,41 @@
 import joblib
 from PIL import Image
 import numpy as np
+import os
 from skimage.color import rgb2hsv
 
-path = input("Enter the path to the image: ")
+test_folder = "tests_cleaned_back"
+X = []
+image_paths = []
 
-model = joblib.load('C:/Users/Kistanov/Desktop/capstone/styleU/ml/color_type_clip/random_forest.pkl')
+model = joblib.load('random_forest_2.pkl')
 X = []
 
-image = Image.open(path).convert('RGB')
-image_np = np.array(image.resize((128, 128))) / 255.0 
+for filename in os.listdir(test_folder):
+    if filename.lower().endswith(('.jpg', '.jpeg', '.png')):
+        path = os.path.join(test_folder, filename)
+        image_paths.append(path)
 
-mean_rgb = image_np.mean(axis=(0, 1))  # mean rgb
-hsv = rgb2hsv(image_np)                # convert to HSV
-mean_hsv = hsv.mean(axis=(0, 1))       # mean hsv 
-std_rgb = image_np.std(axis=(0, 1))    # std rgb
-std_hsv = hsv.std(axis=(0, 1))         # std hsv
+        image = Image.open(path).convert('RGB')
+        image_np = np.array(image.resize((128, 128))) / 255.0
 
-features = np.concatenate([mean_rgb, std_rgb, mean_hsv, std_hsv])
+        mean_rgb = image_np.mean(axis=(0, 1))  # mean rgb
+        hsv = rgb2hsv(image_np)                # convert to HSV
+        mean_hsv = hsv.mean(axis=(0, 1))       # mean hsv
+        std_rgb = image_np.std(axis=(0, 1))    # std rgb
+        std_hsv = hsv.std(axis=(0, 1))         # std hsv
 
-h_hist, _ = np.histogram(hsv[:, :, 0], bins=8, range=(0, 1), density=True)
-s_hist, _ = np.histogram(hsv[:, :, 1], bins=8, range=(0, 1), density=True)
-v_hist, _ = np.histogram(hsv[:, :, 2], bins=8, range=(0, 1), density=True)
+        features = np.concatenate([mean_rgb, std_rgb, mean_hsv, std_hsv])
 
-features = np.concatenate([features, h_hist, s_hist, v_hist])
+        h_hist, _ = np.histogram(hsv[:, :, 0], bins=8, range=(0, 1), density=True)
+        s_hist, _ = np.histogram(hsv[:, :, 1], bins=8, range=(0, 1), density=True)
+        v_hist, _ = np.histogram(hsv[:, :, 2], bins=8, range=(0, 1), density=True)
 
-X.append(features)
+        features = np.concatenate([features, h_hist, s_hist, v_hist])
 
-prediction = model.predict(X)
+        X.append(features)
 
-print("Predicted color type: ", prediction)
+predictions = model.predict(X)
+
+for path, pred in zip(image_paths, predictions):
+    print(f"{os.path.basename(path)}: Predicted color type → {pred}")
