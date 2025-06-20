@@ -3,3 +3,7 @@ uvicorn
 scikit-learn
 joblib
 pydantic
+os
+Pillow
+numpy
+scikit-image
