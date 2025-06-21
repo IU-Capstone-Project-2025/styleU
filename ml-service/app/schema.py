@@ -8,3 +8,9 @@ class BodyParams(BaseModel):
 
 class PredictionResult(BaseModel):
     body_type: str
+
+class ImagePath(BaseModel):
+    path: str
+
+class PredictionColorResult(BaseModel):
+    color_type: str

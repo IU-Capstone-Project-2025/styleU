@@ -4,7 +4,8 @@ from PIL import Image
 import numpy as np
 from skimage.color import rgb2hsv
 
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "../model/random_forest_model.pkl")
+BASE_DIR = os.path.dirname(__file__)
+MODEL_PATH = os.path.join(BASE_DIR, "..", "model", "random_forest.pkl")
 model = joblib.load(MODEL_PATH)
 
 label_map = {
@@ -15,7 +16,7 @@ label_map = {
 }
 inv_label_map = {v: k for k, v in label_map.items()}
 
-def predict_color_type(features: list[float]) -> str:
+def predict_color_types(features: list[float]) -> str:
     prediction = model.predict([features])[0]
     return inv_label_map[prediction]
 
