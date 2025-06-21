@@ -1,5 +1,5 @@
 import './index.css';
-import background from './assets/background2.png';
+import background from './assets/background.jpeg';
 import { useEffect, useState } from 'react';
 import Navbar from './components/Navbar';
 import Home from './components/Home';
@@ -21,12 +21,18 @@ function App() {
       {showNavbar && <Navbar />}
 
       <div
-        style={{ backgroundImage: `url(${background})` }}
-        className="bg-cover bg-center bg-no-repeat min-h-screen w-full"
+        style={{
+          backgroundImage: `url(${background})`,
+          backgroundSize: 'cover',
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'center -80px',
+        }}
+        className="w-full min-h-screen"
       >
         <Home />
         <About />
       </div>
+
     </div>
   );
 }
