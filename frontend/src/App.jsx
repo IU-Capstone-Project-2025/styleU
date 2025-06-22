@@ -1,9 +1,12 @@
 import './index.css';
 import background from './assets/background.jpeg';
+import colorBodyBackground from './assets/color-body-background.png'; // импортируем фон
 import { useEffect, useState } from 'react';
 import Navbar from './components/Navbar';
 import Home from './components/Home';
 import About from './components/About';
+import ColorType from './components/ColorType';
+import BodyShape from './components/BodyShape';
 
 function App() {
   const [showNavbar, setShowNavbar] = useState(false);
@@ -27,12 +30,24 @@ function App() {
           backgroundRepeat: 'no-repeat',
           backgroundPosition: 'center -80px',
         }}
-        className="w-full min-h-screen"
+        className="w-full"
       >
         <Home />
         <About />
       </div>
 
+      <div
+        style={{
+          backgroundImage: `url(${colorBodyBackground})`,
+          backgroundSize: 'cover',
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'center center',
+          padding: '50px 0',
+        }}
+      >
+        <ColorType />
+        <BodyShape />
+      </div>
     </div>
   );
 }

@@ -54,12 +54,12 @@ function About() {
     <section
       id="about"
       className="px-4 pb-12 font-anaheim"
-      style={{ paddingTop: '10vh', scrollBehavior: 'smooth' }}
+      style={{ paddingTop: '25vh', scrollBehavior: 'smooth' }}
     >
 
       {/* Header & Nav Dots */}
-      <div className="flex flex-col items-center justify-center text-center mb-10">
-        <h2 className="text-3xl md:text-4xl font-comfortaa font-bold mb-6 md:mb-5">
+      <div className="flex flex-col items-center justify-center text-center mb-4">
+        <h2 className="text-4xl md:text-5xl font-comfortaa font-normal style={{ letterSpacing: '2.0em' }}">
           Perfect wardrobe in just few steps.
         </h2>
         <p className="text-gray-500 font-anaheim text-base md:text-lg mb-8 md:mb-5">
@@ -101,7 +101,7 @@ function About() {
       </div>
 
       {/* Content */}
-      <div className="flex flex-col md:flex-row items-center justify-center gap-14 px-6 md:px-10">
+      <div className="flex flex-col md:flex-row items-center justify-center gap-10 px-6 md:px-10">
         <div className="text-left max-w-lg">
           <h3 className="text-xl font-bold mb-3">{currentStep + 1}. {title}</h3>
           <p className="text-gray-700 mb-6 whitespace-pre-line leading-relaxed">{description}</p>
