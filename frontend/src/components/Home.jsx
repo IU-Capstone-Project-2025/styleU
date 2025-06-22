@@ -1,10 +1,20 @@
 import React from 'react';
+import arrow from '../assets/arrowWhite.png';
 
 function Home() {
   const scrollToAbout = () => {
     const aboutSection = document.getElementById('about');
     if (aboutSection) {
       aboutSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const scrollToLogin = () => {
+    const loginSection = document.getElementById('login');
+    if (loginSection) {
+      const offset = 10;
+      const y = loginSection.getBoundingClientRect().top + window.pageYOffset - offset;
+      window.scrollTo({ top: y, behavior: 'smooth' });
     }
   };
 
@@ -32,14 +42,13 @@ function Home() {
           </h2>
 
           <div className="relative flex w-fit mx-auto">
-            <button
-              className="bg-[#EEECEA] text-black pl-12 pr-20 py-3 text-lg font-anaheim rounded-full shadow-md z-10"
-            >
+            <span className="bg-[#EEECEA] text-black pl-12 pr-20 py-3 text-lg font-anaheim rounded-full shadow-md z-10">
               Try it for free!
-            </button>
+            </span>
 
             <button
-              className="bg-black text-white pl-16 pr-16 py-3 text-lg font-anaheim rounded-full shadow-md -ml-10 z-20"
+              onClick={scrollToLogin}
+              className="bg-black text-white pl-16 pr-16 py-3 text-lg font-anaheim rounded-full shadow-md -ml-10 z-20 hover:opacity-80 transition"
             >
               LOGIN
             </button>
@@ -59,10 +68,10 @@ function Home() {
       <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 cursor-pointer animate-bounce z-10">
         <button
           onClick={scrollToAbout}
-          className="w-10 h-10 rounded-full bg-black text-white text-xl flex items-center justify-center shadow-md hover:scale-110 transition"
+          className="w-10 h-10 rounded-full bg-black flex items-center justify-center shadow-md hover:scale-110 transition"
           aria-label="Scroll to About"
         >
-          ↓
+          <img src={arrow} alt="Down arrow" className="w-4 h-4" />
         </button>
       </div>
     </section>

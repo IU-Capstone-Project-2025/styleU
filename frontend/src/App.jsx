@@ -1,12 +1,13 @@
 import './index.css';
 import background from './assets/background.jpeg';
-import colorBodyBackground from './assets/color-body-background.png'; // импортируем фон
+import colorBodyBackground from './assets/color-body-background.png';
 import { useEffect, useState } from 'react';
 import Navbar from './components/Navbar';
 import Home from './components/Home';
 import About from './components/About';
 import ColorType from './components/ColorType';
 import BodyShape from './components/BodyShape';
+import Login from './components/Login';
 
 function App() {
   const [showNavbar, setShowNavbar] = useState(false);
@@ -28,7 +29,7 @@ function App() {
           backgroundImage: `url(${background})`,
           backgroundSize: 'cover',
           backgroundRepeat: 'no-repeat',
-          backgroundPosition: 'center -80px',
+          backgroundPosition: 'center -120px',
         }}
         className="w-full"
       >
@@ -47,6 +48,16 @@ function App() {
       >
         <ColorType />
         <BodyShape />
+      </div>
+
+      <div
+        style={{
+          background: 'white',
+          padding: '50px 0',
+          minHeight: '80vh',
+        }}
+      >
+        <Login />
       </div>
     </div>
   );

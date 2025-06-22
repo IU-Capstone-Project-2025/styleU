@@ -8,13 +8,13 @@ export default function ColorType() {
 
   const colorData = {
     type: "DEEP AUTUMN",
-    meaning: "Deep Autumn in color analysis refers to a color season that is characterized by a dark, warm palette with high contrast.",
+    meaning: "Deep Autumn in color analysis refers to a color season that is characterized by a dark, warm palette with high contrast.",
     suitableColors: {
-      description: "Deep Autumn individuals thrive in rich, deep, and warm colors that evoke the essence of fall.",
+      description: "Deep Autumn individuals thrive in rich, deep, and warm colors that evoke the essence of fall. Their palette includes shades like deep teal, warm navy, forest green, olive green, deep aubergine, warm plum, maroon, warm rose, brick red, dark mauve, chocolate brown, dark olive, and warm taupe.",
       palette: ['#2C4A52', '#537072', '#8E9B97', '#F4EBDB', '#D4B483', '#A26769']
     },
     unsuitableColors: {
-      description: "Deep Autumns are light and cool hues, as these can wash out their natural warmth and contrast.",
+      description: "Deep Autumns are light and cool hues, as these can wash out their natural warmth and contrast. They should generally avoid pale pastels, icy blues and grays, and muted shades",
       palette: ['#F8F4E3', '#D8D8D8', '#A5D8FF', '#C8E7F5', '#E8D5C4', '#F3D7D7']
     }
   };
@@ -49,9 +49,7 @@ export default function ColorType() {
     <section 
       id="color" 
       className="px-4 pb-12 font-anaheim relative min-h-screen"
-      style={{
-        paddingTop: '15vh'  // здесь убран фон, только отступ сверху
-      }}
+      style={{ paddingTop: '15vh' }}
     >      
       <div className="max-w-6xl mx-auto relative z-10">
         <div className="text-center mb-12">
@@ -64,7 +62,7 @@ export default function ColorType() {
         </div>
 
         <div className="flex flex-col md:flex-row gap-8 items-start mt-12">
-          {/* Левая часть - изображение + кнопка */}
+          {/* Left - image + upload button */}
           <div className="w-full md:w-[40%] flex flex-col items-start">
             {!image ? (
               <div 
@@ -89,13 +87,11 @@ export default function ColorType() {
                 <img src={image} alt="Uploaded" className="w-full h-full object-cover" />
               </div>
             )}
-            
+
             <button 
               onClick={analyzeImage}
               disabled={!image || loading}
-              className={`mt-6 w-full max-w-[320px] py-3 rounded-full font-medium transition
-                ${image ? 'bg-[rgba(221,221,221,0.35)] text-black hover:bg-[rgba(221,221,221,0.5)]' : 'bg-gray-200 text-gray-500 cursor-not-allowed'}
-              `}
+              className={`mt-6 w-full max-w-[320px] py-3 rounded-full font-medium transition ${image ? 'bg-[rgba(221,221,221,0.35)] text-black hover:bg-[rgba(221,221,221,0.35)]' : 'bg-[rgba(221,221,221,0.35)] text-black cursor-not-allowed'}`}
               style={{
                 backdropFilter: 'blur(4px)',
                 boxShadow: '0 4px 4px 0 rgba(0, 0, 0, 0.25)'
@@ -105,16 +101,14 @@ export default function ColorType() {
             </button>
           </div>
 
-          {/* Правая часть - результаты */}
+          {/* Right - results */}
           <div className="w-full md:w-[60%] flex flex-col items-end space-y-6">
             <div className="w-full max-w-full">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="md:text-2xl">Your color type is</h3>
-                {colorType && (
-                  <h4 className="text-red-500 text-2xl uppercase font-medium ml-auto" style={{ textAlign: 'right' }}>
-                    {colorType.type}
-                  </h4>
-                )}
+                <h4 className="text-red-500 text-2xl uppercase font-medium ml-auto" style={{ textAlign: 'right' }}>
+                  {colorType?.type || 'UNKNOWN'}
+                </h4>
               </div>
 
               {colorType ? (
@@ -126,13 +120,13 @@ export default function ColorType() {
 
                     if (section === 'meaning') {
                       title = 'What does it mean?';
-                      content = <div className="p-4" style={{ color: '#000000' }}>{colorType.meaning}</div>;
+                      content = <div className="p-4 pt-0 text-black">{colorType.meaning}</div>;
                     } else if (section === 'suitableColors') {
                       title = 'What colors suit you?';
                       content = (
-                        <div className="p-4" style={{ color: '#000000' }}>
-                          <p className="mb-3">{colorType.suitableColors.description}</p>
-                          <div className="flex gap-2 mt-3">
+                        <div className="p-4 pt-0 text-black">
+                          <p className="mb-1 mt-1">{colorType.suitableColors.description}</p>
+                          <div className="flex gap-3 mt-3">
                             {colorType.suitableColors.palette.map((color, i) => (
                               <div 
                                 key={i} 
@@ -147,9 +141,9 @@ export default function ColorType() {
                     } else if (section === 'unsuitableColors') {
                       title = "What colors don't suit you?";
                       content = (
-                        <div className="p-4" style={{ color: '#000000' }}>
-                          <p className="mb-3">{colorType.unsuitableColors.description}</p>
-                          <div className="flex gap-2 mt-3">
+                        <div className="p-4 pt-0 text-black">
+                          <p className="mb-4 mt-0">{colorType.unsuitableColors.description}</p>
+                          <div className="flex gap-3 mt-3">
                             {colorType.unsuitableColors.palette.map((color, i) => (
                               <div 
                                 key={i} 
@@ -164,22 +158,25 @@ export default function ColorType() {
                     }
 
                     return (
-                      <div key={section} className="mb-6 rounded-lg overflow-hidden border border-gray-200">
+                      <div key={section} className="mb-6 rounded-lg overflow-hidden border border-gray-200 bg-[rgba(221,221,221,0.35)] transition-all duration-500">
                         <div 
-                          className={`flex justify-between items-center cursor-pointer transition px-4 py-4 bg-gray-50
-                            ${isExpanded ? 'font-semibold' : ''}`}
+                          className={`flex justify-between items-center cursor-pointer px-4 py-4 transition-all duration-300`}
                           onClick={() => toggleSection(section)}
                           style={{
-                            height: isExpanded ? 'auto' : '48px',
-                            minHeight: '48px',
                             userSelect: 'none',
-                            color: 'rgba(0,0,0,0.3)',
+                            color: 'rgba(0,0,0,0.3)'
                           }}
                         >
                           <span>{title}</span>
-                          <span className="text-2xl select-none" style={{ color: 'rgba(0,0,0,0.3)' }}>{isExpanded ? '−' : '+'}</span>
+                          <span className="text-2xl select-none" style={{ color: 'rgba(0,0,0,0.3)' }}>
+                            {isExpanded ? '−' : '+'}
+                          </span>
                         </div>
-                        {isExpanded && content}
+                        <div 
+                          className={`overflow-hidden transition-all duration-200 ease-in-out ${isExpanded ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'}`}
+                        >
+                          {content}
+                        </div>
                       </div>
                     );
                   })}
