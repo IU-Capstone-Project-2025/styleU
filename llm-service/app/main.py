@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from app.llm_client import get_recommendation
 
+
 app = FastAPI()
 
 class LLMRequest(BaseModel):
