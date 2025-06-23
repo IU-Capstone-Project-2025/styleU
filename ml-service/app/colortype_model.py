@@ -17,7 +17,7 @@ label_map = {
 inv_label_map = {v: k for k, v in label_map.items()}
 
 def predict_color_types(features: list[float]) -> str:
-    prediction = model.predict([features])[0]
+    prediction = model.predict(features)[0]
     return inv_label_map[prediction]
 
 def get_features_from_image(image_path: str) -> list[float]:
