@@ -3,3 +3,6 @@ uvicorn
 scikit-learn
 joblib
 pydantic
+Pillow
+numpy
+scikit-image

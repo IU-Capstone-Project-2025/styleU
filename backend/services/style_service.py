@@ -1,4 +1,7 @@
 import httpx
+import tempfile
+import shutil
+import os
 from fastapi import UploadFile, File, HTTPException
 
 from config import (
@@ -52,22 +55,19 @@ async def analyze_body_type(
 async def analyze_color_type(
     file: UploadFile = File(...),
 ):
-    return {}
-    '''
-    async with httpx.AsyncClient() as client:
-        form = httpx.MultipartWriter()
-        form.add_part(
-            file.file,
-            filename=file.filename,
-            name="file",
-            content_type=file.content_type
-        )
+    try:
+        suffix = os.path.splitext(file.filename)[-1]
+        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+            shutil.copyfileobj(file.file, tmp)
+            temp_path = tmp.name
 
-        response = await client.post(
-            PREDICT_COLOR_TYPE_URL,
-            content=await form.read(),
-            headers=form.headers
-        )
-        response.raise_for_status()
-        return response.json()
-    '''
+        async with httpx.AsyncClient() as client:
+            response = await client.post(PREDICT_COLOR_TYPE_URL, json={"path": temp_path})
+            response.raise_for_status()
+            result = response.json()
+
+        return result
+
+    finally:
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
