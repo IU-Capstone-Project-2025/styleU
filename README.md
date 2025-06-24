@@ -24,6 +24,10 @@ To start LLM service, first download LLM model:
 curl -fsSL https://ollama.com/install.sh | sh
 ollama pull mistral
 ```
+Create .env file and paste the key:
+```
+cp .env.example .env
+```
 And then run:
 ```
 cd llm-service
