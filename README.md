@@ -19,12 +19,7 @@ To start the ML service, run:
 cd ml-service
 uvicorn app.main:app --reload --port 8000
 ```
-To start LLM service, first download LLM model:
-```
-curl -fsSL https://ollama.com/install.sh | sh
-ollama pull mistral
-```
-Create .env file and paste the key:
+To start LLM service, create .env file and paste the key:
 ```
 cp .env.example .env
 ```
