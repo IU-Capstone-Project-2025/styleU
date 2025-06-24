@@ -13,10 +13,12 @@ class LLMRequest(BaseModel):
 async def root():
     return {"message": "llm-service is running"}
 
-@app.post("/recommend", response_model=LLMResponse)
+@app.post("/recommend")
 def recommend_outfit(req: LLMRequest):
     result = get_recommendation(req.body_type)
-    # Если пришла ошибка, возвращаем в формате JSON
     if result.startswith("LLM не ответил:"):
-        return {"error": result}
-    return result
+        # Вернем ошибку в корректной структуре, либо выбросим HTTPException
+        from fastapi import HTTPException
+        raise HTTPException(status_code=500, detail=result)
+    return result  # Оборачиваем строку в модель
+
