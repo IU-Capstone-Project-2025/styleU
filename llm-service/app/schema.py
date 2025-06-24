@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
-class PromptRequest(BaseModel):
-    prompt: str
+class LLMRequest(BaseModel):
+    body_type: str  # Пример: "груша", "яблоко", "песочные часы"
 
 class LLMResponse(BaseModel):
-    response: str
+    recommendation: str
