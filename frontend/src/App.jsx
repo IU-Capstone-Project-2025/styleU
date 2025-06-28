@@ -1,33 +1,64 @@
-import { useState } from 'react';
+import './index.css';
+import background from './assets/background.jpeg';
+import colorBodyBackground from './assets/color-body-background.png';
+import { useEffect, useState } from 'react';
+import Navbar from './components/Navbar';
+import Home from './components/Home';
+import About from './components/About';
+import ColorType from './components/ColorType';
+import BodyShape from './components/BodyShape';
+import Login from './components/Login';
 
 function App() {
-  const [loading, setLoading] = useState(false);
+  const [showNavbar, setShowNavbar] = useState(false);
 
-  const handleClick = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch('http://localhost:5000/api/hello');
-      const data = await response.text();
-      alert(data);
-    } catch (error) {
-      alert('Failed to connect to the backend.');
-      console.error('Error:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowNavbar(window.scrollY > window.innerHeight * 0.75);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
-    <div className="h-screen flex flex-col items-center justify-center bg-[#fff8dc] space-y-8">
-      <h1 className="text-6xl font-bold text-gray-900">Hello, World!</h1>
+    <div className="font-sans text-gray-800">
+      {showNavbar && <Navbar />}
 
-      <button
-        onClick={handleClick}
-        disabled={loading}
-        className="bg-[#1A169F] text-[#fff8dc] text-2xl font-medium px-20 py-5 rounded-full transition-all duration-300 hover:bg-[#18148c] hover:scale-105 disabled:opacity-50 focus:outline-none border-none"
+      <div
+        style={{
+          backgroundImage: `url(${background})`,
+          backgroundSize: 'cover',
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'center -120px',
+        }}
+        className="w-full"
       >
-        {loading ? 'Connecting...' : 'Contact to backend'}
-      </button>
+        <Home />
+        <About />
+      </div>
+
+      <div
+        style={{
+          backgroundImage: `url(${colorBodyBackground})`,
+          backgroundSize: 'cover',
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'center center',
+          padding: '50px 0',
+        }}
+      >
+        <ColorType />
+        <BodyShape />
+      </div>
+
+      <div
+        style={{
+          background: 'white',
+          padding: '50px 0',
+          minHeight: '80vh',
+        }}
+      >
+        <Login />
+      </div>
     </div>
   );
 }
