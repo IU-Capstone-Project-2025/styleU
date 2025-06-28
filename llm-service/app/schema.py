@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
-class LLMRequest(BaseModel):
+class BodyTypeRequest(BaseModel):
     body_type: str  # Пример: "груша", "яблоко", "песочные часы"
 
-class LLMResponse(BaseModel):
-    recommendation: str
+class ColorTypeRequest(BaseModel):
+    color_type: str  # Пример: "весна", "лето", "осень", "зима"
