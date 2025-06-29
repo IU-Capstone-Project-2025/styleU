@@ -6,4 +6,4 @@ RUN pip install --no-cache-dir -r ./backend/requirements.txt
 
 # RUN alembic upgrade head
 
-CMD ["python", "./backend/main.py"]
+CMD ["sh", "-c", "sleep 5 && python ./backend/main.py"]
