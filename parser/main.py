@@ -2,6 +2,8 @@ from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 import requests
+import json
+import re
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
@@ -34,16 +36,22 @@ client = Together(api_key="d6c15ee0b57f97707f05b2661455333de5db0666fcd25b4cfdb28
 # LLM generating query for search
 def llm_refine_query(user_input: str, size: str, material: str, style: str, color_type: str, body_shape: str, color: str) -> str:
     prompt = (
-        f"Пользователь ищет одежду с такими параметрами:\n"
-        f"Запрос: {user_input}\n"
-        f"Размер: {size}\n"
-        f"Цвет: {color}\n"
-        f"Материал: {material}\n"
-        f"Стиль: {style}\n"
-        f"Цветотип: {color_type}\n"
-        f"Фигура: {body_shape}\n\n"
-        f"Сформируй краткий (не более 5 слов) поисковый запрос., но точный поисковый запрос для Wildberries или любого магазина одежды.\n"
-        f"Верни только поисковую фразу без пояснений."
+        f"Пользователь хочет образ: {user_input}\n"
+        f"Размер: {size}, Цвет: {color}, Материал: {material}, Стиль: {style}, Цветотип: {color_type}, Фигура: {body_shape}\n\n"
+        f"Собери **3 разных полноценных образа** (варианта луков) для пользователя. Каждый образ должен быть модным, "
+        f"современным, соответствовать сезону и учитывать тренды 2024/2025 года (например, банты, объемные плечи, металлик, кружево и т.п.).\n"
+        f"Убедись, что внутри каждого образа вещи сочетаются между собой по стилю, цвету и назначению.\n\n"
+        f"Верни результат в формате списка из 3 JSON-массивов. Каждый массив — это один образ, состоящий из 3–6 вещей. "
+        f"Каждая вещь должна быть JSON-объектом с ключами:\n"
+        f"- item: название (платье, туфли, сумка и т.д.)\n"
+        f"- query: поисковый запрос (до 7 слов)\n"
+        f"- category: категория (main, shoes, bag, accessory, outerwear и т.д.)\n\n"
+        f"Пример:\n"
+        f"[\n"
+        f"  [{{\"item\": \"платье\", \"query\": \"платье металлик а-силуэта\", \"category\": \"main\"}}, ...],\n"
+        f"  [...],\n"
+        f"  [...]\n"
+        f"]"
     )
 
     try:
@@ -53,8 +61,10 @@ def llm_refine_query(user_input: str, size: str, material: str, style: str, colo
                 {
                     "role": "system",
                     "content": (
-                        "Ты модный ассистент. Преобразуй описание и параметры пользователя в поисковую фразу. "
-                        "Учитывай: 1) фасон должен соответствовать фигуре, 2) оттенки цвета — цветотипу, "
+                        "Ты модный ассистент. Подбирай **целые образы** (луки), состоящие из сочетающихся вещей.  "
+                        "Учитывай текущие тренды этого года, стиль, фигуру, цветотип."
+                        "Убедись, что вещи внутри одного образа подходят друг к другу."
+                        "Учитывай: 1) фасон вещи должен соответствовать фигуре, 2) оттенки цвета — цветотипу, "
                         "3) включай материал, 4) не упоминай напрямую фигуру или цветотип, "
                         "а адаптируй фасон и цвет под них, 5) всегда указывай тип вещи (юбка, платье и т.п.)."
                     )
@@ -66,14 +76,24 @@ def llm_refine_query(user_input: str, size: str, material: str, style: str, colo
             ],
             stream=False
         )
+        raw_content = response.choices[0].message.content.strip()
 
-        content = response.choices[0].message.content.strip()
+        # Ищем JSON внутри текста
+        json_match = re.search(r"```json\s*(\[.*?\])\s*```", raw_content, re.DOTALL)
+
+        if not json_match:
+            raise ValueError("LLM did not return valid JSON block")
+
+        json_block = json_match.group(1)
+
+        content = json.loads(json_block)
         print("Answer of LLM:", content)
         return content
 
     except Exception as e:
         print("Error in llm_refine_query:", e)
-        return "платье хлопок"
+        return [[{"item": "платье", "query": "платье на выпускной", "category": "main"}]]
+
 
 
 # Check if product matches user material and styel preferences
@@ -98,14 +118,17 @@ def size_matches(size_filter, sizes):
         if size_filter == s.upper():
             return True
         if '-' in s:
-            start, end = s.split('-')
+            parts = s.split('-')
             try:
+                start = int(parts[0])
+                end = int(parts[-1])
                 size_int = int(size_filter)
-                if int(start) <= size_int <= int(end):
+                if start <= size_int <= end:
                     return True
             except ValueError:
                 continue
     return False
+
 
 # Build WB image url from product id
 def build_wb_image_url(product_id):  
@@ -171,43 +194,51 @@ def build_wb_image_url(product_id):
 
 
 # Get products from WB API and filter by user preferences
-def get_products(search_query: str, size_filter: str, material_filter: str, color_filter: str, style_filter: str):
-    params = {
-        'appType': '1',
-        'curr': 'rub',
-        'dest': '-1257786',
-        'query': search_query,
-        'resultset': 'catalog',
-        'sort': 'popular',
-        'spp': '30',
-        'uclusters': '0'
-    }
+def get_products(search_query: str, size_filter: str, material_filter: str, color_filter: str, style_filter: str, category: str = ""):
+    max_pages = 5
+    for page in range(max_pages):
+        params = {
+            'appType': '1',
+            'curr': 'rub',
+            'dest': '-1257786',
+            'query': search_query,
+            'resultset': 'catalog',
+            'sort': 'popular',
+            'spp': '30',
+            'uclusters': '0',
+            'page': page
+        }
 
-    url = "https://search.wb.ru/exactmatch/ru/common/v4/search"
-    response = requests.get(url, params=params)
-    data = response.json()
+        url = "https://search.wb.ru/exactmatch/ru/common/v4/search"
+        response = requests.get(url, params=params)
+        data = response.json()
 
-    cards = []
-    for product in data.get('data', {}).get('products', [])[:20]:
-        sizes = [s['name'] for s in product.get('sizes', []) if 'name' in s]
-        description = product.get('name', '').lower()
-        print("Checking product:", product['name'])
-        print("Sizes:", sizes)
-        print("Description:", description)
+        cards = []
+        for product in data.get('data', {}).get('products', [])[:20]:
+            sizes = [s['name'] for s in product.get('sizes', []) if 'name' in s]
+            description = product.get('name', '').lower()
+            # print("Checking product:", product['name'])
+            # print("Sizes:", sizes)
+            # print("Description:", description)
 
-        if (size_matches(size_filter, sizes) and(
-            matches_any(description, material_filter, MATERIAL_SYNONYMS) or
-            has_color(product, color_filter) or
-            matches_any(description, style_filter, STYLE_KEYWORDS))):
+            if category  == "main":
+
+                if not (size_matches(size_filter, sizes) and(
+                    matches_any(description, material_filter, MATERIAL_SYNONYMS) or
+                    has_color(product, color_filter) or
+                    matches_any(description, style_filter, STYLE_KEYWORDS))):
+                    continue
 
             cards.append({
-                'title': product['name'],
-                'price': product['salePriceU'] // 100 if 'salePriceU' in product else product['priceU'] // 100,
-                'image': build_wb_image_url(product['id']),
-                'link': f"https://www.wildberries.ru/catalog/{product['id']}/detail.aspx",
-                'sizes': sizes
-            })
-    return cards
+                    'title': product['name'],
+                    'price': product['salePriceU'] // 100 if 'salePriceU' in product else product['priceU'] // 100,
+                    'image': build_wb_image_url(product['id']),
+                    'link': f"https://www.wildberries.ru/catalog/{product['id']}/detail.aspx",
+                    'sizes': sizes
+                })
+            if len(cards) >= 15:
+                break  
+        return cards
 
 # Define FastAPI app
 @app.get("/", response_class=HTMLResponse)
@@ -225,11 +256,24 @@ async def search(
         color_type: str = Form(...),
         body_shape: str = Form(...),
 ):
-    try:
-        refined = llm_refine_query(query, size, material, style, color_type, body_shape, color)
-        products = get_products(refined, size, material, color, style)
-    except Exception as e:
-        print("Error:", e)
-        products = []
-    return templates.TemplateResponse("index.html", {"request": request, "products": products})
+    outfit_variants = llm_refine_query(query, size, material, style, color_type, body_shape, color)
 
+    outfits = []
+
+    for outfit in outfit_variants:
+        has_main = False 
+        complete_look = []
+        for item in outfit:
+            items = get_products(item["query"], size, material, color, style, category=item['category'] )
+            if items:
+                if item["category"] == "main":
+                    has_main = True
+                complete_look.append({
+                    "category": item["category"],
+                    "query": item["query"],
+                    "results": items[:3]
+                })
+        if complete_look  and has_main:
+            outfits.append(complete_look)
+
+    return templates.TemplateResponse("index.html", {"request": request, "outfits": outfits})

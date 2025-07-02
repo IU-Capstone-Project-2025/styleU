@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -70,7 +71,7 @@
     <button type="submit">Поиск</button>
 </form>
 
-{% if products %}
+<!-- {% if products %}
 <h2>Results:</h2>
 {% for item in products %}
 <div class="product">
@@ -87,6 +88,30 @@
 </div>
 <hr>
 {% endfor %}
-{% endif %}
+{% endif %} -->
+
+{% for outfit in outfits %}
+  <div class="outfit-block" style="margin-bottom: 40px;">
+    <h2>Образ {{ loop.index }}</h2>
+    <div class="products" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px;">
+      {% for block in outfit %}
+        <div class="card" style="background-color: #f5f5f5; padding: 10px; border-radius: 8px; width: 200px;">
+          <h4 style="font-size: 16px; margin-bottom: 10px;">{{ block.category | capitalize }}</h4>
+          {% if block.results and block.results|length > 0 %}
+            {% set p = block.results[0] %}  {# отображаем только первый найденный товар по запросу #}
+            <img src="{{ p.image }}" alt="{{ p.title }}" width="180" style="display: block; margin: 0 auto;">
+            <p style="margin: 10px 0 5px 0;">{{ p.title }}</p>
+            <p style="margin: 0 0 10px 0;">{{ p.price }} ₽</p>
+            <a href="{{ p.link }}" target="_blank">Смотреть</a>
+          {% else %}
+            <p>Ничего не найдено</p>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+{% endfor %}
+
+
 </body>
 </html>
