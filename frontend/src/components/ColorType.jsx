@@ -44,7 +44,7 @@ export default function ColorType() {
   return (
     <section
       id="color"
-      className="px-4 pb-12 font-anaheim relative min-h-screen"
+      className="px-4 pb-12 font-noto font-light relative min-h-screen"
       style={{ paddingTop: '15vh' }}
     >
       <div className="max-w-6xl mx-auto relative z-10">
@@ -52,8 +52,8 @@ export default function ColorType() {
           <h2 className="text-3xl md:text-5xl font-comfortaa font-normal mb-4 tracking-wider">
             Узнай свой цветотип!
           </h2>
-          <p className="text-base md:text-3xl opacity-25">
-            Просто загрузите фото, убедитесь, что всё лицо видно.
+          <p className="text-base md:text-2xl opacity-25">
+            Загрузи фото своего лица, нажми "Анализировать", а мы определим его цветотип!
           </p>
         </div>
 

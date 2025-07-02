@@ -46,9 +46,9 @@ function Navbar() {
         STYLEU
       </h1>
       <nav className="flex items-center space-x-6 text-sm">
-        <span onClick={() => scrollToSection('about')} className={linkClass('about')}>About</span>
-        <span onClick={() => scrollToSection('color')} className={linkClass('color')}>Color type</span>
-        <span onClick={() => scrollToSection('shape')} className={linkClass('shape')}>Body shape</span>
+        <span onClick={() => scrollToSection('about')} className={linkClass('about')}>О нас</span>
+        <span onClick={() => scrollToSection('color')} className={linkClass('color')}>Цветотип</span>
+        <span onClick={() => scrollToSection('shape')} className={linkClass('shape')}>Тип фигуры</span>
         <button
           onClick={() => scrollToSection('login')}
           className={`px-4 py-1 rounded-full text-xs transition-all duration-300 ${
@@ -57,7 +57,7 @@ function Navbar() {
               : 'bg-black text-white hover:opacity-80'
           }`}
         >
-          LOGIN
+          Войти
         </button>
       </nav>
     </header>
