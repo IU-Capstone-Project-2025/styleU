@@ -146,14 +146,14 @@ export default function BodyShape() {
   };
 
   return (
-    <section id="shape" className="px-4 pb-12 font-anaheim relative min-h-screen" style={{ paddingTop: '15vh' }}>
+    <section id="shape" className="px-4 pb-12 font-noto font-light relative min-h-screen" style={{ paddingTop: '15vh' }}>
       <div className="max-w-6xl mx-auto relative z-10">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-5xl font-comfortaa font-normal mb-4 tracking-wider">
             Узнай свой тип фигуры!
           </h2>
           <p className="text-base md:text-2xl opacity-25">
-            Просто заполни свои мерки и нажми "Анализировать".
+            Заполни свои мерки, нажми "Анализировать", а мы расскажем тебе о твоем типе фигуры!
           </p>
         </div>
 
