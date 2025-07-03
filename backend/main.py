@@ -1,5 +1,7 @@
 import uvicorn
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Depends
+from typing import Optional
+from contextlib import asynccontextmanager
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -8,7 +10,18 @@ from services.style_service import (
     analyze_body_type,
     analyze_color_type,
 )
+from authorization.dependencies import get_current_user_optional
+from authorization.routes import router as auth_router
+from databases.relational_db import get_db, init_models
+from sqlalchemy.ext.asyncio import AsyncSession
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("🚀 Initializing database...")
+    await init_models()
+    print("✅ Database initialized")
+    yield
+    print("🛑 App shutdown")
 
 app = FastAPI(
     title="AI-Powered Stylist - StyleU",
@@ -16,6 +29,7 @@ app = FastAPI(
         "An intelligent stylist that provides personalized outfit\
         suggestions based on user parameters.",
     version="1.0.0",
+    lifespan=lifespan
 )
 
 
@@ -26,6 +40,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.include_router(auth_router)
 
 
 @app.get(
@@ -36,19 +51,6 @@ app.add_middleware(
 )
 def connect():
     return {"message": "Hello, World!"}
-
-
-@app.post(
-    "/auth/login",
-    tags=["Authentication"],
-    summary="Login endpoint",
-    description="Placeholder for user authentication. Will be implemented later.",
-)
-def login():
-    try:
-        return {"message": "Not implemented yet"}
-    except Exception as e:
-        raise HTTPException(status_code=401, detail=str(e))
 
 
 @app.post(
@@ -71,13 +73,17 @@ def login():
         }
     """,
 )
-async def analyze_figure(request: FigureRequest):
+async def analyze_figure(
+    request: FigureRequest,
+    user: Optional[str] = Depends(get_current_user_optional),
+):
     try:
         result = await analyze_body_type(
             height=request.height,
             bust=request.bust,
             waist=request.waist,
             hips=request.hips,
+            username=user,
         )
         return JSONResponse(content=result)
     except Exception as e:
@@ -105,9 +111,10 @@ async def analyze_figure(request: FigureRequest):
 )
 async def analyze_color(
     file: UploadFile = File(...),
+    user: Optional[str] = Depends(get_current_user_optional),
 ):
     try:
-        result = await analyze_color_type(file)
+        result = await analyze_color_type(file=file, username=user)
         return JSONResponse(content=result)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
