@@ -3,7 +3,7 @@ import re
 from together import Together
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv()  # загрузка переменных окружения из .env
 
 TOGETHER_API_KEY = os.getenv("TOGETHER_API_KEY")
 if not TOGETHER_API_KEY:
