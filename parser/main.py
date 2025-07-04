@@ -4,7 +4,7 @@ from fastapi.templating import Jinja2Templates
 import requests
 import json
 import re
-
+import math
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 
@@ -196,6 +196,8 @@ def build_wb_image_url(product_id):
 # Get products from WB API and filter by user preferences
 def get_products(search_query: str, size_filter: str, material_filter: str, color_filter: str, style_filter: str, category: str = ""):
     max_pages = 5
+    all_products = []
+
     for page in range(max_pages):
         params = {
             'appType': '1',
@@ -213,32 +215,39 @@ def get_products(search_query: str, size_filter: str, material_filter: str, colo
         response = requests.get(url, params=params)
         data = response.json()
 
-        cards = []
-        for product in data.get('data', {}).get('products', [])[:20]:
+        for product in data.get('data', {}).get('products', []):
             sizes = [s['name'] for s in product.get('sizes', []) if 'name' in s]
             description = product.get('name', '').lower()
-            # print("Checking product:", product['name'])
-            # print("Sizes:", sizes)
-            # print("Description:", description)
 
-            if category  == "main":
-
-                if not (size_matches(size_filter, sizes) and(
+            if category == "main":
+                if not (size_matches(size_filter, sizes) and (
                     matches_any(description, material_filter, MATERIAL_SYNONYMS) or
                     has_color(product, color_filter) or
                     matches_any(description, style_filter, STYLE_KEYWORDS))):
                     continue
 
-            cards.append({
-                    'title': product['name'],
-                    'price': product['salePriceU'] // 100 if 'salePriceU' in product else product['priceU'] // 100,
-                    'image': build_wb_image_url(product['id']),
-                    'link': f"https://www.wildberries.ru/catalog/{product['id']}/detail.aspx",
-                    'sizes': sizes
-                })
-            if len(cards) >= 15:
-                break  
-        return cards
+            rating = float(product.get("rating", 0))
+            feedbacks = int(product.get("feedbacks", 0))
+            score = rating * math.log1p(feedbacks)
+
+            all_products.append({
+                'title': product['name'],
+                'price': product.get('salePriceU', product['priceU']) // 100,
+                'image': build_wb_image_url(product['id']),
+                'link': f"https://www.wildberries.ru/catalog/{product['id']}/detail.aspx",
+                'sizes': sizes,
+                'rating': rating,
+                'feedbacks': feedbacks,
+                'score': score
+            })
+
+   
+    # Взвешенная оценка: количество отзывов * рейтинг
+    all_products.sort(key=lambda x: x['score'], reverse=True)
+
+
+    return all_products[:15]  # Возвращаем топ-15 отсортированных
+
 
 # Define FastAPI app
 @app.get("/", response_class=HTMLResponse)
@@ -266,14 +275,17 @@ async def search(
         for item in outfit:
             items = get_products(item["query"], size, material, color, style, category=item['category'] )
             if items:
-                if item["category"] == "main":
-                    has_main = True
-                complete_look.append({
-                    "category": item["category"],
-                    "query": item["query"],
-                    "results": items[:3]
-                })
-        if complete_look  and has_main:
+                best_item = max(items, key=lambda x: x['rating'], default=None)
+                if best_item:
+                    if item["category"] == "main":
+                        has_main = True
+                    complete_look.append({
+                        "category": item["category"],
+                        "query": item["query"],
+                        "results": [best_item]
+                    })
+        if complete_look and has_main:
             outfits.append(complete_look)
+
 
     return templates.TemplateResponse("index.html", {"request": request, "outfits": outfits})
