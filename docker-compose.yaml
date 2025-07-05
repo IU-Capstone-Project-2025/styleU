@@ -10,14 +10,18 @@ services:
       - "5000:5000" 
     networks:
       - internal
+    volumes:
+      - shared_tmp:/tmp
 
   db:
     image: postgres:14
     restart: always
-    environment:
-      POSTGRES_USER: styleu_user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: styleu
+    env_file:
+      - .env
+    # environment:
+    #   POSTGRES_USER: styleu_user
+    #   POSTGRES_PASSWORD: password
+    #   POSTGRES_DB: styleu
     ports:
       - "5432:5432"
     volumes:
@@ -33,26 +37,37 @@ services:
       - "5173:5173"
     networks:
       - internal
+  llm:
+    build:
+      context: .
+      dockerfile: llm-service/Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "8001:8001"
+    networks:
+      - internal
 
-  # llm:
-  #   build:
-  #     context: .
-  #     dockerfile: llm-service/Dockerfile
-  #   ports:
-  #     - "8001:8001" 
-  #   networks:
-  #     - internal
+  ollama:
+    image: ollama/ollama
+    ports:
+      - "11434:11434"
+    networks:
+      - internal
 
-  # ml:
-  #   build:
-  #     context: .
-  #     dockerfile: ml-service/Dockerfile
-  #   ports:
-  #     - "8000:8000"
-  #   networks:
-  #     - internal
+  ml:
+    build:
+      context: .
+      dockerfile: ml-service/Dockerfile
+    ports:
+      - "8000:8000"
+    networks:
+      - internal
+    volumes:
+      - shared_tmp:/tmp
 networks:
   internal:
 
 volumes:
   postgres_data:
+  shared_tmp:

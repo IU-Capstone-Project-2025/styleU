@@ -1,3 +1,5 @@
+import uuid
+
 from databases.database_connector import DatabaseConnector
 import httpx, tempfile, shutil, os
 from fastapi import UploadFile, HTTPException
@@ -44,10 +46,15 @@ async def analyze_body_type(height, bust, waist, hips, username=None):
 
 async def analyze_color_type(file: UploadFile, username=None):
     suffix = os.path.splitext(file.filename)[-1]
-    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
-        shutil.copyfileobj(file.file, tmp)
-        temp_path = tmp.name
+    # with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+    #     shutil.copyfileobj(file.file, tmp)
+    #     temp_path = tmp.name
+    temp_path = f"/tmp/{uuid.uuid4()}{suffix}"
     try:
+
+        with open(temp_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+
         async with httpx.AsyncClient(timeout=30.0) as client:
             response = await client.post(PREDICT_COLOR_TYPE_URL, json={"path": temp_path})
             response.raise_for_status()
