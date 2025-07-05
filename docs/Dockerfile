@@ -2,11 +2,11 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-COPY ./frontend/package*.json ./
+COPY ./docs/package*.json ./
 
 RUN npm install
 
-COPY ./frontend .
+COPY ./docs .
 
 EXPOSE 5173
 
