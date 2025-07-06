@@ -257,6 +257,7 @@ def get_products(search_query: str, size_filter: str, material_filter: str, colo
 async def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request, "products": None})
 
+
 @app.post("/parser", response_class=HTMLResponse)
 async def search(
         request: Request,
