@@ -15,6 +15,8 @@ PREDICT_BODY_TYPE_LLM_URL = "http://llm:8001/recommend"
 PREDICT_COLOR_TYPE_URL = "http://ml:8000/predict_color_type"
 PREDICT_COLOR_TYPE_LLM_URL = "http://llm:8001/recommend_by_color_type"
 
+PARSER_URL = "http://host.docker.internal:8002/parser"
+
 
 DATABASE_URL="postgresql+asyncpg://styleu_user:password@db:5432/styleu"
 SECRET_KEY = os.getenv("SECRET_KEY")

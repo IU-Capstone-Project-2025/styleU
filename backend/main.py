@@ -5,12 +5,13 @@ from contextlib import asynccontextmanager
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
-from validation import FigureRequest
+from validation import FigureRequest, OutfitRequest
 from services.style_service import (
     analyze_body_type,
     analyze_color_type,
 )
-from authorization.dependencies import get_current_user_optional
+from services.outfit_service import suggest_outfits_for_user
+from authorization.dependencies import get_current_user_optional, get_current_user
 from authorization.routes import router as auth_router
 from databases.relational_db import get_db, init_models
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -141,15 +142,62 @@ def find_products():
     tags=["Outfit Service"],
     summary="Suggest outfits",
     description="""
-        Suggests outfits based on user's body type and color type.
-        Not implemented yet.
-    """
+        Подбирает образы на основе введенного запроса, предпочтений пользователя (размер, стиль, цвет, материал), а также его сохраненных color_type и body_type.
+
+        **Требуется авторизация**.
+
+        Параметры формы (multipart/form-data):
+        - query: Желаемый образ, например "летний образ на прогулку"
+        - size: Размер пользователя (например, "S", "M", "44", "46-48")
+        - color: Предпочтительный цвет
+        - material: Предпочтительный материал
+        - style: Предпочтительный стиль
+
+        Ответ:
+        ```json
+        [
+          [
+            {
+              "category": "main",
+              "query": "платье металлик а-силуэта",
+              "results": [
+                {
+                  "title": "Платье длинное с корсетом",
+                  "price": 3460,
+                  "image": "https://...",
+                  "link": "https://...",
+                  "sizes": ["S", "M"],
+                  "rating": 4.8,
+                  "feedbacks": 1200,
+                  "score": 300.0
+                }
+              ]
+            },
+            ...
+          ],
+          ...
+        ]
+        ```
+    """,
 )
-def suggest_outfits():
+async def suggest_outfits(
+    request: OutfitRequest,
+    user: str = Depends(get_current_user),
+):
     try:
-        return {"message": "Not implemented yet"}
+        outfits = await suggest_outfits_for_user(
+            user=user,
+            query=request.query,
+            size=request.size,
+            color=request.color,
+            material=request.material,
+            style=request.style,
+        )
+        return JSONResponse(content=outfits)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Ошибка при подборе образов: {str(e)}")
 
 
 if __name__ == "__main__":

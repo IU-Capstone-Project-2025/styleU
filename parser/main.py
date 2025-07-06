@@ -101,6 +101,7 @@ def matches_any(description, value, synonym_dict):
     synonyms = synonym_dict.get(value.lower(), [value.lower()])
     return any(syn in description.lower() for syn in synonyms)
 
+
 # Check if product has user color
 def has_color(product: dict, user_color: str) -> bool:
     if not user_color:
@@ -111,6 +112,8 @@ def has_color(product: dict, user_color: str) -> bool:
         if any(syn in name for syn in synonyms):
             return True
     return False
+
+
 # Check if product has user size
 def size_matches(size_filter, sizes):
     size_filter = size_filter.upper()
@@ -254,7 +257,7 @@ def get_products(search_query: str, size_filter: str, material_filter: str, colo
 async def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request, "products": None})
 
-@app.post("/", response_class=HTMLResponse)
+@app.post("/parser", response_class=HTMLResponse)
 async def search(
         request: Request,
         query: str = Form(...),

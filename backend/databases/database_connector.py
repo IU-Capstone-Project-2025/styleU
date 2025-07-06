@@ -40,3 +40,23 @@ class DatabaseConnector:
     async def set_color_type(self, user_id: int, color_type: str):
         self.db.add(UserParameters(user_id=user_id, color_type=color_type))
         await self.db.commit()
+
+    async def get_user_features(self, username: str) -> dict:
+        user = await self.get_user_by_username(username)
+        if not user:
+            raise ValueError("User not found")
+
+        result = await self.db.execute(
+            select(UserParameters).where(UserParameters.user_id == user.id)
+        )
+        params_list = result.scalars().all()
+
+        if not params_list:
+            raise ValueError("User parameters not found")
+
+        params = params_list[-1]
+
+        return {
+            "color_type": params.color_type,
+            "body_type": params.body_type,
+        }
