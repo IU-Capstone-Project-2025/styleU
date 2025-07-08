@@ -1,10 +1,10 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import arrow from '../assets/arrowBlack.png';
-import { loginUser } from '../services/api';
+import { registerUser } from '../services/api';
 import { AuthContext } from './AuthContext';
 
-function Login() {
+function Register() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -20,33 +20,28 @@ function Login() {
 
     setIsLoading(true);
     try {
-      const response = await loginUser({ username, password });
+      const response = await registerUser({ username, password });
       const token = response.access_token;
-      login(token);
-      alert('Вы успешно вошли!');
+      login(token); // сохранить токен в контекст
+      alert('Регистрация прошла успешно!');
+      navigate('/'); // переход на главную
     } catch (error) {
-      console.error('Ошибка при входе:', error);
-      alert('Неверное имя пользователя или пароль. Попробуйте снова.');
+      console.error('Ошибка при регистрации:', error);
+      alert('Пользователь с таким именем уже существует или произошла ошибка.');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <section id="login" className="flex justify-center items-center py-16 px-4">
+    <section id="register" className="flex justify-center items-center py-16 px-4">
       <div className="bg-[#eaeaea] p-10 rounded-xl w-full max-w-md shadow-md">
         <h2 className="text-6xl font-comfortaa text-center mb-4 tracking-widest">
           STYLE<span className="text-[#aaa]">U</span>
         </h2>
         <p className="text-xs text-gray-500 text-center mb-2">
-          Нет аккаунта?{' '}
-          <Link 
-            to="/register" 
-            className="text-black font-semibold"
-            onClick={() => console.log('Навигация на /register')}
-          >
-            Зарегистрируйтесь
-          </Link>
+          Уже есть аккаунт?{' '}
+          <Link to="/login" className="text-black font-semibold">Войдите</Link>
         </p>
 
         <form className="flex flex-col space-y-4 mt-4" onSubmit={handleSubmit}>
@@ -71,7 +66,7 @@ function Login() {
             disabled={isLoading}
             className="ml-auto w-10 h-10 flex items-center justify-center bg-white border border-black rounded-full hover:bg-gray-100 transition"
           >
-            <img src={arrow} alt="Войти" className="w-4 h-4 transform -rotate-180" />
+            <img src={arrow} alt="Зарегистрироваться" className="w-4 h-4 transform -rotate-180" />
           </button>
         </form>
       </div>
@@ -79,4 +74,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default Register;

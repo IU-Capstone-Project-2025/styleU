@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
+import { AuthContext } from './AuthContext';
 
 function Navbar() {
   const [activeSection, setActiveSection] = useState('');
+  const { isAuthenticated, logout } = useContext(AuthContext);
 
   useEffect(() => {
     const handleScroll = () => {
-      const sections = ['home', 'about', 'color', 'shape', 'login'];
+      const sections = ['home', 'about', 'color', 'shape', 'login', 'shop', 'profile'];
       const scrollPosition = window.scrollY + window.innerHeight / 2;
 
       let currentSection = '';
@@ -46,19 +48,37 @@ function Navbar() {
         STYLEU
       </h1>
       <nav className="flex items-center space-x-6 text-sm">
-        <span onClick={() => scrollToSection('about')} className={linkClass('about')}>О нас</span>
-        <span onClick={() => scrollToSection('color')} className={linkClass('color')}>Цветотип</span>
-        <span onClick={() => scrollToSection('shape')} className={linkClass('shape')}>Тип фигуры</span>
-        <button
-          onClick={() => scrollToSection('login')}
-          className={`px-4 py-1 rounded-full text-xs transition-all duration-300 ${
-            activeSection === 'login'
-              ? 'bg-white text-black border border-black font-semibold'
-              : 'bg-black text-white hover:opacity-80'
-          }`}
-        >
-          Войти
-        </button>
+        {isAuthenticated ? (
+          <>
+            <span onClick={() => scrollToSection('shop')} className={linkClass('shop')}>Магазин</span>
+            <span onClick={() => scrollToSection('color')} className={linkClass('color')}>Цветотип</span>
+            <span onClick={() => scrollToSection('shape')} className={linkClass('shape')}>Тип фигуры</span>
+            <span
+              onClick={() => scrollToSection('profile')}
+              className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center cursor-pointer"
+              title="Личный кабинет"
+            >
+              🧍
+            </span>
+            <button onClick={logout} className="text-xs text-red-500 underline ml-2">Выйти</button>
+          </>
+        ) : (
+          <>
+            <span onClick={() => scrollToSection('about')} className={linkClass('about')}>О нас</span>
+            <span onClick={() => scrollToSection('color')} className={linkClass('color')}>Цветотип</span>
+            <span onClick={() => scrollToSection('shape')} className={linkClass('shape')}>Тип фигуры</span>
+            <button
+              onClick={() => scrollToSection('login')}
+              className={`px-4 py-1 rounded-full text-xs transition-all duration-300 ${
+                activeSection === 'login'
+                  ? 'bg-white text-black border border-black font-semibold'
+                  : 'bg-black text-white hover:opacity-80'
+              }`}
+            >
+              Войти
+            </button>
+          </>
+        )}
       </nav>
     </header>
   );

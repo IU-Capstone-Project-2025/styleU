@@ -18,10 +18,10 @@ services:
     restart: always
     env_file:
       - .env
-    # environment:
-    #   POSTGRES_USER: styleu_user
-    #   POSTGRES_PASSWORD: password
-    #   POSTGRES_DB: styleu
+    environment:
+      POSTGRES_USER: styleu_user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: styleu
     ports:
       - "5432:5432"
     volumes:
@@ -44,7 +44,7 @@ services:
     env_file:
       - .env
     ports:
-      - "8001:8001"
+      - "8001:8001" 
     networks:
       - internal
 
@@ -69,5 +69,5 @@ networks:
   internal:
 
 volumes:
-  postgres_data:
+  postgres_data:  
   shared_tmp:

@@ -2,15 +2,19 @@ import './index.css';
 import background from './assets/background.jpeg';
 import colorBodyBackground from './assets/color-body-background.png';
 import { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+
 import Navbar from './components/Navbar';
 import Home from './components/Home';
 import About from './components/About';
 import ColorType from './components/ColorType';
 import BodyShape from './components/BodyShape';
 import Login from './components/Login';
+import Register from './components/Register'; 
 
-function App() {
+function ScrollNavbarWrapper({ children }) {
   const [showNavbar, setShowNavbar] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -23,7 +27,14 @@ function App() {
   return (
     <div className="font-sans text-gray-800">
       {showNavbar && <Navbar />}
+      {children}
+    </div>
+  );
+}
 
+function MainPage() {
+  return (
+    <>
       <div
         style={{
           backgroundImage: `url(${background})`,
@@ -49,16 +60,38 @@ function App() {
         <ColorType />
         <BodyShape />
       </div>
-
-      <div
-        style={{
-          background: 'white',
-          padding: '50px 0',
-          minHeight: '80vh',
-        }}
-      >
+      
+      <div id="login" style={{ background: 'white', minHeight: '100vh', padding: '50px 0' }}>
         <Login />
       </div>
+    </>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <ScrollNavbarWrapper>
+        <Routes>
+          <Route path="/" element={<MainPage />} />
+          <Route path="/login" element={<SectionWrapper><Login /></SectionWrapper>} />
+          <Route path="/register" element={<SectionWrapper><Register /></SectionWrapper>} />
+        </Routes>
+      </ScrollNavbarWrapper>
+    </Router>
+  );
+}
+
+function SectionWrapper({ children }) {
+  return (
+    <div
+      style={{
+        background: 'white',
+        padding: '50px 0',
+        minHeight: '80vh',
+      }}
+    >
+      {children}
     </div>
   );
 }
