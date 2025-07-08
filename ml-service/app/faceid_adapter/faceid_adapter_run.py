@@ -2,10 +2,20 @@ from gradio_client import Client, handle_file
 from gradio_client.exceptions import AppError
 from pathlib import Path
 import requests
+import os
+from dotenv import load_dotenv
+
+
+load_dotenv() 
+HF_TOKEN = os.getenv("HF_TOKEN")
+if not HF_TOKEN:
+    raise ValueError("HF_TOKEN не задан в переменных окружения")
+
+ 
 def generate_stylized_avatar(input_image_path: Path, output_dir: Path):
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    client = Client("multimodalart/Ip-Adapter-FaceID", hf_token="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")
+    client = Client("multimodalart/Ip-Adapter-FaceID", hf_token=HF_TOKEN)
 
     try:
         result = client.predict(
