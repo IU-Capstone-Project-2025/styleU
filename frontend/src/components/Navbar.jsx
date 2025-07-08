@@ -1,9 +1,12 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { AuthContext } from './AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { UserIcon } from 'lucide-react';
 
 function Navbar() {
   const [activeSection, setActiveSection] = useState('');
   const { isAuthenticated, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -35,14 +38,14 @@ function Navbar() {
   };
 
   const linkClass = (section) =>
-    `cursor-pointer transition-all ${
+    `cursor-pointer text-sm transition-all ${
       activeSection === section ? 'font-bold' : ''
     }`;
 
   return (
-    <header className="w-full flex justify-between items-center px-8 py-4 transition-all duration-300 fixed top-6 left-1/2 transform -translate-x-1/2 max-w-4xl bg-white bg-opacity-60 backdrop-blur-md rounded-full shadow-md z-20">
+    <header className="w-[90%] max-w-5xl mx-auto flex justify-between items-center px-6 py-3 transition-all duration-300 fixed top-6 left-1/2 transform -translate-x-1/2 bg-white bg-opacity-60 backdrop-blur-md rounded-full shadow-md z-50">
       <h1
-        onClick={() => scrollToSection('home')}
+        onClick={() => (isAuthenticated ? navigate('/personal') : scrollToSection('home'))}
         className="text-md font-semibold tracking-wider cursor-pointer"
       >
         STYLEU
@@ -50,15 +53,15 @@ function Navbar() {
       <nav className="flex items-center space-x-6 text-sm">
         {isAuthenticated ? (
           <>
-            <span onClick={() => scrollToSection('shop')} className={linkClass('shop')}>Магазин</span>
-            <span onClick={() => scrollToSection('color')} className={linkClass('color')}>Цветотип</span>
-            <span onClick={() => scrollToSection('shape')} className={linkClass('shape')}>Тип фигуры</span>
+            <span onClick={() => navigate('/shop')} className={linkClass('shop')}>Магазин</span>
+            <span onClick={() => navigate('/color')} className={linkClass('color')}>Цветотип</span>
+            <span onClick={() => navigate('/shape')} className={linkClass('shape')}>Тип фигуры</span>
             <span
-              onClick={() => scrollToSection('profile')}
-              className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center cursor-pointer"
+              onClick={() => navigate('/personal')}
+              className="w-9 h-9 rounded-full bg-black text-white flex items-center justify-center cursor-pointer"
               title="Личный кабинет"
             >
-              🧍
+              <UserIcon className="w-4 h-4" />
             </span>
             <button onClick={logout} className="text-xs text-red-500 underline ml-2">Выйти</button>
           </>

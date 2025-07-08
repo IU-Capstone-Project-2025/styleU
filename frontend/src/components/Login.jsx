@@ -24,6 +24,7 @@ function Login() {
       const token = response.access_token;
       login(token);
       alert('Вы успешно вошли!');
+      navigate('/personal'); // переход на личную страницу
     } catch (error) {
       console.error('Ошибка при входе:', error);
       alert('Неверное имя пользователя или пароль. Попробуйте снова.');

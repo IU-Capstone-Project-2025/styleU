@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://localhost:5000'; // change if needed
+const BASE_URL = 'http://localhost:5000';
 
 // 🔐 Login (POST /auth/login)
 export const loginUser = async ({ username, password }) => {
