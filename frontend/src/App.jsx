@@ -1,6 +1,7 @@
 import './index.css';
 import background from './assets/background.jpeg';
 import colorBodyBackground from './assets/color-body-background.png';
+
 import { useEffect, useState, useContext } from 'react';
 import {
   BrowserRouter as Router,
@@ -17,9 +18,10 @@ import ColorType from './components/ColorType';
 import BodyShape from './components/BodyShape';
 import Login from './components/Login';
 import Register from './components/Register';
-import PersonalPage from './components/PersonalPage'; // ← новая личная страница
-import { AuthContext, AuthProvider } from './components/AuthContext'; // ← обёртка контекста
-import Shop from './components/Shop'; // добавить импорт
+import PersonalPage from './components/PersonalPage';
+import Shop from './components/Shop';
+
+import { AuthContext, AuthProvider } from './components/AuthContext';
 
 function ScrollNavbarWrapper({ children }) {
   const [showNavbar, setShowNavbar] = useState(false);
@@ -29,13 +31,13 @@ function ScrollNavbarWrapper({ children }) {
   useEffect(() => {
     if (isAuthenticated) {
       setShowNavbar(true);
-      return;
+    } else {
+      const handleScroll = () => {
+        setShowNavbar(window.scrollY > window.innerHeight * 0.75);
+      };
+      window.addEventListener('scroll', handleScroll);
+      return () => window.removeEventListener('scroll', handleScroll);
     }
-    const handleScroll = () => {
-      setShowNavbar(window.scrollY > window.innerHeight * 0.75);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
   }, [location.pathname, isAuthenticated]);
 
   return (
@@ -76,12 +78,50 @@ function MainPage() {
       >
         <ColorType />
         <BodyShape />
+        <Shop />
       </div>
 
       <div id="login" style={{ background: 'white', minHeight: '100vh', padding: '50px 0' }}>
         <Login />
       </div>
     </>
+  );
+}
+
+function SectionWrapper({ children }) {
+  const location = useLocation();
+  const path = location.pathname;
+
+  const isColorOrShapeOrShop = path === '/color' || path === '/shape' || path === '/shop';
+  const isPersonal = path === '/personal';
+
+  return (
+    <div
+      style={
+        isColorOrShapeOrShop
+          ? {
+              backgroundImage: `url(${colorBodyBackground})`,
+              backgroundSize: 'cover',
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'center center',
+              padding: '50px 0',
+              minHeight: '80vh',
+            }
+          : isPersonal
+          ? {
+              background: 'white',
+              padding: '50px 0',
+              minHeight: '80vh',
+            }
+          : {
+              background: 'white',
+              padding: '50px 0',
+              minHeight: '80vh',
+            }
+      }
+    >
+      {children}
+    </div>
   );
 }
 
@@ -94,35 +134,12 @@ function AppRoutes() {
         <Route path="/" element={<MainPage />} />
         <Route path="/login" element={<SectionWrapper><Login /></SectionWrapper>} />
         <Route path="/register" element={<SectionWrapper><Register /></SectionWrapper>} />
-        <Route path="/personal" element={isAuthenticated ? (<SectionWrapper><PersonalPage /></SectionWrapper>) : (<Navigate to="/" />)} />
-        <Route path="/shop" element={isAuthenticated ? (<SectionWrapper><Shop /></SectionWrapper>) : (<Navigate to="/" />)} />
-        <Route path="/color" element={isAuthenticated ? (<SectionWrapper><ColorType /></SectionWrapper>) : (<Navigate to="/" />)} />
-        <Route path="/shape" element={isAuthenticated ? (<SectionWrapper><BodyShape /></SectionWrapper>) : (<Navigate to="/" />)} />
+        <Route path="/personal" element={<SectionWrapper><PersonalPage /></SectionWrapper>} />
+        <Route path="/shop" element={<SectionWrapper><Shop /></SectionWrapper>} />
+        <Route path="/color" element={<SectionWrapper><ColorType /></SectionWrapper>} />
+        <Route path="/shape" element={<SectionWrapper><BodyShape /></SectionWrapper>} />
       </Routes>
     </ScrollNavbarWrapper>
-  );
-}
-
-function SectionWrapper({ children }) {
-  const location = useLocation();
-  const isColorOrShape = location.pathname === '/color' || location.pathname === '/shape';
-  return (
-    <div
-      style={isColorOrShape ? {
-        backgroundImage: `url(${colorBodyBackground})`,
-        backgroundSize: 'cover',
-        backgroundRepeat: 'no-repeat',
-        backgroundPosition: 'center center',
-        padding: '50px 0',
-        minHeight: '80vh',
-      } : {
-        background: 'white',
-        padding: '50px 0',
-        minHeight: '80vh',
-      }}
-    >
-      {children}
-    </div>
   );
 }
 
