@@ -111,6 +111,7 @@ def has_color(product: dict, user_color: str) -> bool:
         if any(syn in name for syn in synonyms):
             return True
     return False
+
 # Check if product has user size
 def size_matches(size_filter, sizes):
     size_filter = size_filter.upper()
@@ -273,7 +274,7 @@ async def search(
                     "query": item["query"],
                     "results": items[:3]
                 })
-        if complete_look  and has_main:
+        if complete_look and has_main:
             outfits.append(complete_look)
 
     return templates.TemplateResponse("index.html", {"request": request, "outfits": outfits})
