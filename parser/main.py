@@ -4,7 +4,7 @@ from fastapi.templating import Jinja2Templates
 import requests
 import json
 import re
-
+import math
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 
@@ -34,26 +34,28 @@ COLOR_SYNONYMS = {
 client = Together(api_key="d6c15ee0b57f97707f05b2661455333de5db0666fcd25b4cfdb2832e55648d27")
 
 # LLM generating query for search
-def llm_refine_query(user_input: str, size: str, material: str, style: str, color_type: str, body_shape: str, color: str) -> str:
+def llm_refine_query(user_input: str, size: str, material: str, style: str, color_type: str, body_shape: str, color: str) -> list:
     prompt = (
         f"Пользователь хочет образ: {user_input}\n"
         f"Размер: {size}, Цвет: {color}, Материал: {material}, Стиль: {style}, Цветотип: {color_type}, Фигура: {body_shape}\n\n"
-        f"Собери **3 разных полноценных образа** (варианта луков) для пользователя. Каждый образ должен быть модным, "
-        f"современным, соответствовать сезону и учитывать тренды 2024/2025 года (например, банты, объемные плечи, металлик, кружево и т.п.).\n"
-        f"Убедись, что внутри каждого образа вещи сочетаются между собой по стилю, цвету и назначению.\n\n"
-        f"Верни результат в формате списка из 3 JSON-массивов. Каждый массив — это один образ, состоящий из 3–6 вещей. "
-        f"Каждая вещь должна быть JSON-объектом с ключами:\n"
-        f"- item: название (платье, туфли, сумка и т.д.)\n"
-        f"- query: поисковый запрос (до 7 слов)\n"
-        f"- category: категория (main, shoes, bag, accessory, outerwear и т.д.)\n\n"
+        f"Собери **3 разных полноценных образа** (варианта луков) для пользователя. Каждый образ должен быть JSON-объектом с полями:\n"
+        f"- items: список вещей (3-6 элементов)\n"
+        f"- totalReason: пояснение почему лук хорош\n"
+        f"Каждая вещь должна содержать:\n"
+        f"- item: тип вещи (платье, туфли и т.д.)\n"
+        f"- query: поисковый запрос для Wildberries (до 7 слов)\n"
+        f"- category: категория (main, shoes, bag, accessory)\n\n"
         f"Пример:\n"
         f"[\n"
-        f"  [{{\"item\": \"платье\", \"query\": \"платье металлик а-силуэта\", \"category\": \"main\"}}, ...],\n"
-        f"  [...],\n"
-        f"  [...]\n"
+        f"  {{\n"
+        f"    \"items\": [\n"
+        f"      {{\"item\": \"платье\", \"query\": \"платье макси молочное хлопок\", \"category\": \"main\"}},\n"
+        f"      {{\"item\": \"хиджаб\", \"query\": \"хиджаб молочный хлопковый\", \"category\": \"accessory\"}}\n"
+        f"    ],\n"
+        f"    \"totalReason\": \"Образ идеально подходит для мусульманок\"\n"
+        f"  }}\n"
         f"]"
     )
-
     try:
         response = client.chat.completions.create(
             model="deepseek-ai/DeepSeek-V3",
@@ -100,6 +102,7 @@ def llm_refine_query(user_input: str, size: str, material: str, style: str, colo
 def matches_any(description, value, synonym_dict):
     synonyms = synonym_dict.get(value.lower(), [value.lower()])
     return any(syn in description.lower() for syn in synonyms)
+
 
 # Check if product has user color
 def has_color(product: dict, user_color: str) -> bool:
@@ -197,6 +200,8 @@ def build_wb_image_url(product_id):
 # Get products from WB API and filter by user preferences
 def get_products(search_query: str, size_filter: str, material_filter: str, color_filter: str, style_filter: str, category: str = ""):
     max_pages = 5
+    all_products = []
+
     for page in range(max_pages):
         params = {
             'appType': '1',
@@ -214,32 +219,39 @@ def get_products(search_query: str, size_filter: str, material_filter: str, colo
         response = requests.get(url, params=params)
         data = response.json()
 
-        cards = []
-        for product in data.get('data', {}).get('products', [])[:20]:
+        for product in data.get('data', {}).get('products', []):
             sizes = [s['name'] for s in product.get('sizes', []) if 'name' in s]
             description = product.get('name', '').lower()
-            # print("Checking product:", product['name'])
-            # print("Sizes:", sizes)
-            # print("Description:", description)
 
-            if category  == "main":
-
-                if not (size_matches(size_filter, sizes) and(
+            if category == "main":
+                if not (size_matches(size_filter, sizes) and (
                     matches_any(description, material_filter, MATERIAL_SYNONYMS) or
                     has_color(product, color_filter) or
                     matches_any(description, style_filter, STYLE_KEYWORDS))):
                     continue
 
-            cards.append({
-                    'title': product['name'],
-                    'price': product['salePriceU'] // 100 if 'salePriceU' in product else product['priceU'] // 100,
-                    'image': build_wb_image_url(product['id']),
-                    'link': f"https://www.wildberries.ru/catalog/{product['id']}/detail.aspx",
-                    'sizes': sizes
-                })
-            if len(cards) >= 15:
-                break  
-        return cards
+            rating = float(product.get("rating", 0))
+            feedbacks = int(product.get("feedbacks", 0))
+            score = rating * math.log1p(feedbacks)
+
+            all_products.append({
+                'title': product['name'],
+                'price': product.get('salePriceU', product['priceU']) // 100,
+                'image': build_wb_image_url(product['id']),
+                'link': f"https://www.wildberries.ru/catalog/{product['id']}/detail.aspx",
+                'sizes': sizes,
+                'rating': rating,
+                'feedbacks': feedbacks,
+                'score': score
+            })
+
+   
+    # Взвешенная оценка: количество отзывов * рейтинг
+    all_products.sort(key=lambda x: x['score'], reverse=True)
+
+
+    return all_products[:15]  # Возвращаем топ-15 отсортированных
+
 
 # Define FastAPI app
 @app.get("/", response_class=HTMLResponse)
@@ -257,24 +269,45 @@ async def search(
         color_type: str = Form(...),
         body_shape: str = Form(...),
 ):
+    print(f" Запрос пользователя: {query}")
+    print(f"Размер: {size}, Цвет: {color}, Материал: {material}, Стиль: {style}, Цветотип: {color_type}, Фигура: {body_shape}")
+    
     outfit_variants = llm_refine_query(query, size, material, style, color_type, body_shape, color)
+
+    print(" Результат от LLM:")
+    print(json.dumps(outfit_variants, ensure_ascii=False, indent=2))
 
     outfits = []
 
     for outfit in outfit_variants:
-        has_main = False 
-        complete_look = []
-        for item in outfit:
-            items = get_products(item["query"], size, material, color, style, category=item['category'] )
-            if items:
-                if item["category"] == "main":
+        if not isinstance(outfit, dict):
+            continue
+            
+        complete_look = {
+            "items": [],
+            "totalReason": outfit.get("totalReason", "Образ составлен с учетом всех параметров")
+        }
+        
+        has_main = False
+        
+        for item in outfit.get("items", []):
+            if not isinstance(item, dict):
+                continue
+                
+            products = get_products(item.get("query", ""), size, material, color, style, item.get("category", ""))
+            if products:
+                best_product = max(products, key=lambda x: x['rating'])
+                if item.get("category") == "main":
                     has_main = True
-                complete_look.append({
-                    "category": item["category"],
-                    "query": item["query"],
-                    "results": items[:3]
+                complete_look["items"].append({
+                    "image": best_product["image"],
+                    "link": best_product["link"],
+                    "price": best_product["price"],
+                    "marketplace": "Wildberries",
+                    "reason": f"{item.get('item', 'Товар')}: {best_product['title']} (рейтинг: {best_product['rating']})"
                 })
-        if complete_look and has_main:
+        
+        if complete_look["items"] and has_main:
             outfits.append(complete_look)
 
     return templates.TemplateResponse("index.html", {"request": request, "outfits": outfits})

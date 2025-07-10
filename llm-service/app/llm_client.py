@@ -34,3 +34,25 @@ def get_recommendation(body_type: str) -> str:
         return recommendation
     except Exception as e:
         return f"LLM не ответил: {str(e)}"
+
+
+def get_recommendation_by_color_type(color_type: str) -> str:
+    prompt = f"""
+    Ты профессиональный стилист. Клиент имеет цветотип лица : {color_type}.
+    Дай рекомендации по образам, мейкапу и вещам, которые подойдут именно под этот цветотип. Не более 5 предложений.
+    """.strip()
+
+    try:
+        response = client.chat.completions.create(
+            model=MODEL_NAME,
+            messages=[
+                {"role": "system", "content": "Ты модный стилист. Отвечай кратко и по делу."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.7
+        )
+        raw_output = response.choices[0].message.content
+        recommendation = re.sub(r"<think>.*?</think>", "", raw_output, flags=re.DOTALL).strip()
+        return recommendation
+    except Exception as e:
+        return f"LLM не ответил: {str(e)}"

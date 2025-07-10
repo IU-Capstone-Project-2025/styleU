@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -56,62 +55,113 @@
             background: #ddd;
             margin: 20px 0;
         }
+        .error {
+            color: red;
+            display: none;
+            font-size: 13px;
+        }
     </style>
 </head>
 <body>
 <h1>Search for items on request</h1>
-<form method="post">
-    <label>Request: <input type="text" name="query" required></label><br>
-    <label>Size: <input type="text" name="size"></label><br>
-    <label>Color: <input type="text" name="color"></label><br>
-    <label>Material: <input type="text" name="material"></label><br>
-    <label>Style: <input type="text" name="style"></label><br>
-    <label>Color type: <input type="text" name="color_type"></label><br>
-    <label>Body shape: <input type="text" name="body_shape"></label><br>
+<form method="post" action="/">
+    <label>Request: <input type="text" name="query" id="query" required></label><br>
+    <span class="error" id="error-query">Введите на русском</span><br>
+
+    <label>Size: <input type="text" name="size" id="size"></label><br>
+    <span class="error" id="error-size">Введите на русском</span><br>
+
+    <label>Color: <input type="text" name="color" id="color"></label><br>
+    <span class="error" id="error-color">Введите на русском</span><br>
+
+    <label>Material: <input type="text" name="material" id="material"></label><br>
+    <span class="error" id="error-material">Введите на русском</span><br>
+
+    <label>Style: <input type="text" name="style" id="style"></label><br>
+    <span class="error" id="error-style">Введите на русском</span><br>
+
+    <label>Color type: <input type="text" name="color_type" id="color_type"></label><br>
+    <span class="error" id="error-color_type">Введите на русском</span><br>
+
+    <label>Body shape: <input type="text" name="body_shape" id="body_shape"></label><br>
+    <span class="error" id="error-body_shape">Введите на русском</span><br>
+
     <button type="submit">Поиск</button>
 </form>
 
-<!-- {% if products %}
-<h2>Results:</h2>
-{% for item in products %}
-<div class="product">
-    <h3>{{ item.title }}</h3>
-    <p>Price: {{ item.price }} ₽</p>
-    <p>Sizes: 
-        {% set sorted_sizes = item.sizes|sort %}
-        {{ sorted_sizes|join(', ') }}
-    </p>
-    <div style="text-align: center;">
-        <img src="{{ item.image }}" alt="Item Image" width="200" style="display: block; margin: 0 auto;">
-    </div>
-    <p style="text-align: center;"><a href="{{ item.link }}" target="_blank">Follow the link</a></p>
-</div>
-<hr>
-{% endfor %}
-{% endif %} -->
-
 {% for outfit in outfits %}
-  <div class="outfit-block" style="margin-bottom: 40px;">
+<div class="outfit-block" style="margin-bottom: 40px;">
     <h2>Образ {{ loop.index }}</h2>
+    <p style="font-style: italic; color: #555;">{{ outfit.totalReason }}</p>
     <div class="products" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px;">
-      {% for block in outfit %}
-        <div class="card" style="background-color: #f5f5f5; padding: 10px; border-radius: 8px; width: 200px;">
-          <h4 style="font-size: 16px; margin-bottom: 10px;">{{ block.category | capitalize }}</h4>
-          {% if block.results and block.results|length > 0 %}
-            {% set p = block.results[0] %}  {# отображаем только первый найденный товар по запросу #}
-            <img src="{{ p.image }}" alt="{{ p.title }}" width="180" style="display: block; margin: 0 auto;">
-            <p style="margin: 10px 0 5px 0;">{{ p.title }}</p>
-            <p style="margin: 0 0 10px 0;">{{ p.price }} ₽</p>
-            <a href="{{ p.link }}" target="_blank">Смотреть</a>
-          {% else %}
-            <p>Ничего не найдено</p>
-          {% endif %}
-        </div>
-      {% endfor %}
+        {% for item in outfit["items"] %}
+      <div class="card" style="background-color: #f5f5f5; padding: 10px; border-radius: 8px; width: 200px;">
+          <img src="{{ item.image }}" alt="Товар" width="180" style="display: block; margin: 0 auto;">
+          <h3 style="margin: 10px 0 5px 0;">{{ item.marketplace }}</h3>
+          <p style="margin: 10px 0 5px 0;">{{ item.reason }}</p>
+          <p style="margin: 0 0 10px 0;">{{ item.price }} ₽</p>
+          <a href="{{ item.link }}" target="_blank">Купить на Wildberries</a>
+      </div>
+        {% endfor %}
+
     </div>
-  </div>
+</div>
 {% endfor %}
 
+<script>
+  document.querySelector("form").addEventListener("submit", function (e) {
+    const fields = [
+      "query",
+      "size",
+      "color",
+      "material",
+      "style",
+      "color_type",
+      "body_shape"
+    ];
+
+    let isValid = true;
+
+    const onlyRussianRegex = /^[А-Яа-яЁё ,.?!\-]+$/;
+    const sizeRegex = /^[A-Za-z0-9\s\-\.]+$/;  // английские буквы + цифры + пробелы/дефисы/точки
+
+    fields.forEach(fieldId => {
+      const input = document.getElementById(fieldId);
+      const error = document.getElementById("error-" + fieldId);
+      const value = input.value.trim();
+      if ((fieldId === "color_type" || fieldId === "body_shape") && value === "") {
+      // Очистить ошибки и рамки
+      input.style.border = "";
+      error.style.display = "none";
+      return; // дальше не проверяем
+    }
+      if (!value) {
+        input.style.border = "1px solid red";
+        error.textContent = "Заполните поле";
+        error.style.display = "inline";
+        isValid = false;
+      } else {
+        const regex = fieldId === "size" ? sizeRegex : onlyRussianRegex;
+
+        if (!regex.test(value)) {
+          input.style.border = "1px solid red";
+          error.textContent = fieldId === "size"
+            ? "Разрешены латинские буквы и цифры"
+            : "Введите на русском";
+          error.style.display = "inline";
+          isValid = false;
+        } else {
+          input.style.border = "";
+          error.style.display = "none";
+        }
+      }
+    });
+
+    if (!isValid) {
+      e.preventDefault();
+    }
+  });
+</script>
 
 </body>
 </html>

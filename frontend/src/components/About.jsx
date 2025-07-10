@@ -7,36 +7,36 @@ import arrow from '../assets/arrowBlack.png';
 
 const steps = [
   {
-    title: 'Color Type',
+    title: 'Цветотип',
     description:
-      'We analyze your photo and skin undertone to define your color season. With this, we recommend clothing in hues that naturally enhance your complexion and overall look.',
-    button: 'Try it!',
+      'Мы анализируем вашу фотографию и оттенок кожи, чтобы определить ваш цветотип. На его основе мы рекомендуем одежду, которая подчеркнёт вашу внешность.',
+    button: 'Попробовать!',
     image: colorTypeImage,
-    href: '#color'
+    href: '#color',
   },
   {
-    title: 'Body Shape',
+    title: 'Тип фигуры',
     description:
-      'Based on your body measurements and shape, we suggest clothing cuts and silhouettes that flatter your figure best.',
-    button: 'Try it!',
+      'На основе ваших параметров и формы тела мы подберём фасоны одежды, которые подчеркнут ваши достоинства.',
+    button: 'Попробовать!',
     image: bodyShapeImage,
-    href: '#shape'
+    href: '#shape',
   },
   {
-    title: 'Shop',
+    title: 'Подбор образов',
     description:
-      'Based on your preferences and our AI styling system, we suggest outfit combinations personalized to your style.',
-    button: 'LOGIN',
-    subtext: 'In order to try this feature you have to login.',
-    image: outfitSuggestionImage
+      'С учётом ваших предпочтений и данных, наш AI подберёт для вас уникальные комбинации одежды.',
+    button: 'ВОЙТИ',
+    subtext: 'Чтобы воспользоваться функцией, войдите в систему.',
+    image: outfitSuggestionImage,
   },
   {
-    title: '3D - Fitting',
+    title: '3D-примерка',
     description:
-      'Try on clothes virtually with our 3D fitting tool. Visualize how each look fits your body in motion and get confident about your next purchase.',
-    button: 'LOGIN',
-    subtext: 'In order to try this feature you have to login.',
-    image: fittingToolImage
+      'Примерьте одежду виртуально с помощью 3D-примерки. Увидьте, как она сидит на вас в движении и принимайте уверенные решения.',
+    button: 'ВОЙТИ',
+    subtext: 'Чтобы воспользоваться функцией, войдите в систему.',
+    image: fittingToolImage,
   },
 ];
 
@@ -52,10 +52,9 @@ function About() {
   };
 
   const scrollToSection = (idOrHref) => {
-    const element =
-      idOrHref.startsWith('#')
-        ? document.querySelector(idOrHref)
-        : document.getElementById(idOrHref);
+    const element = idOrHref.startsWith('#')
+      ? document.querySelector(idOrHref)
+      : document.getElementById(idOrHref);
     if (element) {
       const offset = 10;
       const y = element.getBoundingClientRect().top + window.pageYOffset - offset;
@@ -68,16 +67,16 @@ function About() {
   return (
     <section
       id="about"
-      className="px-4 pb-12 font-anaheim"
+      className="px-4 pb-12 font-noto font-light"
       style={{ paddingTop: '12vh', scrollBehavior: 'smooth' }}
     >
       {/* Header & Nav Dots */}
       <div className="flex flex-col items-center justify-center text-center mb-4">
         <h2 className="text-3xl md:text-5xl font-comfortaa font-normal mb-4 tracking-wider">
-          Perfect wardrobe in just few steps.
+          Идеальный гардероб<br />всего в несколько шагов.
         </h2>
         <p className="text-base md:text-2xl opacity-25 mb-4">
-          Try it yourself! It’s easy, and fun!
+          Попробуйте сами — это легко и интересно!
         </p>
 
         <div className="flex items-center justify-center space-x-4 mb-6 md:mb-1">
@@ -117,10 +116,10 @@ function About() {
         <div className="text-left max-w-lg">
           <h3 className="text-xl font-bold mb-3">{currentStep + 1}. {title}</h3>
           <p className="text-gray-700 mb-6 whitespace-pre-line leading-relaxed">{description}</p>
-          
+
           <button
             onClick={() => scrollToSection(href || 'login')}
-            className="bg-[rgba(221,221,221,0.35)] text-gray-700 font-anaheim py-2 px-5 rounded-full shadow-md"
+            className="bg-[rgba(221,221,221,0.35)] text-gray-700 py-2 px-5 rounded-full shadow-md"
           >
             {button}
           </button>
@@ -133,7 +132,7 @@ function About() {
         <div className="mt-4 md:mt-8">
           <img
             src={image}
-            alt={`Step ${currentStep + 1} Preview`}
+            alt={`Этап ${currentStep + 1}`}
             className="w-[300px] md:w-[360px] object-contain"
           />
         </div>
