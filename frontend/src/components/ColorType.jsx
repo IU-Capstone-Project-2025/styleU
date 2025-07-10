@@ -1,6 +1,53 @@
 import React, { useState } from 'react';
 import { analyzeColor } from '../services/api';
 
+const COLOR_TYPE_INFO = {
+  summer: {
+    meaning: 'Цветотип "Лето" отличается холодными, приглушенными оттенками. Кожа часто светлая с розовым или оливковым подтоном, глаза — серые, голубые или зелёные, волосы — пепельные или русые.',
+    suitableColors: {
+      description: 'Холодные пастельные цвета: лавандовый, голубой, розовый, сиреневый, серо-бежевый.',
+      palette: ['#E6E6FA', '#ADD8E6', '#FFC0CB', '#D8BFD8', '#D3CBC4']
+    },
+    unsuitableColors: {
+      description: 'Яркие и тёплые цвета: ярко-оранжевый, тёплый жёлтый, тёплый коричневый.',
+      palette: ['#FFA500', '#FFD700', '#8B4513']
+    }
+  },
+  winter: {
+    meaning: 'Цветотип "Зима" отличается яркой контрастной внешностью. Кожа может быть фарфорово-белой или тёмной с холодным подтоном, глаза — яркие, волосы — от чёрных до тёмно-коричневых.',
+    suitableColors: {
+      description: 'Контрастные и холодные цвета: чёрный, белый, ярко-синий, изумрудный, малиновый.',
+      palette: ['#000000', '#FFFFFF', '#0000FF', '#50C878', '#DC143C']
+    },
+    unsuitableColors: {
+      description: 'Тёплые и приглушённые цвета: бежевый, оранжевый, светло-жёлтый.',
+      palette: ['#F5F5DC', '#FFA500', '#FFFFE0']
+    }
+  },
+  spring: {
+    meaning: 'Цветотип "Весна" — тёплый и светлый. Кожа светлая с персиковым или золотистым оттенком, глаза — зелёные, голубые или светло-карие, волосы — светло-русые, золотистые, рыжеватые.',
+    suitableColors: {
+      description: 'Тёплые и светлые цвета: коралловый, бирюзовый, персиковый, светло-жёлтый, мятный.',
+      palette: ['#FF7F50', '#40E0D0', '#FFDAB9', '#FFFFE0', '#98FF98']
+    },
+    unsuitableColors: {
+      description: 'Тёмные и холодные цвета: чёрный, тёмно-синий, серый.',
+      palette: ['#000000', '#00008B', '#808080']
+    }
+  },
+  autumn: {
+    meaning: 'Цветотип "Осень" отличается тёплыми и насыщенными оттенками. Кожа — золотистая или оливковая, глаза — тёплые карие или зелёные, волосы — каштановые, рыжие, тёплые тёмные.',
+    suitableColors: {
+      description: 'Тёплые, землистые цвета: терракотовый, оливковый, горчичный, шоколадный, кирпичный.',
+      palette: ['#E2725B', '#808000', '#FFDB58', '#381819', '#B22222']
+    },
+    unsuitableColors: {
+      description: 'Холодные и неоновые цвета: фуксия, голубой, чёрный.',
+      palette: ['#FF00FF', '#87CEEB', '#000000']
+    }
+  }
+};
+
 export default function ColorType() {
   const [image, setImage] = useState(null);
   const [imageFile, setImageFile] = useState(null);
@@ -28,7 +75,21 @@ export default function ColorType() {
     setLoading(true);
     try {
       const result = await analyzeColor(imageFile);
-      setColorType(result);
+      const typeKey = result.color_type?.toLowerCase();
+
+      if (COLOR_TYPE_INFO[typeKey]) {
+        setColorType({
+          type: result.color_type.toUpperCase(),
+          ...COLOR_TYPE_INFO[typeKey]
+        });
+      } else {
+        setColorType({
+          type: 'НЕ ОПРЕДЕЛЕН',
+          meaning: 'Цветотип не был распознан.',
+          suitableColors: { description: 'Нет рекомендаций.', palette: [] },
+          unsuitableColors: { description: 'Нет рекомендаций.', palette: [] }
+        });
+      }
     } catch (err) {
       console.error(err);
       alert('Не удалось проанализировать изображение. Пожалуйста, попробуйте снова.');
@@ -58,7 +119,6 @@ export default function ColorType() {
         </div>
 
         <div className="flex flex-col md:flex-row gap-8 items-start mt-12">
-          {/* Левая часть - изображение + кнопка загрузки */}
           <div className="w-full md:w-[40%] flex flex-col items-start">
             {!image ? (
               <div
@@ -66,12 +126,7 @@ export default function ColorType() {
                 onClick={() => document.getElementById('file-upload').click()}
                 style={{ aspectRatio: '1 / 1' }}
               >
-                <svg
-                  className="w-16 h-16 text-gray-400 mb-2"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
+                <svg className="w-16 h-16 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -89,10 +144,7 @@ export default function ColorType() {
                 />
               </div>
             ) : (
-              <div
-                className="border border-black rounded-lg overflow-hidden w-full max-w-[320px]"
-                style={{ aspectRatio: '1 / 1' }}
-              >
+              <div className="border border-black rounded-lg overflow-hidden w-full max-w-[320px]" style={{ aspectRatio: '1 / 1' }}>
                 <img src={image} alt="Uploaded" className="w-full h-full object-cover" />
               </div>
             )}
@@ -112,88 +164,83 @@ export default function ColorType() {
             </button>
           </div>
 
-          {/* Правая часть - результаты */}
           <div className="w-full md:w-[60%] flex flex-col items-end space-y-6">
             <div className="w-full max-w-full">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="md:text-2xl">Ваш цветотип:</h3>
-                <h4 className="text-red-500 text-2xl uppercase font-medium ml-auto" style={{ textAlign: 'right' }}>
+                <h4 className="text-red-500 text-2xl uppercase font-medium ml-auto text-right">
                   {colorType?.type || 'НЕ ОПРЕДЕЛЕН'}
                 </h4>
               </div>
 
               {colorType ? (
-                <>
-                  {['meaning', 'suitableColors', 'unsuitableColors'].map((section) => {
-                    const isExpanded = expandedSection === section;
-                    let title = '';
-                    let content = null;
+                ['meaning', 'suitableColors', 'unsuitableColors'].map((section) => {
+                  const isExpanded = expandedSection === section;
+                  let title = '';
+                  let content = null;
 
-                    if (section === 'meaning') {
-                      title = 'Что это значит?';
-                      content = <div className="p-4 pt-0 text-black">{colorType.meaning}</div>;
-                    } else if (section === 'suitableColors') {
-                      title = 'Какие цвета вам подходят?';
-                      content = (
-                        <div className="p-4 pt-0 text-black">
-                          <p className="mb-1 mt-1">{colorType.suitableColors.description}</p>
-                          <div className="flex gap-3 mt-3">
-                            {colorType.suitableColors.palette.map((color, i) => (
-                              <div
-                                key={i}
-                                className="w-8 h-8 rounded border border-gray-200 shadow-sm"
-                                style={{ backgroundColor: color }}
-                                title={color}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                      );
-                    } else if (section === 'unsuitableColors') {
-                      title = 'Какие цвета вам не подходят?';
-                      content = (
-                        <div className="p-4 pt-0 text-black">
-                          <p className="mb-4 mt-0">{colorType.unsuitableColors.description}</p>
-                          <div className="flex gap-3 mt-3">
-                            {colorType.unsuitableColors.palette.map((color, i) => (
-                              <div
-                                key={i}
-                                className="w-8 h-8 rounded border border-gray-200 shadow-sm"
-                                style={{ backgroundColor: color }}
-                                title={color}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                      );
-                    }
-
-                    return (
-                      <div key={section} className="mb-6 rounded-lg overflow-hidden border border-gray-200 bg-[rgba(221,221,221,0.35)] transition-all duration-500">
-                        <div
-                          className={`flex justify-between items-center cursor-pointer px-4 py-4 transition-all duration-300`}
-                          onClick={() => toggleSection(section)}
-                          style={{
-                            userSelect: 'none',
-                            color: 'rgba(0,0,0,0.3)'
-                          }}
-                        >
-                          <span>{title}</span>
-                          <span className="text-2xl select-none" style={{ color: 'rgba(0,0,0,0.3)' }}>
-                            {isExpanded ? '−' : '+'}
-                          </span>
-                        </div>
-                        <div
-                          className={`overflow-hidden transition-all duration-200 ease-in-out ${
-                            isExpanded ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
-                          }`}
-                        >
-                          {content}
+                  if (section === 'meaning') {
+                    title = 'Что это значит?';
+                    content = <div className="p-4 pt-0 text-black">{colorType.meaning}</div>;
+                  } else if (section === 'suitableColors') {
+                    title = 'Какие цвета вам подходят?';
+                    content = (
+                      <div className="p-4 pt-0 text-black">
+                        <p className="mb-1 mt-1">{colorType.suitableColors.description}</p>
+                        <div className="flex gap-3 mt-3">
+                          {colorType.suitableColors.palette.map((color, i) => (
+                            <div
+                              key={i}
+                              className="w-8 h-8 rounded border border-gray-200 shadow-sm"
+                              style={{ backgroundColor: color }}
+                              title={color}
+                            />
+                          ))}
                         </div>
                       </div>
                     );
-                  })}
-                </>
+                  } else if (section === 'unsuitableColors') {
+                    title = 'Какие цвета вам не подходят?';
+                    content = (
+                      <div className="p-4 pt-0 text-black">
+                        <p className="mb-1 mt-1">{colorType.unsuitableColors.description}</p>
+                        <div className="flex gap-3 mt-3">
+                          {colorType.unsuitableColors.palette.map((color, i) => (
+                            <div
+                              key={i}
+                              className="w-8 h-8 rounded border border-gray-200 shadow-sm"
+                              style={{ backgroundColor: color }}
+                              title={color}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div key={section} className="mb-6 rounded-lg overflow-hidden border border-gray-200 bg-[rgba(221,221,221,0.35)] transition-all duration-500">
+                      <div
+                        className="flex justify-between items-center cursor-pointer px-4 py-4"
+                        onClick={() => toggleSection(section)}
+                        style={{
+                          userSelect: 'none',
+                          color: 'rgba(0,0,0,0.3)'
+                        }}
+                      >
+                        <span>{title}</span>
+                        <span className="text-2xl select-none" style={{ color: 'rgba(0,0,0,0.3)' }}>
+                          {isExpanded ? '−' : '+'}
+                        </span>
+                      </div>
+                      <div className={`overflow-hidden transition-all duration-200 ease-in-out ${
+                        isExpanded ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
+                      }`}>
+                        {content}
+                      </div>
+                    </div>
+                  );
+                })
               ) : (
                 <div className="text-gray-400 italic mt-6">
                   {image ? 'Нажмите "Анализировать" для получения результатов' : 'Загрузите фото и нажмите "Анализировать"'}
