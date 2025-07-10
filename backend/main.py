@@ -10,6 +10,7 @@ from services.style_service import (
     analyze_body_type,
     analyze_color_type,
 )
+from services.user_service import generate_avatar_from_saved_photo
 from services.outfit_service import suggest_outfits_for_user
 from authorization.dependencies import get_current_user_optional, get_current_user
 from authorization.routes import router as auth_router
@@ -198,6 +199,11 @@ async def suggest_outfits(
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ошибка при подборе образов: {str(e)}")
+
+
+@app.post("/generate_avatar")
+async def generate_avatar(user: str = Depends(get_current_user)):
+    return await generate_avatar_from_saved_photo(user)
 
 
 if __name__ == "__main__":

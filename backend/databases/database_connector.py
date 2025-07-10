@@ -1,12 +1,18 @@
 from databases.models import User, UserParameters
 from databases.relational_db import SessionLocal
 from sqlalchemy.future import select
+from typing import Optional
+from motor.motor_asyncio import AsyncIOMotorClient
+from bson.binary import Binary
 from authorization.auth_utils import get_password_hash
+from config import MONGO_URL, MONGO_DB
 
 
 class DatabaseConnector:
     def __init__(self):
         self.session = SessionLocal()
+        self.mongo_client = AsyncIOMotorClient(MONGO_URL)
+        self.mongo_db = self.mongo_client[MONGO_DB]
 
     async def __aenter__(self):
         self.db = await self.session.__aenter__()
@@ -60,3 +66,34 @@ class DatabaseConnector:
             "color_type": params.color_type,
             "body_type": params.body_type,
         }
+
+    async def save_user_photo(self, username: str, file_path: str):
+        with open(file_path, "rb") as f:
+            photo_data = Binary(f.read())
+            await self.mongo_db.user_photos.replace_one(
+                {"username": username},
+                {"username": username, "photo": photo_data},
+                upsert=True,
+            )
+
+    async def get_user_photo(self, username: str) -> bytes:
+        doc = await self.mongo_db.user_photos.find_one({"username": username})
+        if not doc or "photo" not in doc:
+            raise ValueError("User photo not found")
+        return doc["photo"]
+
+    async def save_avatar(self, username: str, image_bytes: bytes):
+        await self.mongo_db.avatars.update_one(
+            {"username": username},
+            {"$set": {"image": image_bytes}},
+            upsert=True,
+        )
+
+    async def get_saved_avatar(self, username: str) -> Optional[bytes]:
+        doc = await self.mongo_db.avatars.find_one({"username": username})
+        if doc and "image" in doc:
+            return doc["image"]
+        return None
+
+    async def delete_avatar(self, username: str):
+        await self.mongo_db.avatars.delete_one({"username": username})

@@ -17,6 +17,9 @@ PREDICT_COLOR_TYPE_LLM_URL = "http://llm:8001/recommend_by_color_type"
 
 PARSER_URL = "http://host.docker.internal:8002/parser"
 
+GENERATE_AVATAR_URL = "http://ml:8000/generate-avatar"
 
-DATABASE_URL="postgresql+asyncpg://styleu_user:password@db:5432/styleu"
+DATABASE_URL=f"postgresql+asyncpg://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}@db:5432/{os.getenv('POSTGRES_DB')}"
+MONGO_URL="mongodb://mongo:27017"
 SECRET_KEY = os.getenv("SECRET_KEY")
+MONGO_DB = os.getenv("MONGO_DB")

@@ -67,6 +67,8 @@ async def analyze_color_type(file: UploadFile, username=None):
             async with DatabaseConnector() as connector:
                 user_id = await connector.get_user_id(username)
                 await connector.set_color_type(user_id, color_type)
+                await connector.save_user_photo(username, temp_path)
+                await connector.delete_avatar(username)
 
         return {"color_type": color_type, "recommendation": recommendation}
 

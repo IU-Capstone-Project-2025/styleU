@@ -6,3 +6,7 @@ pydantic
 Pillow
 numpy
 scikit-image
+gradio_client
+python-dotenv
+httpx
+python-multipart
