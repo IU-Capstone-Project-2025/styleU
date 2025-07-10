@@ -78,7 +78,6 @@ function MainPage() {
       >
         <ColorType />
         <BodyShape />
-        <Shop />
       </div>
 
       <div id="login" style={{ background: 'white', minHeight: '100vh', padding: '50px 0' }}>
@@ -87,6 +86,7 @@ function MainPage() {
     </>
   );
 }
+
 
 function SectionWrapper({ children }) {
   const location = useLocation();
