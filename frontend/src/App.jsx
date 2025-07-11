@@ -29,7 +29,7 @@ function ScrollNavbarWrapper({ children }) {
   const { isAuthenticated } = useContext(AuthContext);
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated || location.pathname !== '/') {
       setShowNavbar(true);
     } else {
       const handleScroll = () => {
@@ -87,7 +87,6 @@ function MainPage() {
   );
 }
 
-
 function SectionWrapper({ children }) {
   const location = useLocation();
   const path = location.pathname;
@@ -120,13 +119,17 @@ function SectionWrapper({ children }) {
             }
       }
     >
-      {children}
+      <div className="animate-fade-in">{children}</div>
     </div>
   );
 }
 
 function AppRoutes() {
-  const { isAuthenticated } = useContext(AuthContext);
+  const location = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [location.pathname]);
 
   return (
     <ScrollNavbarWrapper>

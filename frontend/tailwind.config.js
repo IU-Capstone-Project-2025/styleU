@@ -7,7 +7,7 @@ export default {
     extend: {
       fontFamily: {
         comfortaa: ['Comfortaa', 'cursive'],
-        anaheim: ['Anaheim', 'sans-serif'],
+        noto: ['"Noto Sans"', 'sans-serif'],
       },
     },
   },

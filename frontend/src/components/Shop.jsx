@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import OutfitCarousel from './OutfitCarousel';
+import like from '../assets/like.png';
+import dislike from '../assets/dislike.png';
 
 function Shop() {
   const [occasion, setOccasion] = useState('');
@@ -8,6 +10,7 @@ function Shop() {
   const [otherInfo, setOtherInfo] = useState('');
   const [hoveringPrice, setHoveringPrice] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [feedback, setFeedback] = useState(null);
 
   const resultRef = useRef(null);
   const occasionRef = useRef(null);
@@ -56,7 +59,7 @@ function Shop() {
         </div>
 
         <div className="max-w-6xl mx-auto flex flex-wrap justify-center items-start gap-3">
-          {/* Occasion */}
+          {/* Form Fields */}
           <div className="flex-shrink-0 w-52">
             <textarea
               ref={occasionRef}
@@ -69,7 +72,6 @@ function Shop() {
             {submitted && !occasion && <p className={errorText}>заполните окно</p>}
           </div>
 
-          {/* Price Range */}
           <div
             className="flex-shrink-0 w-52 relative"
             onMouseEnter={() => setHoveringPrice(true)}
@@ -108,7 +110,6 @@ function Shop() {
             )}
           </div>
 
-          {/* Location */}
           <div className="flex-shrink-0 w-52">
             <textarea
               ref={locationRef}
@@ -121,7 +122,6 @@ function Shop() {
             {submitted && !location && <p className={errorText}>заполните окно</p>}
           </div>
 
-          {/* Other Info */}
           <div className="flex-shrink-0 w-52">
             <textarea
               ref={otherInfoRef}
@@ -134,7 +134,6 @@ function Shop() {
             {submitted && !otherInfo && <p className={errorText}>заполните окно</p>}
           </div>
 
-          {/* GO Button */}
           <div className="flex-shrink-0 w-32 h-[48px]">
             <button
               onClick={handleSubmit}
@@ -144,9 +143,44 @@ function Shop() {
             </button>
           </div>
         </div>
+
+        {/* Review Section */}
+        <div className="mt-12 flex justify-center">
+          <div className="border border-gray-300 rounded-xl px-4 md:px-6 py-4 md:py-5 bg-white shadow-md w-full max-w-sm text-center transition-all">
+            <p className="mb-4 text-sm md:text-[15px] font-medium text-black">Как вам эта функция?</p>
+            <div className="flex justify-center gap-5">
+              <button
+                onClick={() => setFeedback('like')}
+                className={`w-10 h-10 md:w-11 md:h-11 rounded-full border flex items-center justify-center transition duration-300 ${
+                  feedback === 'like'
+                    ? 'border-gray-400 ring-2 ring-gray-300 bg-white shadow-md'
+                    : 'hover:bg-gray-100 border-gray-300'
+                }`}
+                aria-label="Понравилось"
+              >
+                <img src={like} alt="Like" className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => setFeedback('dislike')}
+                className={`w-10 h-10 md:w-11 md:h-11 rounded-full border flex items-center justify-center transition duration-300 ${
+                  feedback === 'dislike'
+                    ? 'border-gray-400 ring-2 ring-gray-300 bg-white shadow-md'
+                    : 'hover:bg-gray-100 border-gray-300'
+                }`}
+                aria-label="Не понравилось"
+              >
+                <img src={dislike} alt="Dislike" className="w-5 h-5" />
+              </button>
+            </div>
+            {feedback && (
+              <p className="mt-3 text-xs md:text-sm text-gray-600 italic transition-opacity duration-300">
+                {feedback === 'like' ? 'Спасибо за отзыв!' : 'Жаль, что не понравилось'}
+              </p>
+            )}
+          </div>
+        </div>
       </section>
 
-      {/* Result Section */}
       <div ref={resultRef}>
         <OutfitCarousel />
       </div>
