@@ -32,18 +32,18 @@ export default function ColorType() {
     try {
       const result = await analyzeColor(imageFile);
       const type = result.color_type?.toUpperCase() || 'НЕ ОПРЕДЕЛЕН';
-      const rec = result.recommendation || {};
+      const rec = result.recommendation?.recommendation || {};
 
       setColorType({
         type,
         meaning: rec.about || 'Описание не получено.',
         suitableColors: {
-          description: rec.suitable_colors || 'Нет рекомендаций.',
-          palette: []
+          description: rec.suitable_colors?.description || 'Нет рекомендаций.',
+          palette: rec.suitable_colors?.palette || []
         },
         unsuitableColors: {
-          description: rec.unsuitable_colors || 'Нет рекомендаций.',
-          palette: []
+          description: rec.unsuitable_colors?.description || 'Нет рекомендаций.',
+          palette: rec.unsuitable_colors?.palette || []
         }
       });
     } catch (err) {
@@ -196,7 +196,7 @@ export default function ColorType() {
                     content = (
                       <div className="p-4 pt-0 text-black text-sm md:text-base">
                         <p className="mb-1 mt-1">{colorType.suitableColors.description}</p>
-                        <div className="flex gap-3 mt-3">
+                        <div className="flex gap-3 mt-3 flex-wrap">
                           {colorType.suitableColors.palette.map((color, i) => (
                             <div
                               key={i}
@@ -213,7 +213,7 @@ export default function ColorType() {
                     content = (
                       <div className="p-4 pt-0 text-black text-sm md:text-base">
                         <p className="mb-1 mt-1">{colorType.unsuitableColors.description}</p>
-                        <div className="flex gap-3 mt-3">
+                        <div className="flex gap-3 mt-3 flex-wrap">
                           {colorType.unsuitableColors.palette.map((color, i) => (
                             <div
                               key={i}
