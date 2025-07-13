@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, Float, ForeignKey
 from sqlalchemy.orm import relationship
 from .relational_db import Base
 
+
 class User(Base):
     __tablename__ = "users"
 
@@ -25,3 +26,12 @@ class UserParameters(Base):
     color_type = Column(String, nullable=True)
 
     owner = relationship("User", back_populates="parameters")
+
+
+class Feedback(Base):
+    __tablename__ = "feedback"
+
+    id = Column(Integer, primary_key=True, index=True)
+    action_type = Column(String, index=True)
+    feedback_type = Column(String, index=True)
+    count = Column(Integer, default=1)

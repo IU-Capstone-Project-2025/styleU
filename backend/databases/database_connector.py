@@ -1,6 +1,7 @@
-from databases.models import User, UserParameters
+from databases.models import User, UserParameters, Feedback
 from databases.relational_db import SessionLocal
 from sqlalchemy.future import select
+from sqlalchemy import update, insert
 from authorization.auth_utils import get_password_hash
 
 
@@ -40,3 +41,41 @@ class DatabaseConnector:
     async def set_color_type(self, user_id: int, color_type: str):
         self.db.add(UserParameters(user_id=user_id, color_type=color_type))
         await self.db.commit()
+
+    async def add_feedback(self, action_type: str, feedback_type: str):
+        result = await self.db.execute(
+            select(Feedback).where(
+                Feedback.action_type == action_type,
+                Feedback.feedback_type == feedback_type
+            )
+        )
+        feedback = result.scalar_one_or_none()
+
+        if feedback:
+            stmt = (
+                update(Feedback)
+                .where(Feedback.id == feedback.id)
+                .values(count=feedback.count + 1)
+            )
+            await self.db.execute(stmt)
+        else:
+            stmt = insert(Feedback).values(
+                action_type=action_type,
+                feedback_type=feedback_type,
+                count=1
+            )
+            await self.db.execute(stmt)
+
+        await self.db.commit()
+
+    async def get_statistics(self):
+        result = await self.db.execute(select(Feedback))
+        rows = result.scalars().all()
+
+        stats = {}
+        for row in rows:
+            if row.action_type not in stats:
+                stats[row.action_type] = {"like": 0, "dislike": 0}
+            stats[row.action_type][row.feedback_type] = row.count
+
+        return stats

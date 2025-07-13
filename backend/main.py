@@ -1,5 +1,13 @@
+import logging
+logging.basicConfig(
+    filename="backend.log",
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+)
+
 import uvicorn
-from fastapi import FastAPI, UploadFile, File, HTTPException, Depends
+from functools import wraps
+from fastapi import FastAPI, UploadFile, File, HTTPException, Depends, Request, status
 from typing import Optional
 from contextlib import asynccontextmanager
 from fastapi.responses import JSONResponse
@@ -10,10 +18,23 @@ from services.style_service import (
     analyze_body_type,
     analyze_color_type,
 )
+from services.statistic import like_action, get_all_statistics
 from authorization.dependencies import get_current_user_optional
 from authorization.routes import router as auth_router
-from databases.relational_db import get_db, init_models
-from sqlalchemy.ext.asyncio import AsyncSession
+from databases.relational_db import init_models
+
+
+def log_endpoint(func):
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+        logging.info(f"Endpoint called: {func.__name__}")
+        try:
+            return await func(*args, **kwargs)
+        except Exception as e:
+            logging.error(f"Error in {func.__name__}: {str(e)}")
+            raise
+    return wrapper
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -49,6 +70,7 @@ app.include_router(auth_router)
     summary="Health check",
     description="Returns a simple greeting message to verify that the server is running.",
 )
+@log_endpoint
 def connect():
     return {"message": "Hello, World!"}
 
@@ -73,6 +95,7 @@ def connect():
         }
     """,
 )
+@log_endpoint
 async def analyze_figure(
     request: FigureRequest,
     user: Optional[str] = Depends(get_current_user_optional),
@@ -109,6 +132,7 @@ async def analyze_figure(
         }
     """
 )
+@log_endpoint
 async def analyze_color(
     file: UploadFile = File(...),
     user: Optional[str] = Depends(get_current_user_optional),
@@ -129,6 +153,7 @@ async def analyze_color(
         Not implemented yet.
     """
 )
+@log_endpoint
 def find_products():
     try:
         return {"message": "Not implemented yet"}
@@ -145,11 +170,120 @@ def find_products():
         Not implemented yet.
     """
 )
+@log_endpoint
 def suggest_outfits():
     try:
         return {"message": "Not implemented yet"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/generate_avatar")
+async def generate_avatar():
+    try:
+        return {"message": "Not implemented yet"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post(
+    "/like_figure_analization",
+    tags=["Statistics"],
+    summary="Like figure analysis"
+)
+@log_endpoint
+async def like_figure():
+    await like_action("figure", "like")
+    return {"message": "Figure analysis liked"}
+
+
+@app.post(
+    "/dislike_figure_analization",
+    tags=["Statistics"],
+    summary="Dislike figure analysis"
+)
+@log_endpoint
+async def dislike_figure():
+    await like_action("figure", "dislike")
+    return {"message": "Figure analysis disliked"}
+
+
+@app.post(
+    "/like_color_type_analization",
+    tags=["Statistics"],
+    summary="Like color type analysis"
+)
+@log_endpoint
+async def like_color():
+    await like_action("color", "like")
+    return {"message": "Color type liked"}
+
+
+@app.post(
+    "/dislike_color_type_analization",
+    tags=["Statistics"],
+    summary="Dislike color type analysis"
+)
+@log_endpoint
+async def dislike_color():
+    await like_action("color", "dislike")
+    return {"message": "Color type disliked"}
+
+
+@app.post(
+    "/like_outfit_suggestion",
+    tags=["Statistics"],
+    summary="Like outfit suggestion"
+)
+@log_endpoint
+async def like_outfit():
+    await like_action("outfit", "like")
+    return {"message": "Outfit suggestion liked"}
+
+
+@app.post(
+    "/dislike_outfit_suggestion",
+    tags=["Statistics"],
+    summary="Dislike outfit suggestion"
+)
+@log_endpoint
+async def dislike_outfit():
+    await like_action("outfit", "dislike")
+    return {"message": "Outfit suggestion disliked"}
+
+
+@app.post(
+    "/like_avatar_generation",
+    tags=["Statistics"],
+    summary="Like avatar generation"
+)
+@log_endpoint
+async def like_avatar():
+    await like_action("avatar", "like")
+    return {"message": "Avatar generation liked"}
+
+
+@app.post(
+    "/dislike_avatar_generation",
+    tags=["Statistics"],
+    summary="Dislike avatar generation"
+)
+@log_endpoint
+async def dislike_avatar():
+    await like_action("avatar", "dislike")
+    return {"message": "Avatar generation disliked"}
+
+
+@app.get(
+    "/statistics",
+    tags=["Statistics"],
+    summary="Get statistics",
+    description="Returns statistics on user feedback for various actions."
+)
+@log_endpoint
+async def statistics():
+    stats = await get_all_statistics()
+    return JSONResponse(content=stats, status_code=status.HTTP_200_OK)
 
 
 if __name__ == "__main__":
