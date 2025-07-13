@@ -230,8 +230,13 @@ def get_products(search_query: str, size_filter: str, material_filter: str, colo
                     matches_any(description, style_filter, STYLE_KEYWORDS))):
                     continue
 
-            rating = float(product.get("rating", 0))
+            rating = float(product.get("reviewRating") or 0)
             feedbacks = int(product.get("feedbacks", 0))
+
+# Отклоняем товары без достаточного количества отзывов
+            if feedbacks < 5:
+                continue
+
             score = rating * math.log1p(feedbacks)
 
             all_products.append({
@@ -291,7 +296,7 @@ async def search(
         has_main = False
         
         for item in outfit.get("items", []):
-            if not isinstance(item, dict):
+            if not isinstance(item, dict): 
                 continue
                 
             products = get_products(item.get("query", ""), size, material, color, style, item.get("category", ""))
