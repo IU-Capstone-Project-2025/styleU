@@ -4,52 +4,17 @@ import outfitSuggestionImage from '../assets/outfit-suggestion.png';
 import bodyShapeImage from '../assets/body-shape.png';
 import fittingToolImage from '../assets/fitting-tool.png';
 import arrow from '../assets/arrowBlack.png';
-
-const steps = [
-  {
-    title: 'Цветотип',
-    description:
-      'Мы анализируем вашу фотографию и оттенок кожи, чтобы определить ваш цветотип. На его основе мы рекомендуем одежду, которая подчеркнёт вашу внешность.',
-    button: 'Попробовать!',
-    image: colorTypeImage,
-    href: '#color',
-  },
-  {
-    title: 'Тип фигуры',
-    description:
-      'На основе ваших параметров и формы тела мы подберём фасоны одежды, которые подчеркнут ваши достоинства.',
-    button: 'Попробовать!',
-    image: bodyShapeImage,
-    href: '#shape',
-  },
-  {
-    title: 'Подбор образов',
-    description:
-      'С учётом ваших предпочтений и данных, наш AI подберёт для вас уникальные комбинации одежды.',
-    button: 'ВОЙТИ',
-    subtext: 'Чтобы воспользоваться функцией, войдите в систему.',
-    image: outfitSuggestionImage,
-  },
-  {
-    title: '3D-примерка',
-    description:
-      'Примерьте одежду виртуально с помощью 3D-примерки. Увидьте, как она сидит на вас в движении и принимайте уверенные решения.',
-    button: 'ВОЙТИ',
-    subtext: 'Чтобы воспользоваться функцией, войдите в систему.',
-    image: fittingToolImage,
-  },
-];
+import { useTranslation } from 'react-i18next';
 
 function About() {
+  const { t } = useTranslation();
+  const steps = t('about.steps', { returnObjects: true });
   const [currentStep, setCurrentStep] = useState(0);
 
-  const goToNext = () => {
-    setCurrentStep((prev) => (prev + 1) % steps.length);
-  };
+  const images = [colorTypeImage, bodyShapeImage, outfitSuggestionImage, fittingToolImage];
 
-  const goToPrevious = () => {
-    setCurrentStep((prev) => (prev - 1 + steps.length) % steps.length);
-  };
+  const goToNext = () => setCurrentStep((prev) => (prev + 1) % steps.length);
+  const goToPrevious = () => setCurrentStep((prev) => (prev - 1 + steps.length) % steps.length);
 
   const scrollToSection = (idOrHref) => {
     const element = idOrHref.startsWith('#')
@@ -62,7 +27,7 @@ function About() {
     }
   };
 
-  const { title, description, button, subtext, image, href } = steps[currentStep];
+  const { title, description, button, subtext, href } = steps[currentStep];
 
   return (
     <section
@@ -70,17 +35,15 @@ function About() {
       className="px-4 pb-12 font-noto font-light"
       style={{ paddingTop: '12vh', scrollBehavior: 'smooth' }}
     >
-      {/* Header & Nav Dots */}
       <div className="flex flex-col items-center justify-center text-center mb-4">
         <h2 className="text-3xl md:text-5xl font-comfortaa font-normal mb-4 tracking-wider">
-          Идеальный гардероб<br />всего в несколько шагов.
+          {t('about.header')}
         </h2>
         <p className="text-base md:text-2xl opacity-25 mb-4">
-          Попробуйте сами — это легко и интересно!
+          {t('about.subheader')}
         </p>
 
         <div className="flex items-center justify-center space-x-4 mb-6 md:mb-1">
-          {/* Left Arrow Button */}
           <button
             onClick={goToPrevious}
             className="w-5 h-5 rounded-full bg-[#d8dbe0] flex items-center justify-center shadow-sm hover:scale-105 hover:bg-[#cbd0d6] transition-all"
@@ -101,7 +64,6 @@ function About() {
             ))}
           </div>
 
-          {/* Right Arrow Button */}
           <button
             onClick={goToNext}
             className="w-5 h-5 rounded-full bg-[#d8dbe0] flex items-center justify-center shadow-sm hover:scale-105 hover:bg-[#cbd0d6] transition-all"
@@ -111,7 +73,6 @@ function About() {
         </div>
       </div>
 
-      {/* Content */}
       <div className="flex flex-col md:flex-row items-center justify-center gap-10 px-6 md:px-10">
         <div className="text-left max-w-lg">
           <h3 className="text-xl font-bold mb-3">{currentStep + 1}. {title}</h3>
@@ -131,8 +92,8 @@ function About() {
 
         <div className="mt-4 md:mt-8">
           <img
-            src={image}
-            alt={`Этап ${currentStep + 1}`}
+            src={images[currentStep]}
+            alt={`Step ${currentStep + 1}`}
             className="w-[300px] md:w-[360px] object-contain"
           />
         </div>
