@@ -62,6 +62,21 @@ export const analyzeColor = async (file, token = null) => {
   return response.data;
 };
 
+// 🧑‍🎨 Generate Avatar (GET /generate_avatar)
+export const generateAvatar = async (token) => {
+  if (!token) throw new Error("Token is required to generate avatar");
+
+  const response = await axios.post(`${BASE_URL}/generate_avatar`, {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    },
+    responseType: 'blob', // <- это важно: мы ожидаем изображение!
+  });
+  
+
+  return response.data; // <- это будет blob (изображение)
+};
+
 // ✅ Test Server Status (GET /api/hello)
 export const checkServer = async () => {
   const response = await axios.get(`${BASE_URL}/api/hello`);

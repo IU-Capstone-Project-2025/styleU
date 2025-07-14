@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import OutfitCarousel from './OutfitCarousel';
+import Avatar from './Avatar';
 import like from '../assets/like.png';
 import dislike from '../assets/dislike.png';
 
@@ -181,6 +182,9 @@ function Shop() {
         </div>
       </section>
 
+      <div >
+            <Avatar/>
+      </div>
       <div ref={resultRef}>
         <OutfitCarousel />
       </div>
