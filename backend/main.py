@@ -13,13 +13,15 @@ from contextlib import asynccontextmanager
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
-from validation import FigureRequest
+from validation import FigureRequest, OutfitRequest
 from services.style_service import (
     analyze_body_type,
     analyze_color_type,
 )
 from services.statistic import like_action, get_all_statistics
-from authorization.dependencies import get_current_user_optional
+from services.user_service import generate_avatar_from_saved_photo
+from services.outfit_service import suggest_outfits_for_user
+from authorization.dependencies import get_current_user_optional, get_current_user
 from authorization.routes import router as auth_router
 from databases.relational_db import init_models
 
@@ -93,6 +95,7 @@ def connect():
         {
         ML specific response structure
         }
+        ```
     """,
 )
 @log_endpoint
@@ -130,6 +133,7 @@ async def analyze_figure(
         {
         ML specific response structure
         }
+        ```
     """
 )
 @log_endpoint
@@ -145,45 +149,54 @@ async def analyze_color(
 
 
 @app.post(
-    "/find_products",
-    tags=["Clothing Service"],
-    summary="Find clothes",
-    description="""
-        Finds clothing products based on user preferences and body type.
-        Not implemented yet.
-    """
-)
-@log_endpoint
-def find_products():
-    try:
-        return {"message": "Not implemented yet"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.post(
     "/suggest_outfits",
     tags=["Outfit Service"],
     summary="Suggest outfits",
     description="""
-        Suggests outfits based on user's body type and color type.
-        Not implemented yet.
-    """
+        Подбирает образы на основе введенного запроса, предпочтений пользователя (размер, стиль, цвет, материал), а также его сохраненных color_type и body_type.
+
+        **Требуется авторизация**.
+
+        Параметры формы (multipart/form-data):
+        - query: Желаемый образ, например "летний образ на прогулку"
+        - size: Размер пользователя (например, "S", "M", "44", "46-48")
+        - color: Предпочтительный цвет
+        - material: Предпочтительный материал
+        - style: Предпочтительный стиль
+
+        Ответ:
+        ```json
+        {
+        ML specific response structure
+        }
+        ```
+    """,
 )
 @log_endpoint
-def suggest_outfits():
+async def suggest_outfits(
+    request: OutfitRequest,
+    user: str = Depends(get_current_user),
+):
     try:
-        return {"message": "Not implemented yet"}
+        outfits = await suggest_outfits_for_user(
+            user=user,
+            query=request.query,
+            size=request.size,
+            color=request.color,
+            material=request.material,
+            style=request.style,
+        )
+        return JSONResponse(content=outfits)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Ошибка при подборе образов: {str(e)}")
 
 
 @app.post("/generate_avatar")
-async def generate_avatar():
-    try:
-        return {"message": "Not implemented yet"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+@log_endpoint
+async def generate_avatar(user: str = Depends(get_current_user)):
+    return await generate_avatar_from_saved_photo(user)
 
 
 @app.post(
