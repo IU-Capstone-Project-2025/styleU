@@ -1,7 +1,7 @@
 import uuid
 import httpx, tempfile, shutil, os, uuid
 from databases.database_connector import DatabaseConnector
-import httpx, tempfile, shutil, os
+import httpx, shutil, os, uuid
 from fastapi import UploadFile, HTTPException
 from config import (
     PREDICT_BODY_TYPE_ML_URL,
@@ -69,6 +69,8 @@ async def analyze_color_type(file: UploadFile, username=None):
             async with DatabaseConnector() as connector:
                 user_id = await connector.get_user_id(username)
                 await connector.set_color_type(user_id, color_type)
+                await connector.save_user_photo(username, temp_path)
+                await connector.delete_avatar(username)
 
         return {"color_type": color_type, "recommendation": recommendation}
 
