@@ -14,7 +14,7 @@ async def suggest_outfits_for_user(user: str, query: str, size: str, color: str,
     color_type = user_data.get("color_type")
     body_shape = user_data.get("body_type")
 
-    data = {
+    form_data = {
         "query": query,
         "size": size,
         "color": color,
@@ -26,11 +26,16 @@ async def suggest_outfits_for_user(user: str, query: str, size: str, color: str,
 
     async with httpx.AsyncClient(timeout=300.0) as client:
         try:
-            response = await client.post(PARSER_URL, data=data)
+            response = await client.post(PARSER_URL, data=form_data)
         except httpx.RequestError as exc:
             raise HTTPException(status_code=502, detail=f"Parser service unavailable: {exc}")
 
     if response.status_code != 200:
         raise HTTPException(status_code=response.status_code, detail="Failed to get response from parser")
 
-    return response.text
+    try:
+        outfits = response.json()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Parser returned invalid JSON: {str(e)}")
+
+    return {"outfits": outfits}
