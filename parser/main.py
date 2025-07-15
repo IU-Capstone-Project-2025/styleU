@@ -34,26 +34,29 @@ COLOR_SYNONYMS = {
 client = Together(api_key="d6c15ee0b57f97707f05b2661455333de5db0666fcd25b4cfdb2832e55648d27")
 
 # LLM generating query for search
-def llm_refine_query(user_input: str, size: str, material: str, style: str, color_type: str, body_shape: str, color: str) -> str:
+def llm_refine_query(user_input: str, size: str, material: str, style: str, color_type: str, body_shape: str, color: str) -> list:
     prompt = (
         f"Пользователь хочет образ: {user_input}\n"
         f"Размер: {size}, Цвет: {color}, Материал: {material}, Стиль: {style}, Цветотип: {color_type}, Фигура: {body_shape}\n\n"
-        f"Собери **3 разных полноценных образа** (варианта луков) для пользователя. Каждый образ должен быть модным, "
-        f"современным, соответствовать сезону и учитывать тренды 2024/2025 года (например, банты, объемные плечи, металлик, кружево и т.п.).\n"
-        f"Убедись, что внутри каждого образа вещи сочетаются между собой по стилю, цвету и назначению.\n\n"
-        f"Верни результат в формате списка из 3 JSON-массивов. Каждый массив — это один образ, состоящий из 3–6 вещей. "
-        f"Каждая вещь должна быть JSON-объектом с ключами:\n"
-        f"- item: название (платье, туфли, сумка и т.д.)\n"
-        f"- query: поисковый запрос (до 7 слов)\n"
-        f"- category: категория (main, shoes, bag, accessory, outerwear и т.д.)\n\n"
+        f"Собери **3 разных полноценных образа** (варианта луков) для пользователя. Каждый образ должен быть JSON-объектом с полями:\n"
+        f"- items: список вещей (3-6 элементов)\n"
+        f"- totalReason: пояснение почему лук хорош\n"
+        f"- totalReason: пояснение почему лук хорош для пользователя с его параметрами (форма тела и цветотип)\n"
+        f"Каждая вещь должна содержать:\n"
+        f"- item: тип вещи (платье, туфли и т.д.)\n"
+        f"- query: поисковый запрос для Wildberries (до 7 слов)\n"
+        f"- category: категория (main, shoes, bag, accessory)\n\n"
         f"Пример:\n"
         f"[\n"
-        f"  [{{\"item\": \"платье\", \"query\": \"платье металлик а-силуэта\", \"category\": \"main\"}}, ...],\n"
-        f"  [...],\n"
-        f"  [...]\n"
+        f"  {{\n"
+        f"    \"items\": [\n"
+        f"      {{\"item\": \"платье\", \"query\": \"платье макси молочное хлопок\", \"category\": \"main\"}},\n"
+        f"      {{\"item\": \"хиджаб\", \"query\": \"хиджаб молочный хлопковый\", \"category\": \"accessory\"}}\n"
+        f"    ],\n"
+        f"    \"totalReason\": \"Образ идеально подходит для мусульманок\"\n"
+        f"  }}\n"
         f"]"
     )
-
     try:
         response = client.chat.completions.create(
             model="deepseek-ai/DeepSeek-V3",
@@ -64,7 +67,7 @@ def llm_refine_query(user_input: str, size: str, material: str, style: str, colo
                         "Ты модный ассистент. Подбирай **целые образы** (луки), состоящие из сочетающихся вещей.  "
                         "Учитывай текущие тренды этого года, стиль, фигуру, цветотип."
                         "Убедись, что вещи внутри одного образа подходят друг к другу."
-                        "Учитывай: 1) фасон вещи должен соответствовать фигуре, 2) оттенки цвета — цветотипу, "
+                        "Учитывай: 0) Всегда возвращай JSON строго в блоке ```json ... ```,1) фасон вещи должен соответствовать фигуре, 2) оттенки цвета — цветотипу, "
                         "3) включай материал, 4) не упоминай напрямую фигуру или цветотип, "
                         "а адаптируй фасон и цвет под них, 5) всегда указывай тип вещи (юбка, платье и т.п.)."
                     )
@@ -78,17 +81,22 @@ def llm_refine_query(user_input: str, size: str, material: str, style: str, colo
         )
         raw_content = response.choices[0].message.content.strip()
 
-        # Ищем JSON внутри текста
-        json_match = re.search(r"```json\s*(\[.*?\])\s*```", raw_content, re.DOTALL)
+        try:
+            json_match = re.search(r"```json\s*(\[.*?\])\s*```", raw_content, re.DOTALL)
+            if json_match:
+                json_block = json_match.group(1)
+            else:
+                # Пробуем достать JSON даже без ```json
+                json_block = re.search(r"(\[\s*{.*?}\s*\])", raw_content, re.DOTALL).group(1)
+            
+            content = json.loads(json_block)
+            print("Answer of LLM:", content)
+            return content
 
-        if not json_match:
-            raise ValueError("LLM did not return valid JSON block")
+        except Exception as e:
+            print("Error in llm_refine_query:", e)
+            return [[{"item": "платье", "query": "платье на выпускной", "category": "main"}]]
 
-        json_block = json_match.group(1)
-
-        content = json.loads(json_block)
-        print("Answer of LLM:", content)
-        return content
 
     except Exception as e:
         print("Error in llm_refine_query:", e)
@@ -113,12 +121,12 @@ def has_color(product: dict, user_color: str) -> bool:
             return True
     return False
 
-
 # Check if product has user size
 def size_matches(size_filter, sizes):
     size_filter = size_filter.upper()
     for s in sizes:
-        if size_filter == s.upper():
+        s = s.upper()
+        if size_filter == s:
             return True
         if '-' in s:
             parts = s.split('-')
@@ -131,6 +139,21 @@ def size_matches(size_filter, sizes):
             except ValueError:
                 continue
     return False
+
+def match_query_words(product_name: str, query: str) -> bool:
+    name_words = set(product_name.lower().split())
+    query_words = set(query.lower().split())
+    return bool(name_words & query_words)  # есть хотя бы одно общее слово
+
+def extract_price(product: dict) -> int | None:
+    min_price = None
+    for size in product.get("sizes", []):
+        if "price" in size and "product" in size["price"]:
+            price_val = size["price"]["product"] - 0.035*size["price"]["product"]
+            if not min_price or price_val < min_price:
+                min_price = price_val
+    return min_price // 100 if min_price else None
+
 
 
 # Build WB image url from product id
@@ -200,6 +223,10 @@ def build_wb_image_url(product_id):
 def get_products(search_query: str, size_filter: str, material_filter: str, color_filter: str, style_filter: str, category: str = ""):
     max_pages = 5
     all_products = []
+    headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+    "Accept": "application/json"
+}
 
     for page in range(max_pages):
         params = {
@@ -214,13 +241,23 @@ def get_products(search_query: str, size_filter: str, material_filter: str, colo
             'page': page
         }
 
-        url = "https://search.wb.ru/exactmatch/ru/common/v4/search"
-        response = requests.get(url, params=params)
-        data = response.json()
+        url = "https://search.wb.ru/exactmatch/ru/common/v5/search"
+        try:
+            response = requests.get(url, params=params, headers=headers)
+            data = response.json()
+            print(f"📨 Ответ от WB (стр. {page+1}):", json.dumps(data, ensure_ascii=False, indent=2))
+        except Exception as e:
+            print("❌ Ошибка запроса:", e)
+            continue
+        
+        products = data.get('data', {}).get('products', [])
 
-        for product in data.get('data', {}).get('products', []):
+        for product in products:
             sizes = [s['name'] for s in product.get('sizes', []) if 'name' in s]
             description = product.get('name', '').lower()
+
+            if not match_query_words(description, search_query):
+                continue
 
             if category == "main":
                 if not (size_matches(size_filter, sizes) and (
@@ -229,13 +266,18 @@ def get_products(search_query: str, size_filter: str, material_filter: str, colo
                     matches_any(description, style_filter, STYLE_KEYWORDS))):
                     continue
 
-            rating = float(product.get("rating", 0))
+            rating = float(product.get("reviewRating", 0))
             feedbacks = int(product.get("feedbacks", 0))
+
+            if feedbacks < 5:
+                continue
+
             score = rating * math.log1p(feedbacks)
+            price = extract_price(product)
 
             all_products.append({
                 'title': product['name'],
-                'price': product.get('salePriceU', product['priceU']) // 100,
+                'price': price,
                 'image': build_wb_image_url(product['id']),
                 'link': f"https://www.wildberries.ru/catalog/{product['id']}/detail.aspx",
                 'sizes': sizes,
@@ -244,7 +286,7 @@ def get_products(search_query: str, size_filter: str, material_filter: str, colo
                 'score': score
             })
 
-   
+
     # Взвешенная оценка: количество отзывов * рейтинг
     all_products.sort(key=lambda x: x['score'], reverse=True)
 
@@ -257,8 +299,7 @@ def get_products(search_query: str, size_filter: str, material_filter: str, colo
 async def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request, "products": None})
 
-
-@app.post("/parser", response_class=HTMLResponse)
+@app.post("/", response_class=HTMLResponse)
 async def search(
         request: Request,
         query: str = Form(...),
@@ -269,27 +310,57 @@ async def search(
         color_type: str = Form(...),
         body_shape: str = Form(...),
 ):
+    print(f" Запрос пользователя: {query}")
+    print(f"Размер: {size}, Цвет: {color}, Материал: {material}, Стиль: {style}, Цветотип: {color_type}, Фигура: {body_shape}")
+
     outfit_variants = llm_refine_query(query, size, material, style, color_type, body_shape, color)
+
+    print(" Результат от LLM:")
+    print(json.dumps(outfit_variants, ensure_ascii=False, indent=2))
 
     outfits = []
 
-    for outfit in outfit_variants:
-        has_main = False 
-        complete_look = []
-        for item in outfit:
-            items = get_products(item["query"], size, material, color, style, category=item['category'] )
-            if items:
-                best_item = max(items, key=lambda x: x['rating'], default=None)
-                if best_item:
-                    if item["category"] == "main":
-                        has_main = True
-                    complete_look.append({
-                        "category": item["category"],
-                        "query": item["query"],
-                        "results": [best_item]
-                    })
-        if complete_look and has_main:
-            outfits.append(complete_look)
+    def shorten_query(query: str, max_words: int = 3) -> str:
+        return " ".join(query.split()[:max_words])
 
+    for idx, outfit in enumerate(outfit_variants):
+
+        if not isinstance(outfit, dict):
+            continue
+
+        complete_look = {
+            "items": [],
+            "totalReason": outfit.get("totalReason", "Образ составлен с учетом всех параметров"),
+        }
+
+        for item_idx, item in enumerate(outfit.get("items", [])):
+
+            if not isinstance(item, dict):
+                continue
+
+            query = item.get("query", "")
+            category = item.get("category", "")
+
+            products = get_products(query, size, material, color, style, category)
+
+            # 🔁 fallback: упрощение запроса при отсутствии результатов
+            if not products and " " in query:
+                simplified_query = shorten_query(query)
+                products = get_products(simplified_query, size, material, color, style, category)
+
+
+            if products:
+                best_product = max(products, key=lambda x: x['rating'])
+
+                complete_look["items"].append({
+                    "image": best_product["image"],
+                    "link": best_product["link"],
+                    "price": best_product["price"],
+                    "marketplace": "Wildberries",
+                    "reason": f"{item.get('item', 'Товар')}: {best_product['title']} (рейтинг: {best_product['rating']})"
+                })
+
+        if complete_look["items"]:
+            outfits.append(complete_look) 
 
     return templates.TemplateResponse("index.html", {"request": request, "outfits": outfits})
