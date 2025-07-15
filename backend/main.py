@@ -196,7 +196,12 @@ async def suggest_outfits(
 @app.post("/generate_avatar")
 @log_endpoint
 async def generate_avatar(user: str = Depends(get_current_user)):
-    return await generate_avatar_from_saved_photo(user)
+    try:
+        return await generate_avatar_from_saved_photo(user)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail="Сначала пройдите определение цветотипа.")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка при генерации аватара: {str(e)}")
 
 
 @app.post(
