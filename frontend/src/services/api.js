@@ -62,20 +62,20 @@ export const analyzeColor = async (file, token = null) => {
   return response.data;
 };
 
-// 🧑‍🎨 Generate Avatar (GET /generate_avatar)
+// 🧑‍🎨 Generate Avatar (POST /generate_avatar)
 export const generateAvatar = async (token) => {
   if (!token) throw new Error("Token is required to generate avatar");
 
-  const response = await axios.post(`${BASE_URL}/generate_avatar`, {
+  const response = await axios.post(`${BASE_URL}/generate_avatar`, null, {
     headers: {
       'Authorization': `Bearer ${token}`
     },
-    responseType: 'blob', // <- это важно: мы ожидаем изображение!
+    responseType: 'blob', // <-- move this into the config
   });
-  
 
-  return response.data; // <- это будет blob (изображение)
+  return response.data;
 };
+
 
 // ✅ Test Server Status (GET /api/hello)
 export const checkServer = async () => {
