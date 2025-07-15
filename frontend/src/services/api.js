@@ -76,6 +76,12 @@ export const generateAvatar = async (token) => {
   return response.data;
 };
 
+export const likeColorType = () => axios.post(`${BASE_URL}/like_color_type_analization`);
+export const dislikeColorType = () => axios.post(`${BASE_URL}/dislike_color_type_analization`);
+export const likeBodyShape = () => axios.post(`${BASE_URL}/like_figure_analization`);
+export const dislikeBodyShape = () => axios.post(`${BASE_URL}/dislike_figure_analization`);
+export const likeShop = () => axios.post(`${BASE_URL}/like_outfit_suggestion`);
+export const dislikeShop = () => axios.post(`${BASE_URL}/dislike_outfit_suggestion`);
 
 // ✅ Test Server Status (GET /api/hello)
 export const checkServer = async () => {

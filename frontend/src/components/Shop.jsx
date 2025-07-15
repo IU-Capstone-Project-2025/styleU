@@ -3,6 +3,7 @@ import OutfitCarousel from './OutfitCarousel';
 import Avatar from './Avatar';
 import like from '../assets/like.png';
 import dislike from '../assets/dislike.png';
+import { likeShop, dislikeShop } from '../services/api';
 
 function Shop() {
   const [occasion, setOccasion] = useState('');
@@ -46,6 +47,24 @@ function Shop() {
 
   const errorText = 'text-xs text-red-500 mt-1';
   const errorField = 'border border-red-400';
+
+  const handleLike = async () => {
+    setFeedback('like');
+    try {
+      await likeShop();
+    } catch (err) {
+      console.error('Failed to send like feedback for shop:', err);
+    }
+  };
+
+  const handleDislike = async () => {
+    setFeedback('dislike');
+    try {
+      await dislikeShop();
+    } catch (err) {
+      console.error('Failed to send dislike feedback for shop:', err);
+    }
+  };
 
   return (
     <>
@@ -151,7 +170,7 @@ function Shop() {
             <p className="mb-4 text-sm md:text-[15px] font-medium text-black">Как вам эта функция?</p>
             <div className="flex justify-center gap-5">
               <button
-                onClick={() => setFeedback('like')}
+                onClick={handleLike}
                 className={`w-10 h-10 md:w-11 md:h-11 rounded-full border flex items-center justify-center transition duration-300 ${
                   feedback === 'like'
                     ? 'border-gray-400 ring-2 ring-gray-300 bg-white shadow-md'
@@ -162,7 +181,7 @@ function Shop() {
                 <img src={like} alt="Like" className="w-5 h-5" />
               </button>
               <button
-                onClick={() => setFeedback('dislike')}
+                onClick={handleDislike}
                 className={`w-10 h-10 md:w-11 md:h-11 rounded-full border flex items-center justify-center transition duration-300 ${
                   feedback === 'dislike'
                     ? 'border-gray-400 ring-2 ring-gray-300 bg-white shadow-md'

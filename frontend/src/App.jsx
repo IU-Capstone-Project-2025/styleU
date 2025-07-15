@@ -20,6 +20,7 @@ import Login from './components/Login';
 import Register from './components/Register';
 import PersonalPage from './components/PersonalPage';
 import Shop from './components/Shop';
+import Footer from './components/Footer';
 
 import { AuthContext, AuthProvider } from './components/AuthContext';
 
@@ -142,6 +143,7 @@ function AppRoutes() {
         <Route path="/color" element={<SectionWrapper><ColorType /></SectionWrapper>} />
         <Route path="/shape" element={<SectionWrapper><BodyShape /></SectionWrapper>} />
       </Routes>
+      <Footer />
     </ScrollNavbarWrapper>
   );
 }

@@ -32,5 +32,58 @@
         "subtext": "Please log in to use this feature."
       }
     ]
+  },
+
+  "colorType": {
+    "title": "Find your color type!",
+    "description": "Upload a photo of your face, click 'Analyze', and we'll determine your color type!",
+    "selectFile": "SELECT FILE",
+    "analyze": "Analyze",
+    "analyzing": "Analyzing...",
+    "feedbackQuestion": "How do you like this feature?",
+    "likeResponse": "Thanks for your feedback!",
+    "dislikeResponse": "Sorry it didn’t meet your expectations",
+    "yourType": "Your color type:",
+    "meaning": "What does it mean?",
+    "suitable": "Which colors suit you?",
+    "unsuitable": "Which colors don't suit you?",
+    "noImageMsg": "Upload a photo and click 'Analyze'",
+    "analyzeMsg": "Click 'Analyze' to get results",
+    "notDefined": "NOT DEFINED",
+    "errorMessage": "Failed to analyze the image. Please try again."
+  },
+  "bodyShape": {
+    "title": "Find your body shape!",
+    "subtitle": "Enter your measurements and click 'Analyze' — we’ll determine your shape!",
+    "sex": "Sex",
+    "height": "Height",
+    "weight": "Weight",
+    "waist": "Waist",
+    "chest": "Chest",
+    "hip": "Hips",
+    "rangeErr": "Value must be 1‑300 cm",
+    "analyze": "Analyze",
+    "analyzing": "Analyzing...",
+    "yourType": "Your body shape:",
+    "meaning": "What does it mean?",
+    "clothes": "Which clothes suit you?",
+    "prompt": "Fill in the measurements and click 'Analyze'",
+    "notDefined": "NOT DEFINED",
+    "error": "Figure analysis failed. Please try again.",
+    "feedbackQ": "How do you like this feature?",
+    "likeResp": "Thanks for your feedback!",
+    "dislikeResp": "Sorry it didn’t meet your expectations"
+  },
+  "footer": {
+    "rights": "All rights reserved."
+  },
+  "navbar": {
+    "shop": "Shop",
+    "color": "Color Type",
+    "shape": "Body Shape",
+    "profile": "Profile",
+    "logout": "Logout",
+    "login": "Login",
+    "about": "About"
   }
 }
