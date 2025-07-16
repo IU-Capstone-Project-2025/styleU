@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { analyzeFigure, likeBodyShape, dislikeBodyShape } from '../services/api';
-
 import like from '../assets/like.png';
 import dislike from '../assets/dislike.png';
 
@@ -19,19 +18,38 @@ export default function BodyShape() {
   const { t, i18n } = useTranslation();
 
   const [sex, setSex] = useState('Ж');
-  const [inputs, setInputs] = useState({ height: '', weight: '', waist: '', chest: '', hip: '' });
+  const [inputs, setInputs] = useState(() => {
+    const saved = localStorage.getItem('bodyInputs');
+    return saved ? JSON.parse(saved) : { height: '', weight: '', waist: '', chest: '', hip: '' };
+  });
+
   const [errors, setErrors] = useState({});
-  const [shapeResult, setShapeResult] = useState({ type: t('bodyShape.notDefined'), description: '', recommendation: '' });
+  const [shapeResult, setShapeResult] = useState(() => {
+    const saved = localStorage.getItem('bodyResult');
+    return saved
+      ? JSON.parse(saved)
+      : { type: t('bodyShape.notDefined'), description: '', recommendation: '' };
+  });
+
   const [expanded, setExpanded] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [feedback, setFeedback] = useState(null);
 
-  /* ---------- validation ---------- */
+  // Store inputs on change
+  useEffect(() => {
+    localStorage.setItem('bodyInputs', JSON.stringify(inputs));
+  }, [inputs]);
+
+  // Store results on change
+  useEffect(() => {
+    localStorage.setItem('bodyResult', JSON.stringify(shapeResult));
+  }, [shapeResult]);
+
   const validate = () => {
     const e = {};
     const { height, waist, chest, hip } = inputs;
-
     const rangeErr = t('bodyShape.rangeErr');
+
     if (height <= 0 || height > 300) e.height = rangeErr;
     if (waist <= 0 || waist > 300) e.waist = rangeErr;
     if (chest <= 0 || chest > 300) e.chest = rangeErr;
@@ -41,7 +59,6 @@ export default function BodyShape() {
     return !Object.keys(e).length;
   };
 
-  /* ---------- call backend ---------- */
   const analyze = async () => {
     if (!validate()) {
       setShapeResult({ type: t('bodyShape.notDefined'), description: '', recommendation: '' });
@@ -64,11 +81,14 @@ export default function BodyShape() {
       const ruLabel = res.body_type || '';
       const enEnum = RUS_TO_EN_ENUM[ruLabel.toLowerCase()] || ruLabel.toUpperCase();
 
-      setShapeResult({
+      const newResult = {
         type: enEnum,
         description: data.description || '',
         recommendation: data.recommendation || '',
-      });
+      };
+
+      setShapeResult(newResult);
+      localStorage.setItem('bodyResult', JSON.stringify(newResult));
     } catch (err) {
       alert(t('bodyShape.error'));
       setShapeResult({ type: t('bodyShape.notDefined'), description: '', recommendation: '' });
@@ -76,7 +96,6 @@ export default function BodyShape() {
       setIsLoading(false);
     }
   };
-
 
   const toggleSection = (s) => setExpanded((p) => (p === s ? null : s));
 
@@ -87,7 +106,6 @@ export default function BodyShape() {
         : p
     );
 
-  
   const sendFeedback = async (type) => {
     try {
       if (type === 'like') await likeBodyShape();

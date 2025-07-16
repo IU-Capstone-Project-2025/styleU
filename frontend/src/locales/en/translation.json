@@ -1,7 +1,7 @@
 {
   "smartFashion": "Smart fashion that adapts to you",
   "tryFree": "Try it for free",
-  "login": "Login",
+  "loginbtn": "Login",
 
   "about": {
     "header": "The perfect wardrobe in just a few steps.",
@@ -109,6 +109,40 @@
     "price": "Price",
     "marketplace": "Shop",
     "reason": "Why this item"
+  },
+  "login": {
+    "noAccount": "No account?",
+    "register": "Register",
+    "username": "username",
+    "password": "password",
+    "login": "Login",
+    "enterCredentials": "Please enter username and password.",
+    "success": "You have successfully logged in!",
+    "error": "Invalid username or password. Please try again."
+  },
+  "personal": {
+    "welcome": "Welcome",
+    "user": "User",
+    "logout": "Logout",
+    "photoAlt": "Profile Photo",
+    "sex": "Sex",
+    "weight": "Weight",
+    "height": "Height",
+    "colorType": "Color Type",
+    "bodyShape": "Body Shape",
+    "findOut": "Find out!"
+  },
+  "register": {
+    "title": "Create Account",
+    "username": "Username",
+    "password": "Password",
+    "registerBtn": "Register",
+    "success": "Registration successful!",
+    "error": "Registration failed. Try a different username.",
+    "fillFields": "Please fill in all fields.",
+    "haveAccount": "Already have an account?",
+    "loginLink": "Log in",
+    "exit": "← Exit"
   }
 
 }

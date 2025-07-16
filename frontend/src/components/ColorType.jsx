@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { analyzeColor, likeColorType, dislikeColorType } from '../services/api';
 import like from '../assets/like.png';
@@ -15,6 +15,16 @@ export default function ColorType() {
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState(null);
 
+  // Load from localStorage on mount
+  useEffect(() => {
+    const savedImage = localStorage.getItem('color_image');
+    const savedResult = localStorage.getItem('color_result');
+    if (savedImage && savedResult) {
+      setImage(savedImage);
+      setColorType(JSON.parse(savedResult));
+    }
+  }, []);
+
   const handleUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -24,13 +34,14 @@ export default function ColorType() {
     reader.onloadend = () => {
       setImage(reader.result);
       setColorType(null);
+      setExpandedSection(null);
+      setFeedback(null);
     };
     reader.readAsDataURL(file);
   };
 
   const analyzeImage = async () => {
     if (!imageFile) return;
-
     setLoading(true);
     try {
       const result = await analyzeColor(imageFile);
@@ -38,7 +49,7 @@ export default function ColorType() {
       const data = result.recommendation?.[langKey] || {};
       const rec = data.recommendation || {};
 
-      setColorType({
+      const parsedResult = {
         type: result.color_type?.toUpperCase() || t('colorType.notDefined'),
         meaning: rec.about || '',
         suitableColors: {
@@ -49,8 +60,11 @@ export default function ColorType() {
           description: rec.unsuitable_colors?.description || '',
           palette: rec.unsuitable_colors?.palette || [],
         },
-      });
+      };
 
+      setColorType(parsedResult);
+      localStorage.setItem('color_image', image);
+      localStorage.setItem('color_result', JSON.stringify(parsedResult));
     } catch (err) {
       console.error(err);
       alert(t('colorType.errorMessage'));
@@ -84,29 +98,31 @@ export default function ColorType() {
         <div className="flex flex-col md:flex-row gap-16 md:gap-28 items-start mt-12">
           <div className="w-full md:w-[40%] flex flex-col items-center md:items-start">
             <div className="w-[90%] max-w-[320px]">
-              {!image ? (
-                <div
-                  className="border border-black rounded-lg w-full aspect-square flex flex-col items-center justify-center cursor-pointer bg-cover bg-center bg-no-repeat"
-                  style={{ backgroundImage: `url(${bgImage})`, backgroundSize: '120%' }}
-                  onClick={() => document.getElementById('file-upload').click()}
-                >
-                  <svg className="w-10 h-10 md:w-12 md:h-12 text-gray-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  <span className="text-gray-600 text-xs md:text-sm font-semibold">{t('colorType.selectFile')}</span>
-                  <input id="file-upload" type="file" accept="image/*" onChange={handleUpload} className="hidden" />
-                </div>
-              ) : (
-                <div className="border border-black rounded-lg overflow-hidden w-full aspect-square">
-                  <img src={image} alt="Uploaded" className="w-full h-full object-cover" />
-                </div>
-              )}
+              <label htmlFor="file-upload" className="cursor-pointer w-full block">
+                {!image ? (
+                  <div
+                    className="border border-black rounded-lg w-full aspect-square flex flex-col items-center justify-center bg-cover bg-center bg-no-repeat"
+                    style={{ backgroundImage: `url(${bgImage})`, backgroundSize: '120%' }}
+                  >
+                    <svg className="w-10 h-10 md:w-12 md:h-12 text-gray-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span className="text-gray-600 text-xs md:text-sm font-semibold">{t('colorType.selectFile')}</span>
+                  </div>
+                ) : (
+                  <div className="border border-black rounded-lg overflow-hidden w-full aspect-square">
+                    <img src={image} alt="Uploaded" className="w-full h-full object-cover" />
+                  </div>
+                )}
+              </label>
+              <input id="file-upload" type="file" accept="image/*" onChange={handleUpload} className="hidden" />
+
 
               <button
                 onClick={analyzeImage}
                 disabled={!image || loading}
                 className={`mt-6 w-full py-2 md:py-3 rounded-full font-medium transition ${
-                  image ? 'bg-[rgba(221,221,221,0.35)] text-black hover:bg-[rgba(221,221,221,0.35)]' : 'bg-[rgba(221,221,221,0.35)] text-black cursor-not-allowed'
+                  image ? 'bg-[rgba(221,221,221,0.35)] text-black hover:bg-[rgba(221,221,221,0.35)]' : 'cursor-not-allowed'
                 }`}
                 style={{ backdropFilter: 'blur(4px)', boxShadow: '0 4px 4px 0 rgba(0, 0, 0, 0.25)' }}
               >
@@ -123,39 +139,43 @@ export default function ColorType() {
                 )}
               </button>
 
-              <div className="mt-6 w-full flex justify-center">
-                <div className="border border-gray-300 rounded-xl px-4 md:px-6 py-4 md:py-5 bg-white shadow-md w-full max-w-sm text-center transition-all">
-                  <p className="mb-4 text-sm md:text-[15px] font-medium text-black">{t('colorType.feedbackQuestion')}</p>
-                  <div className="flex justify-center gap-5">
-                    <button
-                      onClick={() => sendFeedback('like')}
-                      className={`w-10 h-10 md:w-11 md:h-11 rounded-full border flex items-center justify-center transition duration-300 ${
-                        feedback === 'like' ? 'border-gray-400 ring-2 ring-gray-300 bg-white shadow-md' : 'hover:bg-gray-100 border-gray-300'
-                      }`}
-                      aria-label="Like"
-                    >
-                      <img src={like} alt="Like" className="w-5 h-5" />
-                    </button>
-                    <button
-                      onClick={() => sendFeedback('dislike')}
-                      className={`w-10 h-10 md:w-11 md:h-11 rounded-full border flex items-center justify-center transition duration-300 ${
-                        feedback === 'dislike' ? 'border-gray-400 ring-2 ring-gray-300 bg-white shadow-md' : 'hover:bg-gray-100 border-gray-300'
-                      }`}
-                      aria-label="Dislike"
-                    >
-                      <img src={dislike} alt="Dislike" className="w-5 h-5" />
-                    </button>
+              {/* Feedback Section */}
+              {colorType && (
+                <div className="mt-6 w-full flex justify-center">
+                  <div className="border border-gray-300 rounded-xl px-4 md:px-6 py-4 md:py-5 bg-white shadow-md w-full max-w-sm text-center transition-all">
+                    <p className="mb-4 text-sm md:text-[15px] font-medium text-black">{t('colorType.feedbackQuestion')}</p>
+                    <div className="flex justify-center gap-5">
+                      <button
+                        onClick={() => sendFeedback('like')}
+                        className={`w-10 h-10 md:w-11 md:h-11 rounded-full border flex items-center justify-center transition duration-300 ${
+                          feedback === 'like' ? 'border-gray-400 ring-2 ring-gray-300 bg-white shadow-md' : 'hover:bg-gray-100 border-gray-300'
+                        }`}
+                        aria-label="Like"
+                      >
+                        <img src={like} alt="Like" className="w-5 h-5" />
+                      </button>
+                      <button
+                        onClick={() => sendFeedback('dislike')}
+                        className={`w-10 h-10 md:w-11 md:h-11 rounded-full border flex items-center justify-center transition duration-300 ${
+                          feedback === 'dislike' ? 'border-gray-400 ring-2 ring-gray-300 bg-white shadow-md' : 'hover:bg-gray-100 border-gray-300'
+                        }`}
+                        aria-label="Dislike"
+                      >
+                        <img src={dislike} alt="Dislike" className="w-5 h-5" />
+                      </button>
+                    </div>
+                    {feedback && (
+                      <p className="mt-3 text-xs md:text-sm text-gray-600 italic transition-opacity duration-300">
+                        {feedback === 'like' ? t('colorType.likeResponse') : t('colorType.dislikeResponse')}
+                      </p>
+                    )}
                   </div>
-                  {feedback && (
-                    <p className="mt-3 text-xs md:text-sm text-gray-600 italic transition-opacity duration-300">
-                      {feedback === 'like' ? t('colorType.likeResponse') : t('colorType.dislikeResponse')}
-                    </p>
-                  )}
                 </div>
-              </div>
+              )}
             </div>
           </div>
 
+          {/* Right Panel - Color Result */}
           <div className="w-full md:w-[60%] flex flex-col items-end space-y-6">
             <div className="w-full max-w-full">
               <div className="flex justify-between items-center mb-4">

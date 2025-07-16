@@ -70,7 +70,7 @@ function Home() {
             onClick={scrollToLogin}
             className="bg-black text-white px-10 py-2 sm:pl-16 sm:pr-16 sm:py-3 text-base sm:text-lg font-noto rounded-full shadow-md sm:-ml-10 z-20 hover:opacity-80 transition"
           >
-            {t('login')}
+            {t('loginbtn')}
           </button>
         </div>
       </div>
