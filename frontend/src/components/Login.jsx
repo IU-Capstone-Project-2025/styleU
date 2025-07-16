@@ -22,7 +22,7 @@ function Login() {
     try {
       const response = await loginUser({ username, password });
       const token = response.access_token;
-      login(token);
+      login(token, { username });
       alert('Вы успешно вошли!');
       navigate('/personal'); // переход на личную страницу
     } catch (error) {
