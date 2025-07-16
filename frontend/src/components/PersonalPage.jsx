@@ -1,57 +1,92 @@
 import React, { useContext } from 'react';
 import { AuthContext } from './AuthContext';
+import { UserIcon } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 function PersonalPage() {
   const { user, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-white px-4">
-      <div className="w-full max-w-3xl bg-gray-100 rounded-xl p-8 shadow-md">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="flex flex-col items-center">
-            <div
-              className="w-32 h-32 rounded-full border bg-gray-200 flex items-center justify-center"
-            >
-              <span className="text-gray-500 text-lg font-semibold">Фото отсутствует</span>
+      <div className="relative w-full max-w-3xl bg-[#f3f3f3] rounded-xl p-12 pt-10 pb-24 shadow-md font-noto font-light">
+
+        <div className="flex flex-row items-start w-full">
+          {/* Левая часть: фото и кнопка */}
+          <div className="flex flex-col items-center min-w-[140px]">
+            <div className="w-32 h-32 rounded-full border bg-gray-200 flex items-center justify-center overflow-hidden shadow">
+              {user?.profilePhoto ? (
+                <img src={user.profilePhoto} alt="Фото профиля" className="w-full h-full object-cover" />
+              ) : (
+                <UserIcon className="w-16 h-16 text-gray-400" />
+              )}
             </div>
             <button
               onClick={logout}
-              className="mt-4 px-6 py-2 bg-gray-300 text-black rounded-full shadow hover:bg-gray-400 transition"
+              className="mt-3 px-6 py-1.5 bg-gray-300 text-black rounded-full shadow-md hover:bg-gray-400 transition text-sm"
+              style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
             >
               Выйти
             </button>
           </div>
-          <div className="text-center sm:text-left">
-            <h1 className="text-3xl font-semibold mb-4">
-              Добро пожаловать, <span className="text-black font-bold">{user?.fullName || 'Пользователь'}</span>
+          {/* Правая часть: текст */}
+          <div className="flex-1 flex flex-col items-start ml-12">
+            <h1 className="text-3xl font-comfortaa mb-10 mt-2">
+              Добро пожаловать, <span className="font-bold">{user?.username || 'Пользователь'}</span>
             </h1>
-            <div className="flex justify-between gap-8 border-t pt-4">
-              <div>
+            <div className="flex justify-between w-full max-w-lg text-center mx-auto">
+              <div className="pl-4">
                 <div className="text-gray-600">Пол</div>
-                <div className="text-xl font-semibold">{user?.sex || '-'}</div>
+                <div className="text-xl font-noto font-light">
+                  {user?.sex || <span className="inline-block w-8 border-b border-gray-400 text-gray-400">&nbsp;</span>}
+                </div>
               </div>
               <div>
                 <div className="text-gray-600">Вес</div>
-                <div className="text-xl font-semibold">{user?.weight || '-'}</div>
+                <div className="text-xl font-noto font-light">
+                  {user?.weight || <span className="inline-block w-8 border-b border-gray-400 text-gray-400">&nbsp;</span>}
+                </div>
               </div>
-              <div>
+              <div className="pr-4">
                 <div className="text-gray-600">Рост</div>
-                <div className="text-xl font-semibold">{user?.height || '-'}</div>
+                <div className="text-xl font-noto font-light">
+                  {user?.height || <span className="inline-block w-8 border-b border-gray-400 text-gray-400">&nbsp;</span>}
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex flex-col">
-            <div className="text-gray-600">Цветотип</div>
-            <div className="text-lg">{user?.colorType || '—'}</div>
-          </div>
-          <div className="flex flex-col">
-            <div className="text-gray-600">Тип фигуры</div>
-            <button className="mt-1 px-6 py-2 bg-gray-300 text-black rounded-full shadow hover:bg-gray-400 transition">
-              Узнать!
-            </button>
+            {/* Разделитель */}
+            <div className="w-full max-w-lg border-b border-gray-400 my-6 mx-auto" />
+            {/* Цветотип и Тип фигуры */}
+            <div className="flex flex-col gap-4 w-full max-w-lg mx-auto mt-8">
+              <div className="flex items-center gap-4 w-full">
+                <div className="text-gray-600 min-w-[90px]">Цветотип</div>
+                {user?.colorType ? (
+                  <div className="text-lg font-noto font-light">{user.colorType}</div>
+                ) : (
+                  <button
+                    className="px-10 py-2 bg-gray-300 text-black rounded-full shadow-md hover:bg-gray-400 transition text-base ml-auto"
+                    style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
+                    onClick={() => navigate('/color')}
+                  >
+                    Узнать!
+                  </button>
+                )}
+              </div>
+              <div className="flex items-center gap-4 w-full">
+                <div className="text-gray-600 min-w-[90px]">Тип фигуры</div>
+                {user?.bodyShape ? (
+                  <div className="text-lg font-noto font-light">{user.bodyShape}</div>
+                ) : (
+                  <button
+                    className="px-10 py-2 bg-gray-300 text-black rounded-full shadow-md hover:bg-gray-400 transition text-base ml-auto"
+                    style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
+                    onClick={() => navigate('/shape')}
+                  >
+                    Узнать!
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>

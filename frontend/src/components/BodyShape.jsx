@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { analyzeFigure } from '../services/api';
 import like from '../assets/like.png';
 import dislike from '../assets/dislike.png';
+import { AuthContext } from './AuthContext';
 
 const BODY_TYPE_DESCRIPTIONS_RU = {
   'RECTANGLE': 'Прямоугольный тип фигуры характеризуется прямым силуэтом, с похожими размерами плеч, талии и бёдер, что означает минимальную выраженность талии. Этот тип фигуры часто выглядит сбалансированным и обтекаемым, напоминая прямоугольник с почти одинаковой шириной в верхней, средней и нижней частях.',
@@ -26,6 +27,7 @@ const formatTextWithBold = (text) => {
 
 export default function BodyShape() {
   const [sex, setSex] = useState('Ж');
+  const { user, setUser } = useContext(AuthContext);
   const [inputs, setInputs] = useState({ height: '', weight: '', waist: '', chest: '', hip: '' });
   const [errors, setErrors] = useState({});
   const [shapeResult, setShapeResult] = useState({ type: 'НЕ ОПРЕДЕЛЕН', meaning: '', clothes: '' });
@@ -80,6 +82,22 @@ export default function BodyShape() {
         meaning: BODY_TYPE_DESCRIPTIONS_RU[englishKey] || 'Описание недоступно',
         clothes: result.recommendation || 'Рекомендации по одежде отсутствуют'
       });
+
+      // Обновляем данные пользователя в контексте
+      setUser({
+        ...user,
+        sex,
+        height: inputs.height,
+        weight: inputs.weight,
+        bodyShape: russianBodyType.toUpperCase(),
+      });
+      localStorage.setItem('user', JSON.stringify({
+        ...user,
+        sex,
+        height: inputs.height,
+        weight: inputs.weight,
+        bodyShape: russianBodyType.toUpperCase(),
+      }));
     } catch (error) {
       alert('Ошибка анализа фигуры. Пожалуйста, попробуйте снова.');
       setShapeResult({ type: 'НЕ ОПРЕДЕЛЕН', meaning: '', clothes: '' });

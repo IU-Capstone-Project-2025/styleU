@@ -2,6 +2,22 @@ import React, { useContext, useEffect, useState } from 'react';
 import { AuthContext } from './AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { UserIcon, Menu } from 'lucide-react';
+import heartOutline from '../assets/heart-outline.png';
+
+// Мини-меню навигации слева
+function SideNav() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  return (
+    <div className="fixed left-8 top-1/2 -translate-y-1/2 flex flex-col items-center gap-6 z-40">
+      <button onClick={() => navigate('/personal')} className={`w-12 h-12 rounded-full flex items-center justify-center border ${location.pathname === '/personal' ? 'bg-black text-white' : 'bg-white text-black'}`}> <UserIcon className="w-6 h-6" /> </button>
+      <div className="flex flex-col gap-3 items-center">
+        {[1,2,3,4].map((_,i) => <div key={i} className="w-4 h-4 rounded-full bg-gray-400 opacity-60" />)}
+      </div>
+      <button onClick={() => navigate('/favorites')} className={`w-12 h-12 rounded-full flex items-center justify-center border ${location.pathname === '/favorites' ? 'bg-black text-white' : 'bg-white text-black'}`}> <img src={heartOutline} alt="favorites" className="w-6 h-6" /> </button>
+    </div>
+  );
+}
 
 function Navbar() {
   const [activeSection, setActiveSection] = useState('');
@@ -61,6 +77,7 @@ function Navbar() {
 
   return (
     <>
+      <SideNav />
       {/* Desktop Navbar */}
       <header className="hidden md:flex w-[90%] max-w-5xl mx-auto justify-between items-center px-6 py-3 transition-all duration-300 fixed top-6 left-1/2 transform -translate-x-1/2 bg-white bg-opacity-60 backdrop-blur-md rounded-full shadow-md z-50">
         <h1
@@ -129,36 +146,4 @@ function Navbar() {
               <div onClick={() => { navigate('/shape'); setIsMobileMenuOpen(false); }} className={linkClass('shape')}>Тип фигуры</div>
               <div
                 onClick={() => { navigate('/personal'); setIsMobileMenuOpen(false); }}
-                className={`flex items-center justify-center gap-2 cursor-pointer ${activeSection === 'profile' ? 'font-bold' : ''}`}
-              >
-                <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center">
-                  <UserIcon className="w-4 h-4" />
-                </div>
-                <span>Личный кабинет</span>
-              </div>
-              <button onClick={logout} className="text-red-500 underline">Выйти</button>
-            </>
-          ) : (
-            <>
-              <div onClick={() => scrollToSection('about')} className={linkClass('about')}>О нас</div>
-              <div onClick={() => scrollToSection('color')} className={linkClass('color')}>Цветотип</div>
-              <div onClick={() => scrollToSection('shape')} className={linkClass('shape')}>Тип фигуры</div>
-              <button
-                onClick={() => scrollToSection('login')}
-                className={`px-4 py-1 rounded-full text-xs transition-all duration-300 ${
-                  activeSection === 'login'
-                    ? 'bg-white text-black border border-black font-semibold'
-                    : 'bg-black text-white hover:opacity-80'
-                }`}
-              >
-                Войти
-              </button>
-            </>
-          )}
-        </div>
-      )}
-    </>
-  );
-}
-
-export default Navbar;
+                className={`
