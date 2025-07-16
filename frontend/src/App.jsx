@@ -1,34 +1,158 @@
-import { useState } from 'react';
+import './index.css';
+import background from './assets/background.jpeg';
+import colorBodyBackground from './assets/color-body-background.png';
 
-function App() {
-  const [loading, setLoading] = useState(false);
+import { useEffect, useState, useContext } from 'react';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+  Navigate,
+} from 'react-router-dom';
 
-  const handleClick = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch('http://localhost:5000/api/hello');
-      const data = await response.text();
-      alert(data);
-    } catch (error) {
-      alert('Failed to connect to the backend.');
-      console.error('Error:', error);
-    } finally {
-      setLoading(false);
+import Navbar from './components/Navbar';
+import Home from './components/Home';
+import About from './components/About';
+import ColorType from './components/ColorType';
+import BodyShape from './components/BodyShape';
+import Login from './components/Login';
+import Register from './components/Register';
+import PersonalPage from './components/PersonalPage';
+import Shop from './components/Shop';
+
+import { AuthContext, AuthProvider } from './components/AuthContext';
+
+function ScrollNavbarWrapper({ children }) {
+  const [showNavbar, setShowNavbar] = useState(false);
+  const location = useLocation();
+  const { isAuthenticated } = useContext(AuthContext);
+
+  useEffect(() => {
+    if (isAuthenticated || location.pathname !== '/') {
+      setShowNavbar(true);
+    } else {
+      const handleScroll = () => {
+        setShowNavbar(window.scrollY > window.innerHeight * 0.75);
+      };
+      window.addEventListener('scroll', handleScroll);
+      return () => window.removeEventListener('scroll', handleScroll);
     }
-  };
+  }, [location.pathname, isAuthenticated]);
 
   return (
-    <div className="h-screen flex flex-col items-center justify-center bg-[#fff8dc] space-y-8">
-      <h1 className="text-6xl font-bold text-gray-900">Hello, World!</h1>
-
-      <button
-        onClick={handleClick}
-        disabled={loading}
-        className="bg-[#1A169F] text-[#fff8dc] text-2xl font-medium px-20 py-5 rounded-full transition-all duration-300 hover:bg-[#18148c] hover:scale-105 disabled:opacity-50 focus:outline-none border-none"
-      >
-        {loading ? 'Connecting...' : 'Contact to backend'}
-      </button>
+    <div className="font-sans text-gray-800">
+      {showNavbar && <Navbar />}
+      {children}
     </div>
+  );
+}
+
+function MainPage() {
+  const { isAuthenticated } = useContext(AuthContext);
+  if (isAuthenticated) return <Navigate to="/personal" />;
+
+  return (
+    <>
+      <div
+        style={{
+          backgroundImage: `url(${background})`,
+          backgroundSize: 'cover',
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'center -120px',
+        }}
+        className="w-full"
+      >
+        <Home />
+        <About />
+      </div>
+
+      <div
+        style={{
+          backgroundImage: `url(${colorBodyBackground})`,
+          backgroundSize: 'cover',
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'center center',
+          padding: '50px 0',
+        }}
+      >
+        <ColorType />
+        <BodyShape />
+      </div>
+
+      <div id="login" style={{ background: 'white', minHeight: '100vh', padding: '50px 0' }}>
+        <Login />
+      </div>
+    </>
+  );
+}
+
+function SectionWrapper({ children }) {
+  const location = useLocation();
+  const path = location.pathname;
+
+  const isColorOrShapeOrShop = path === '/color' || path === '/shape' || path === '/shop';
+  const isPersonal = path === '/personal';
+
+  return (
+    <div
+      style={
+        isColorOrShapeOrShop
+          ? {
+              backgroundImage: `url(${colorBodyBackground})`,
+              backgroundSize: 'cover',
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'center center',
+              padding: '50px 0',
+              minHeight: '80vh',
+            }
+          : isPersonal
+          ? {
+              background: 'white',
+              padding: '50px 0',
+              minHeight: '80vh',
+            }
+          : {
+              background: 'white',
+              padding: '50px 0',
+              minHeight: '80vh',
+            }
+      }
+    >
+      <div className="animate-fade-in">{children}</div>
+    </div>
+  );
+}
+
+function AppRoutes() {
+  const location = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [location.pathname]);
+
+  return (
+    <ScrollNavbarWrapper>
+      <Routes>
+        <Route path="/" element={<MainPage />} />
+        <Route path="/login" element={<SectionWrapper><Login /></SectionWrapper>} />
+        <Route path="/register" element={<SectionWrapper><Register /></SectionWrapper>} />
+        <Route path="/personal" element={<SectionWrapper><PersonalPage /></SectionWrapper>} />
+        <Route path="/shop" element={<SectionWrapper><Shop /></SectionWrapper>} />
+        <Route path="/color" element={<SectionWrapper><ColorType /></SectionWrapper>} />
+        <Route path="/shape" element={<SectionWrapper><BodyShape /></SectionWrapper>} />
+      </Routes>
+    </ScrollNavbarWrapper>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <Router>
+        <AppRoutes />
+      </Router>
+    </AuthProvider>
   );
 }
 

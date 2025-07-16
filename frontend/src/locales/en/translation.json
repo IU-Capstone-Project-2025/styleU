@@ -1,0 +1,36 @@
+{
+  "smartFashion": "Smart fashion that adapts to you",
+  "tryFree": "Try it for free",
+  "login": "Login",
+
+  "about": {
+    "header": "The perfect wardrobe in just a few steps.",
+    "subheader": "Try it yourself — it’s easy and fun!",
+    "steps": [
+      {
+        "title": "Color Type",
+        "description": "We analyze your photo and skin tone to determine your color type. Based on this, we recommend clothes that highlight your appearance.",
+        "button": "Try it!",
+        "href": "#color"
+      },
+      {
+        "title": "Body Shape",
+        "description": "Based on your body shape and measurements, we suggest clothing cuts that highlight your features.",
+        "button": "Try it!",
+        "href": "#shape"
+      },
+      {
+        "title": "Outfit Suggestion",
+        "description": "Based on your preferences and data, our AI will suggest unique clothing combinations.",
+        "button": "Login",
+        "subtext": "Please log in to use this feature."
+      },
+      {
+        "title": "3D Fitting",
+        "description": "Try on clothes virtually using our 3D fitting tool. See how they move and fit your body.",
+        "button": "Login",
+        "subtext": "Please log in to use this feature."
+      }
+    ]
+  }
+}

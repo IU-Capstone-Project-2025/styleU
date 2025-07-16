@@ -1,34 +1,32 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
-import requests
+from app.llm_client import get_recommendation
+from app.llm_client import get_recommendation_by_color_type
+from app.schema import BodyTypeRequest, ColorTypeRequest  # импорт схем
+from fastapi import HTTPException
 
 app = FastAPI()
 
-class LLMRequest(BaseModel):
-    body_type: str  # Пример: "груша", "яблоко", "песочные часы"
-    
+
     
 @app.get("/")
 async def root():
     return {"message": "llm-service is running"}
 
 @app.post("/recommend")
-def recommend_outfit(req: LLMRequest):
-    prompt = f"""
-Ты профессиональный стилист. Клиент имеет тип фигуры: {req.body_type}.
-Дай короткие и практичные рекомендации по стилю одежды, фасонам и вещам, которые подойдут именно под этот тип фигуры, не более 3 предложений
-"""
-    response = requests.post("http://localhost:11434/api/generate", json={
-        "model": "mistral",
-        "prompt": prompt.strip(),
-        "stream": False
-    })
+def recommend_outfit(req: BodyTypeRequest):
+    result = get_recommendation(req.body_type)
+    # Если пришла ошибка, возвращаем в формате JSON
+    if result.startswith("LLM не ответил:"):
+        # Вернем ошибку в корректной структуре, либо выбросим HTTPException
+        from fastapi import HTTPException
+        raise HTTPException(status_code=500, detail=result)
+    return result  # Оборачиваем строку в модель
 
-    if response.status_code != 200:
-        return {"error": "LLM не ответил"}
+@app.post("/recommend_by_color_type")
+def recommend_by_color_type(req: ColorTypeRequest):
+    result = get_recommendation_by_color_type(req.color_type)
 
-    result = response.json()
-    return {
-        "body_type": req.body_type,
-        "recommendation": result.get("response", "Нет ответа от модели.")
-    }
+    if isinstance(result, dict) and "error" in result:
+        raise HTTPException(status_code=500, detail=result["error"])
+
+    return result

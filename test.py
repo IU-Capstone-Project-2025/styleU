@@ -1,4 +1,7 @@
-import requests
+import os
 
-res = requests.post("http://localhost:8001/recommend", json={"body_type": "груша"})
-print(res.json())
+HF_TOKEN = os.getenv("HF_TOKEN")
+print("HF_TOKEN:", HF_TOKEN)  # временно для отладки
+
+if not HF_TOKEN:
+    raise ValueError("HF_TOKEN не задан в переменных окружения")
