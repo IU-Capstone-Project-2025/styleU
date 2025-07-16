@@ -35,21 +35,22 @@ export default function ColorType() {
     try {
       const result = await analyzeColor(imageFile);
       const langKey = i18n.language === 'ru' ? 'rus' : 'eng';
-      const data = result[langKey] || {};
+      const data = result.recommendation?.[langKey] || {};
       const rec = data.recommendation || {};
 
       setColorType({
-        type: data.color_type?.toUpperCase() || t('colorType.notDefined'),
+        type: result.color_type?.toUpperCase() || t('colorType.notDefined'),
         meaning: rec.about || '',
         suitableColors: {
           description: rec.suitable_colors?.description || '',
-          palette: rec.suitable_colors?.palette || []
+          palette: rec.suitable_colors?.palette || [],
         },
         unsuitableColors: {
           description: rec.unsuitable_colors?.description || '',
-          palette: rec.unsuitable_colors?.palette || []
-        }
+          palette: rec.unsuitable_colors?.palette || [],
+        },
       });
+
     } catch (err) {
       console.error(err);
       alert(t('colorType.errorMessage'));

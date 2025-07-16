@@ -58,14 +58,11 @@ export default function BodyShape() {
       };
 
       const res = await analyzeFigure(bodyData);
-
-      /* pick correct language block from back‑end response */
       const langKey = i18n.language === 'ru' ? 'rus' : 'eng';
-      const data = res?.[langKey] || {};
+      const data = res.recommendation?.[langKey] || {};
 
-      /* unify / capitalise the type label for the header */
       const ruLabel = res.body_type || '';
-      const enEnum   = RUS_TO_EN_ENUM[ruLabel.toLowerCase()] || ruLabel.toUpperCase();
+      const enEnum = RUS_TO_EN_ENUM[ruLabel.toLowerCase()] || ruLabel.toUpperCase();
 
       setShapeResult({
         type: enEnum,
@@ -79,6 +76,7 @@ export default function BodyShape() {
       setIsLoading(false);
     }
   };
+
 
   const toggleSection = (s) => setExpanded((p) => (p === s ? null : s));
 
