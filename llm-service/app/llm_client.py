@@ -13,7 +13,7 @@ if not TOGETHER_API_KEY:
 
 client = Together(api_key=TOGETHER_API_KEY)
 
-MODEL_NAME = "deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free"
+MODEL_NAME = "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free"
 
 def get_recommendation(body_type: str) -> dict:
     prompt = f"""
