@@ -19,29 +19,56 @@ STYLE_KEYWORDS = {
     "минимализм":["однотонный", "простой", "минималистичный", "без логотипов", "классика", "old money"]
 }
 MATERIAL_SYNONYMS = {
-    "хлопок": ["хлопок", "cotton", "100% хлопка", "хлопковый"],
+    "хлопок": ["хлопок", "cotton", "100% хлопка", "хлопковый", "коттон"],
     "лен": ["лён", "льняной", "linen"],
-    # /// add more
+    "шерсть": ["шерсть", "шерстяной", "wool", "woolen"],
+    "вискоза": ["вискоза", "вискозный", "viscose"],
+    "полиэстер": ["полиэстер", "полиэстровый", "polyester"],
+    "шелк": ["шёлк", "шелк", "шелковый", "silk"],
+    "джинса": ["джинса", "деним", "джинсовый", "denim"],
+    "трикотаж": ["трикотаж", "трикотажный", "knit", "jersey"],
+    "кожа": ["кожа", "кожаный", "leather"],
+    "эко-кожа": ["эко-кожа", "экокожа", "искусственная кожа", "eco-leather", "faux leather"],
+    "замша": ["замша", "замшевый", "suede"],
+    "акрил": ["акрил", "акриловый", "acrylic"],
+    "нейлон": ["нейлон", "нейлоновый", "nylon"],
+    "эластан": ["эластан", "spandex", "elastane"],
+    "лайкра": ["лайкра", "lycra"],
+    "мех": ["мех", "меховой", "fur", "искусственный мех", "натуральный мех"],
 }
 
+
 COLOR_SYNONYMS = {
-    "зелёный": ["зелёный", "оливковый", "хаки", "мятный", "салатовый"],
-    "белый": ["белый", "молочный", "айвори", "экрю"],
-    # ///
+    "белый": ["белый", "молочный", "айвори", "экрю", "слоновая кость"],
+    "черный": ["чёрный", "черный", "графит", "антрацит", "смоль"],
+    "красный": ["красный", "бордовый", "алый", "вишнёвый", "терракотовый"],
+    "синий": ["синий", "тёмно-синий", "голубой", "индиго", "васильковый", "лазурный", "джинсовый"],
+    "зелёный": ["зелёный", "оливковый", "хаки", "мятный", "салатовый", "изумрудный", "лайм"],
+    "розовый": ["розовый", "пудровый", "коралловый", "фуксия", "неоново-розовый"],
+    "бежевый": ["бежевый", "нюд", "песочный", "карамельный", "какао", "кафе латте"],
+    "серый": ["серый", "пепельный", "графитовый", "стальной"],
+    "желтый": ["жёлтый", "горчичный", "соломенный", "лимонный", "золотой"],
+    "оранжевый": ["оранжевый", "янтарный", "мандариновый", "персиковый"],
+    "фиолетовый": ["фиолетовый", "лавандовый", "баклажан", "лиловый", "сиреневый"],
+    "коричневый": ["коричневый", "шоколадный", "кофейный", "каштановый", "бронзовый"],
+    "серебристый": ["серебристый", "металлик", "серебро", "silver"],
+    "золотой": ["золотой", "gold", "золотистый", "metallic", "металлик"],
 }
+
 
 # Deepseek API key
 client = Together(api_key="d6c15ee0b57f97707f05b2661455333de5db0666fcd25b4cfdb2832e55648d27")
 
 # LLM generating query for search
-def llm_refine_query(user_input: str, size: str, material: str, style: str, color_type: str, body_shape: str, color: str) -> list:
+def llm_refine_query(user_input: str, size: str, price_min: str, price_max: str, extra_info: str, style: str, color_type: str, body_shape: str) -> list:
     prompt = (
         f"Пользователь хочет образ: {user_input}\n"
-        f"Размер: {size}, Цвет: {color}, Материал: {material}, Стиль: {style}, Цветотип: {color_type}, Фигура: {body_shape}\n\n"
+        f"... Убедись, что цвет из запроса пользователя (если он есть) включен в поле query каждой вещи."
+        f"Размер: {size}, Цена: {price_min}-{price_max}, Дополнительная информация: {extra_info}, Стиль: {style}, Цветотип: {color_type}, Фигура: {body_shape}\n\n"
         f"Собери **3 разных полноценных образа** (варианта луков) для пользователя. Каждый образ должен быть JSON-объектом с полями:\n"
         f"- items: список вещей (3-6 элементов)\n"
-        f"- totalReason: пояснение почему лук хорош\n"
         f"- totalReason: пояснение почему лук хорош для пользователя с его параметрами (форма тела и цветотип)\n"
+        f"- totalReason_en: an explanation of why a bow is good for a user with its parameters (body shape and color type)\n"
         f"Каждая вещь должна содержать:\n"
         f"- item: тип вещи (платье, туфли и т.д.)\n"
         f"- query: поисковый запрос для Wildberries (до 7 слов)\n"
@@ -53,7 +80,8 @@ def llm_refine_query(user_input: str, size: str, material: str, style: str, colo
         f"      {{\"item\": \"платье\", \"query\": \"платье макси молочное хлопок\", \"category\": \"main\"}},\n"
         f"      {{\"item\": \"хиджаб\", \"query\": \"хиджаб молочный хлопковый\", \"category\": \"accessory\"}}\n"
         f"    ],\n"
-        f"    \"totalReason\": \"Образ идеально подходит для мусульманок\"\n"
+        f"    \"totalReason\": \"Образ идеально подходит для мусульманок\",\n"
+        f"    \"totalReason_en\": \"The bow is perfect for muslims\"\n"
         f"  }}\n"
         f"]"
     )
@@ -103,23 +131,26 @@ def llm_refine_query(user_input: str, size: str, material: str, style: str, colo
         return [[{"item": "платье", "query": "платье на выпускной", "category": "main"}]]
 
 
-
 # Check if product matches user material and styel preferences
-def matches_any(description, value, synonym_dict):
+def matches_style(description, value, synonym_dict):
     synonyms = synonym_dict.get(value.lower(), [value.lower()])
     return any(syn in description.lower() for syn in synonyms)
 
+# Check if product has user extra info
+def matches_extra_info(description: str, extra_info: str) -> bool:
+    description = description.lower()
+    words = extra_info.lower().split()
 
-# Check if product has user color
-def has_color(product: dict, user_color: str) -> bool:
-    if not user_color:
-        return True
-    synonyms = COLOR_SYNONYMS.get(user_color.lower(), [user_color.lower()])
-    for color in product.get("colors", []):
-        name = color.get("name", "").lower()
-        if any(syn in name for syn in synonyms):
+    combined_synonyms = {}
+    combined_synonyms.update(MATERIAL_SYNONYMS)
+    combined_synonyms.update(COLOR_SYNONYMS)
+
+    for word in words:
+        synonyms = combined_synonyms.get(word, [word])
+        if any(syn in description for syn in synonyms):
             return True
     return False
+
 
 # Check if product has user size
 def size_matches(size_filter, sizes):
@@ -149,7 +180,7 @@ def extract_price(product: dict) -> int | None:
     min_price = None
     for size in product.get("sizes", []):
         if "price" in size and "product" in size["price"]:
-            price_val = size["price"]["product"] - 0.035*size["price"]["product"]
+            price_val = size["price"]["product"] 
             if not min_price or price_val < min_price:
                 min_price = price_val
     return min_price // 100 if min_price else None
@@ -220,7 +251,18 @@ def build_wb_image_url(product_id):
 
 
 # Get products from WB API and filter by user preferences
-def get_products(search_query: str, size_filter: str, material_filter: str, color_filter: str, style_filter: str, category: str = ""):
+def get_products(search_query: str, size_filter: str, extra_info_filter: str, style_filter: str, category: str = "" ,min_price=None, max_price=None):
+        # Приведение типов
+    try:
+        min_price = int(min_price) if min_price else None
+    except:
+        min_price = None
+
+    try:
+        max_price = int(max_price) if max_price else None
+    except:
+        max_price = None
+
     max_pages = 5
     all_products = []
     headers = {
@@ -260,10 +302,7 @@ def get_products(search_query: str, size_filter: str, material_filter: str, colo
                 continue
 
             if category == "main":
-                if not (size_matches(size_filter, sizes) and (
-                    matches_any(description, material_filter, MATERIAL_SYNONYMS) or
-                    has_color(product, color_filter) or
-                    matches_any(description, style_filter, STYLE_KEYWORDS))):
+               if not (size_matches(size_filter, sizes) or matches_extra_info(description, extra_info_filter) or matches_style(description, style_filter, STYLE_KEYWORDS)):
                     continue
 
             rating = float(product.get("reviewRating", 0))
@@ -273,7 +312,14 @@ def get_products(search_query: str, size_filter: str, material_filter: str, colo
                 continue
 
             score = rating * math.log1p(feedbacks)
-            price = extract_price(product)
+
+            if min_price or max_price:
+                price = extract_price(product)
+                if price:
+                    if min_price and price < min_price:
+                        continue
+                    if max_price and price > max_price:
+                        continue
 
             all_products.append({
                 'title': product['name'],
@@ -293,27 +339,34 @@ def get_products(search_query: str, size_filter: str, material_filter: str, colo
 
     return all_products[:15]  # Возвращаем топ-15 отсортированных
 
+from fastapi.responses import JSONResponse
 
 # Define FastAPI app
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request, "products": None})
 
-@app.post("/", response_class=HTMLResponse)
+@app.post("/parser", response_class=JSONResponse)
 async def search(
         request: Request,
         query: str = Form(...),
         size: str = Form(...),
-        color: str = Form(...),
-        material: str = Form(...),
+        price_min: str = Form(...),
+        price_max: str = Form(...),
+        extra_info: str = Form(...),
         style: str = Form(...),
         color_type: str = Form(...),
         body_shape: str = Form(...),
 ):
-    print(f" Запрос пользователя: {query}")
-    print(f"Размер: {size}, Цвет: {color}, Материал: {material}, Стиль: {style}, Цветотип: {color_type}, Фигура: {body_shape}")
+    # заглушка
+    # style = "повседневный"
+    # color_type = "весна"
+    # body_shape = "прямоугольник"
 
-    outfit_variants = llm_refine_query(query, size, material, style, color_type, body_shape, color)
+    print(f" Запрос пользователя: {query}")
+    print(f"Размер: {size}, Дополнительная информация: {extra_info}, Стиль: {style}, Цветотип: {color_type}, Фигура: {body_shape}")
+
+    outfit_variants = llm_refine_query(query, size,price_min, price_max, extra_info, style, color_type, body_shape)
 
     print(" Результат от LLM:")
     print(json.dumps(outfit_variants, ensure_ascii=False, indent=2))
@@ -331,6 +384,7 @@ async def search(
         complete_look = {
             "items": [],
             "totalReason": outfit.get("totalReason", "Образ составлен с учетом всех параметров"),
+            "totalReason_en": outfit.get("totalReason_en", "The outfit is composed with all parameters"),
         }
 
         for item_idx, item in enumerate(outfit.get("items", [])):
@@ -341,12 +395,12 @@ async def search(
             query = item.get("query", "")
             category = item.get("category", "")
 
-            products = get_products(query, size, material, color, style, category)
+            products = get_products(query, size, extra_info, style, category,  price_min, price_max)
 
             # 🔁 fallback: упрощение запроса при отсутствии результатов
             if not products and " " in query:
                 simplified_query = shorten_query(query)
-                products = get_products(simplified_query, size, material, color, style, category)
+                products = get_products(simplified_query, size, extra_info, style, category, price_min, price_max)
 
 
             if products:
@@ -363,4 +417,4 @@ async def search(
         if complete_look["items"]:
             outfits.append(complete_look) 
 
-    return templates.TemplateResponse("index.html", {"request": request, "outfits": outfits})
+    return JSONResponse(content={"outfits": outfits})
