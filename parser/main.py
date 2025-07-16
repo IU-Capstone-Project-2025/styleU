@@ -360,7 +360,7 @@ from fastapi.responses import JSONResponse
 async def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request, "products": None})
 
-@app.post("/", response_class=JSONResponse)
+@app.post("/parser", response_class=JSONResponse)
 async def search(
         request: Request,
         query: str = Form(...),
@@ -368,14 +368,14 @@ async def search(
         price_min: str = Form(...),
         price_max: str = Form(...),
         extra_info: str = Form(...),
-        # style: str = Form(...),
-        # color_type: str = Form(...),
-        # body_shape: str = Form(...),
+        style: str = Form(...),
+        color_type: str = Form(...),
+        body_shape: str = Form(...),
 ):
     # заглушка
-    style = "повседневный"
-    color_type = "весна"
-    body_shape = "прямоугольник"
+    # style = "повседневный"
+    # color_type = "весна"
+    # body_shape = "прямоугольник"
 
     print(f" Запрос пользователя: {query}")
     print(f"Размер: {size}, Дополнительная информация: {extra_info}, Стиль: {style}, Цветотип: {color_type}, Фигура: {body_shape}")
