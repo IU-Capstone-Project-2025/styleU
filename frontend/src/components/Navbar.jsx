@@ -83,7 +83,7 @@ function Navbar() {
 
   return (
     <>
-      <SideNav />
+      {(location.pathname === '/personal' || location.pathname === '/favorites') && <SideNav />}
       {/* Desktop Navbar */}
       <header className="hidden md:flex w-[90%] max-w-5xl mx-auto justify-between items-center px-6 py-3 transition-all duration-300 fixed top-6 left-1/2 transform -translate-x-1/2 bg-white bg-opacity-60 backdrop-blur-md rounded-full shadow-md z-50">
         <h1
