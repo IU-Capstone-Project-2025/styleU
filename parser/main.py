@@ -177,13 +177,20 @@ def match_query_words(product_name: str, query: str) -> bool:
     return bool(name_words & query_words)  # есть хотя бы одно общее слово
 
 def extract_price(product: dict) -> int | None:
-    min_price = None
-    for size in product.get("sizes", []):
-        if "price" in size and "product" in size["price"]:
-            price_val = size["price"]["product"] 
-            if not min_price or price_val < min_price:
-                min_price = price_val
-    return min_price // 100 if min_price else None
+    try:
+        prices = []
+        for size in product.get("sizes", []):
+            if size.get("price", {}).get("product"):
+                prices.append(size["price"]["product"])
+        
+        if not prices:
+            return None
+            
+        min_price = min(prices) // 100
+        return min_price if min_price > 0 else None
+    except Exception as e:
+        print(f"Ошибка извлечения цены: {e}")
+        return None
 
 
 
@@ -313,6 +320,11 @@ def get_products(search_query: str, size_filter: str, extra_info_filter: str, st
 
             score = rating * math.log1p(feedbacks)
 
+             # Получаем цену товара
+            price = extract_price(product)
+            if price is None:
+                continue  # Пропускаем если не удалось получить цену
+
             if min_price or max_price:
                 price = extract_price(product)
                 if price:
@@ -320,17 +332,19 @@ def get_products(search_query: str, size_filter: str, extra_info_filter: str, st
                         continue
                     if max_price and price > max_price:
                         continue
-
-            all_products.append({
-                'title': product['name'],
-                'price': price,
-                'image': build_wb_image_url(product['id']),
-                'link': f"https://www.wildberries.ru/catalog/{product['id']}/detail.aspx",
-                'sizes': sizes,
-                'rating': rating,
-                'feedbacks': feedbacks,
-                'score': score
-            })
+            
+                product_data = {
+                    'title': product.get('name', ''),
+                    'price': extract_price(product) or 0,  
+                    'image': build_wb_image_url(product.get('id', 0)),
+                    'link': f"https://www.wildberries.ru/catalog/{product.get('id', '')}/detail.aspx",
+                    'sizes': sizes,
+                    'rating': rating,
+                    'feedbacks': feedbacks,
+                    'score': score
+                }
+                if product_data['price'] is not None: 
+                    all_products.append(product_data)
 
 
     # Взвешенная оценка: количество отзывов * рейтинг
@@ -346,7 +360,7 @@ from fastapi.responses import JSONResponse
 async def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request, "products": None})
 
-@app.post("/parser", response_class=JSONResponse)
+@app.post("/", response_class=JSONResponse)
 async def search(
         request: Request,
         query: str = Form(...),
@@ -354,14 +368,14 @@ async def search(
         price_min: str = Form(...),
         price_max: str = Form(...),
         extra_info: str = Form(...),
-        style: str = Form(...),
-        color_type: str = Form(...),
-        body_shape: str = Form(...),
+        # style: str = Form(...),
+        # color_type: str = Form(...),
+        # body_shape: str = Form(...),
 ):
     # заглушка
-    # style = "повседневный"
-    # color_type = "весна"
-    # body_shape = "прямоугольник"
+    style = "повседневный"
+    color_type = "весна"
+    body_shape = "прямоугольник"
 
     print(f" Запрос пользователя: {query}")
     print(f"Размер: {size}, Дополнительная информация: {extra_info}, Стиль: {style}, Цветотип: {color_type}, Фигура: {body_shape}")
