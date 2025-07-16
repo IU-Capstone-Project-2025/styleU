@@ -20,6 +20,7 @@ import Login from './components/Login';
 import Register from './components/Register';
 import PersonalPage from './components/PersonalPage';
 import Shop from './components/Shop';
+import Footer from './components/Footer';
 import Favorites from './components/Favorites';
 
 import { AuthContext, AuthProvider } from './components/AuthContext';
@@ -144,6 +145,7 @@ function AppRoutes() {
         <Route path="/shape" element={<SectionWrapper><BodyShape /></SectionWrapper>} />
         <Route path="/favorites" element={<Favorites />} />
       </Routes>
+      <Footer />
     </ScrollNavbarWrapper>
   );
 }

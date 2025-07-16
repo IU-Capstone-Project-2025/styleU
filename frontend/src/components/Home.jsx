@@ -1,13 +1,11 @@
 import React from 'react';
-import { useContext } from 'react';
-import { AuthContext } from './AuthContext';
 import arrow from '../assets/arrowWhite.png';
 import { useTranslation } from 'react-i18next';
 import i18n from 'i18next';
 
 function Home() {
   const { t } = useTranslation();
-  const { user, isAuthenticated } = useContext(AuthContext);
+  const currentLang = i18n.language;
 
   const scrollToAbout = () => {
     const aboutSection = document.getElementById('about');
@@ -25,9 +23,9 @@ function Home() {
     }
   };
 
-  const toggleLanguage = () => {
-    const newLang = i18n.language === 'ru' ? 'en' : 'ru';
-    i18n.changeLanguage(newLang);
+  const setLanguage = (lang) => {
+    i18n.changeLanguage(lang);
+    localStorage.setItem('lang', lang);
   };
 
   return (
@@ -40,44 +38,28 @@ function Home() {
         <h1 className="text-3xl sm:text-4xl font-comfortaa text-black">STYLEU</h1>
       </div>
 
-      {/* Language toggle */}
-      <div className="absolute top-6 right-4 sm:top-10 sm:right-[6%] z-10">
-        <button
-          onClick={toggleLanguage}
-          className="w-10 h-10 rounded-full bg-black text-white text-sm font-medium shadow-md flex items-center justify-center transition hover:opacity-80"
-        >
-          {i18n.language === 'ru' ? 'EN' : 'RU'}
-        </button>
+      {/* Language toggle (EN / RU) */}
+      <div className="absolute top-6 right-4 sm:top-10 sm:right-[6%] z-10 flex gap-3">
+        {['en', 'ru'].map((lang) => (
+          <button
+            key={lang}
+            onClick={() => setLanguage(lang)}
+            className={`w-10 h-10 rounded-full text-sm font-medium flex items-center justify-center border transition duration-200 ${
+              currentLang === lang
+                ? 'bg-black text-white border-black'
+                : 'bg-transparent text-black border-black hover:bg-black hover:text-white'
+            }`}
+          >
+            {lang.toUpperCase()}
+          </button>
+        ))}
       </div>
 
       {/* Main content */}
-      <div className="flex flex-col items-center text-center mt-20 space-y-6 sm:space-y-5 px-2">
+      <div className="flex flex-col items-center text-center mt-[12vh] sm:mt-[14vh] space-y-6 sm:space-y-6 px-2">
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-comfortaa text-black leading-snug sm:leading-tight">
           {t('smartFashion')}
         </h2>
-
-        {isAuthenticated && (
-          <div className="mt-6 mb-2 w-full max-w-md bg-white bg-opacity-80 rounded-xl shadow p-6 flex flex-col gap-2 items-center">
-            <div className="flex flex-col sm:flex-row justify-between w-full gap-4">
-              <div className="text-left w-full">
-                <div className="text-gray-600 text-sm">Пол</div>
-                <div className="text-lg font-semibold">{user?.sex || '-'}</div>
-              </div>
-              <div className="text-left w-full">
-                <div className="text-gray-600 text-sm">Вес</div>
-                <div className="text-lg font-semibold">{user?.weight || '-'}</div>
-              </div>
-              <div className="text-left w-full">
-                <div className="text-gray-600 text-sm">Рост</div>
-                <div className="text-lg font-semibold">{user?.height || '-'}</div>
-              </div>
-              <div className="text-left w-full">
-                <div className="text-gray-600 text-sm">Тип фигуры</div>
-                <div className="text-lg font-semibold">{user?.bodyShape || '-'}</div>
-              </div>
-            </div>
-          </div>
-        )}
 
         <div className="relative flex flex-col sm:flex-row items-center gap-4 sm:gap-0">
           <span className="bg-[#EEECEA] text-black px-8 py-2 sm:pl-12 sm:pr-20 sm:py-3 text-base sm:text-lg font-noto rounded-full shadow-md z-10">
