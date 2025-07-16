@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { analyzeColor } from '../services/api';
 import like from '../assets/like.png';
 import dislike from '../assets/dislike.png';
 import bgImage from '../assets/photo-background.png';
+import { AuthContext } from './AuthContext';
 
 export default function ColorType() {
   const [image, setImage] = useState(null);
+  const { user, setUser } = useContext(AuthContext);
   const [imageFile, setImageFile] = useState(null);
   const [colorType, setColorType] = useState(null);
   const [expandedSection, setExpandedSection] = useState(null);
@@ -46,6 +48,18 @@ export default function ColorType() {
           palette: rec.unsuitable_colors?.palette || []
         }
       });
+
+      // Обновляем данные пользователя в контексте
+      setUser({
+        ...user,
+        colorType: type,
+        profilePhoto: image, // base64 строка
+      });
+      localStorage.setItem('user', JSON.stringify({
+        ...user,
+        colorType: type,
+        profilePhoto: image,
+      }));
     } catch (err) {
       console.error(err);
       alert('Не удалось проанализировать изображение. Пожалуйста, попробуйте снова.');

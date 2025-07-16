@@ -22,7 +22,7 @@ function Register() {
     try {
       const response = await registerUser({ username, password });
       const token = response.access_token;
-      login(token); // сохранить токен в контекст
+      login(token, { username }); // сохранить токен и логин в контекст
       alert('Регистрация прошла успешно!');
       navigate('/'); // переход на главную
     } catch (error) {

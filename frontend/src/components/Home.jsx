@@ -1,10 +1,13 @@
 import React from 'react';
+import { useContext } from 'react';
+import { AuthContext } from './AuthContext';
 import arrow from '../assets/arrowWhite.png';
 import { useTranslation } from 'react-i18next';
 import i18n from 'i18next';
 
 function Home() {
   const { t } = useTranslation();
+  const { user, isAuthenticated } = useContext(AuthContext);
 
   const scrollToAbout = () => {
     const aboutSection = document.getElementById('about');
@@ -52,6 +55,29 @@ function Home() {
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-comfortaa text-black leading-snug sm:leading-tight">
           {t('smartFashion')}
         </h2>
+
+        {isAuthenticated && (
+          <div className="mt-6 mb-2 w-full max-w-md bg-white bg-opacity-80 rounded-xl shadow p-6 flex flex-col gap-2 items-center">
+            <div className="flex flex-col sm:flex-row justify-between w-full gap-4">
+              <div className="text-left w-full">
+                <div className="text-gray-600 text-sm">Пол</div>
+                <div className="text-lg font-semibold">{user?.sex || '-'}</div>
+              </div>
+              <div className="text-left w-full">
+                <div className="text-gray-600 text-sm">Вес</div>
+                <div className="text-lg font-semibold">{user?.weight || '-'}</div>
+              </div>
+              <div className="text-left w-full">
+                <div className="text-gray-600 text-sm">Рост</div>
+                <div className="text-lg font-semibold">{user?.height || '-'}</div>
+              </div>
+              <div className="text-left w-full">
+                <div className="text-gray-600 text-sm">Тип фигуры</div>
+                <div className="text-lg font-semibold">{user?.bodyShape || '-'}</div>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="relative flex flex-col sm:flex-row items-center gap-4 sm:gap-0">
           <span className="bg-[#EEECEA] text-black px-8 py-2 sm:pl-12 sm:pr-20 sm:py-3 text-base sm:text-lg font-noto rounded-full shadow-md z-10">
