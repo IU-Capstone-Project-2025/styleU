@@ -6,6 +6,10 @@ import { useNavigate } from 'react-router-dom';
 function PersonalPage() {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-white px-4">
@@ -22,7 +26,7 @@ function PersonalPage() {
               )}
             </div>
             <button
-              onClick={logout}
+              onClick={handleLogout}
               className="mt-3 px-6 py-1.5 bg-gray-300 text-black rounded-full shadow-md hover:bg-gray-400 transition text-sm"
               style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
             >

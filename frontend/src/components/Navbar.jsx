@@ -14,7 +14,9 @@ function SideNav() {
       <div className="flex flex-col gap-3 items-center">
         {[1,2,3,4].map((_,i) => <div key={i} className="w-4 h-4 rounded-full bg-gray-400 opacity-60" />)}
       </div>
-      <button onClick={() => navigate('/favorites')} className={`w-12 h-12 rounded-full flex items-center justify-center border ${location.pathname === '/favorites' ? 'bg-black text-white' : 'bg-white text-black'}`}> <img src={heartOutline} alt="favorites" className="w-6 h-6" /> </button>
+      <button onClick={() => navigate('/favorites')} className={`w-12 h-12 rounded-full flex items-center justify-center border ${location.pathname === '/favorites' ? 'bg-black text-white' : 'bg-white text-black'}`}>
+        <img src={heartOutline} alt="favorites" className={`w-6 h-6 transition ${location.pathname === '/favorites' ? 'filter invert' : ''}`} />
+      </button>
     </div>
   );
 }
@@ -25,6 +27,10 @@ function Navbar() {
   const { isAuthenticated, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   // --- update active section on scroll OR route ---
   useEffect(() => {
@@ -101,7 +107,7 @@ function Navbar() {
               >
                 <UserIcon className="w-4 h-4" />
               </span>
-              <button onClick={logout} className="text-xs text-red-500 underline ml-2">Выйти</button>
+              <button onClick={handleLogout} className="text-xs text-red-500 underline ml-2">Выйти</button>
             </>
           ) : (
             <>
@@ -146,4 +152,23 @@ function Navbar() {
               <div onClick={() => { navigate('/shape'); setIsMobileMenuOpen(false); }} className={linkClass('shape')}>Тип фигуры</div>
               <div
                 onClick={() => { navigate('/personal'); setIsMobileMenuOpen(false); }}
-                className={`
+                className={linkClass('profile')}
+              >
+                Личный кабинет
+              </div>
+            </>
+          ) : (
+            <>
+              <div onClick={() => { scrollToSection('about'); setIsMobileMenuOpen(false); }} className={linkClass('about')}>О нас</div>
+              <div onClick={() => { scrollToSection('color'); setIsMobileMenuOpen(false); }} className={linkClass('color')}>Цветотип</div>
+              <div onClick={() => { scrollToSection('shape'); setIsMobileMenuOpen(false); }} className={linkClass('shape')}>Тип фигуры</div>
+              <div onClick={() => { scrollToSection('login'); setIsMobileMenuOpen(false); }} className={linkClass('login')}>Войти</div>
+            </>
+          )}
+        </div>
+      )}
+    </>
+  );
+}
+
+export default Navbar;
