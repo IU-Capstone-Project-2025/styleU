@@ -360,7 +360,7 @@ from fastapi.responses import JSONResponse
 async def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request, "products": None})
 
-@app.post("/", response_class=JSONResponse)
+@app.post("/parser", response_class=JSONResponse)
 async def search(
         request: Request,
         query: str = Form(...),
@@ -431,4 +431,4 @@ async def search(
         if complete_look["items"]:
             outfits.append(complete_look) 
 
-    return JSONResponse(content={"outfits": outfits})
+    return {"outfits": outfits}

@@ -11,6 +11,7 @@ class FigureRequest(BaseModel):
 class OutfitRequest(BaseModel):
     query: str = Field(...)
     size: str = Field(...)
-    color: str = Field(...)
-    material: str = Field(...)
+    price_min: str = Field(...)
+    price_max: str = Field(...)
+    extra_info: str = Field(...)
     style: str = Field(...)
