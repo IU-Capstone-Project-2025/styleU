@@ -160,8 +160,9 @@ async def analyze_color(
         Параметры формы (multipart/form-data):
         - query: Желаемый образ, например "летний образ на прогулку"
         - size: Размер пользователя (например, "S", "M", "44", "46-48")
-        - color: Предпочтительный цвет
-        - material: Предпочтительный материал
+        - price_min: Минимальная цена
+        - price_max: Маскимальная цена
+        - extra_info: Дополнительная информация
         - style: Предпочтительный стиль
 
         Ответ:
@@ -182,8 +183,9 @@ async def suggest_outfits(
             user=user,
             query=request.query,
             size=request.size,
-            color=request.color,
-            material=request.material,
+            price_min=request.price_min,
+            price_max=request.price_max,
+            extra_info=request.extra_info,
             style=request.style,
         )
         return JSONResponse(content=outfits)
