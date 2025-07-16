@@ -83,6 +83,16 @@ export const dislikeBodyShape = () => axios.post(`${BASE_URL}/dislike_figure_ana
 export const likeShop = () => axios.post(`${BASE_URL}/like_outfit_suggestion`);
 export const dislikeShop = () => axios.post(`${BASE_URL}/dislike_outfit_suggestion`);
 
+export const suggestOutfits = async (data, token = null) => {
+  const headers = {
+    'Content-Type': 'application/json'
+  };
+
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  const response = await axios.post(`${BASE_URL}/suggest_outfits`, data, { headers });
+  return response.data;
+};
 // ✅ Test Server Status (GET /api/hello)
 export const checkServer = async () => {
   const response = await axios.get(`${BASE_URL}/api/hello`);

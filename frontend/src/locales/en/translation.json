@@ -85,5 +85,30 @@
     "logout": "Logout",
     "login": "Login",
     "about": "About"
+  },
+  "shop": {
+    "title": "StyleU Shop",
+    "subtitle": "Make sure you know your colortype and bodyshape first!!!",
+    "query": "What are you looking for?",
+    "size": "Choose size",
+    "style": "Choose style",
+    "extra": "Extra info",
+    "min": "Min price (₽)",
+    "max": "Max price (₽)",
+    "search": "Search!",
+    "fillField": "Please fill out this field",
+    "feedbackQ": "Did you like this feature?",
+    "likeResp": "Thanks for your feedback!",
+    "dislikeResp": "Sorry to hear that!"
+  },
+  "carousel": {
+    "title": "Outfits selected just for your request",
+    "totalPrice": "Total price",
+    "marketplaces": "Shops",
+    "overallReason": "Why this outfit",
+    "price": "Price",
+    "marketplace": "Shop",
+    "reason": "Why this item"
   }
+
 }
