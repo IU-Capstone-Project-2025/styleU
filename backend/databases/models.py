@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, Float, ForeignKey
+from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.orm import relationship
 from .relational_db import Base
 
@@ -18,12 +19,16 @@ class UserParameters(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
+    sex = Column(String, nullable=True)
     height = Column(Float, nullable=True)
     bust = Column(Float, nullable=True)
     waist = Column(Float, nullable=True)
     hips = Column(Float, nullable=True)
     body_type = Column(String, nullable=True)
     color_type = Column(String, nullable=True)
+
+    body_type_recommendation = Column(JSON, nullable=True)
+    color_type_recommendation = Column(JSON, nullable=True)
 
     owner = relationship("User", back_populates="parameters")
 
