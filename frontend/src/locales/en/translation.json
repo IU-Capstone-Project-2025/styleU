@@ -99,7 +99,8 @@
     "fillField": "Please fill out this field",
     "feedbackQ": "Did you like this feature?",
     "likeResp": "Thanks for your feedback!",
-    "dislikeResp": "Sorry to hear that!"
+    "dislikeResp": "Sorry to hear that!",
+    "searching": "Searching..."
   },
   "carousel": {
     "title": "Outfits selected just for your request",
