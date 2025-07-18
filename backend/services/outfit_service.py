@@ -21,6 +21,7 @@ async def suggest_outfits_for_user(
 
     color_type = user_data.get("color_type")
     body_shape = user_data.get("body_type")
+    sex = user_data.get("sex")
 
     data = {
         "query": query,
@@ -28,6 +29,7 @@ async def suggest_outfits_for_user(
         "price_min": price_min,
         "price_max": price_max,
         "extra_info": extra_info,
+        "sex": sex,
         "style": style,
         "color_type": color_type,
         "body_shape": body_shape,
