@@ -7,8 +7,8 @@ import dislike from '../assets/dislike.png';
 const RUS_TO_EN_ENUM = {
   'песочные часы': 'HOURGLASS',
   'груша': 'PEAR',
-  'перевёрнутый треугольник': 'INVERTED TRIANGLE',
-  'перевернутый треугольник': 'INVERTED TRIANGLE',
+  'перевёрнутый треугольник': 'INVERTED_TRIANGLE',
+  'перевернутый треугольник': 'INVERTED_TRIANGLE',
   'яблоко': 'APPLE',
   'прямоугольник': 'RECTANGLE',
   'неопределённый тип': 'UNKNOWN',
@@ -23,7 +23,7 @@ export default function BodyShape() {
   const [sex, setSex] = useState(() => localStorage.getItem('bodySex') || 'Ж');
   const [inputs, setInputs] = useState(() => {
     const saved = localStorage.getItem('bodyInputs');
-    return saved ? JSON.parse(saved) : { height: '', bust: '', waist: '', hip: '' };
+    return saved ? JSON.parse(saved) : { height: '', bust: '', waist: '', hips: '' };
   });
 
   const [errors, setErrors] = useState({});
@@ -52,13 +52,13 @@ export default function BodyShape() {
 
   const validate = () => {
     const e = {};
-    const { height, waist, bust, hip } = inputs;
+    const { height, waist, bust, hips } = inputs;
     const rangeErr = t('bodyShape.rangeErr');
 
     if (height <= 0 || height > 300) e.height = rangeErr;
     if (waist <= 0 || waist > 300) e.waist = rangeErr;
     if (bust <= 0 || bust > 300) e.bust = rangeErr;
-    if (hip <= 0 || hip > 300) e.hip = rangeErr;
+    if (hips <= 0 || hips > 300) e.hips = rangeErr;
 
     setErrors(e);
     return !Object.keys(e).length;
@@ -74,10 +74,10 @@ export default function BodyShape() {
     try {
       const bodyData = {
         sex: sex === 'Ж' ? 'female' : 'male',
-        height: +inputs.height,
-        bust: +inputs.bust,
-        waist: +inputs.waist,
-        hip: +inputs.hip,
+        height: parseFloat(inputs.height),
+        bust: parseFloat(inputs.bust),
+        waist: parseFloat(inputs.waist),
+        hips: parseFloat(inputs.hips),
       };
 
       const res = await analyzeFigure(bodyData);
@@ -154,11 +154,11 @@ export default function BodyShape() {
                 </div>
               </div>
 
-              {[
+              {[ 
                 { lbl: t('bodyShape.height'), name: 'height' },
                 { lbl: t('bodyShape.chest'),  name: 'bust' },
                 { lbl: t('bodyShape.waist'),  name: 'waist' },
-                { lbl: t('bodyShape.hip'),    name: 'hip' },
+                { lbl: t('bodyShape.hip'),    name: 'hips' },
               ].map(({ lbl, name }) => (
                 <div key={name} className="flex flex-col gap-1">
                   <div className="flex justify-between items-center">
