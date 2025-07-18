@@ -79,6 +79,20 @@ services:
       - internal
     volumes:
       - shared_tmp:/tmp
+
+  parser:
+    build:
+      context: .
+      dockerfile: parser/Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "8002:8002"
+    networks:
+      - internal
+    volumes:
+      - shared_tmp:/tmp
+
 networks:
   internal:
 

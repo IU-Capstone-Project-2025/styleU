@@ -4,7 +4,15 @@ from databases.database_connector import DatabaseConnector
 from config import PARSER_URL
 
 
-async def suggest_outfits_for_user(user: str, query: str, size: str, color: str, material: str, style: str):
+async def suggest_outfits_for_user(
+    user: str,
+    query: str,
+    size: str,
+    price_min: str,
+    price_max: str,
+    extra_info: str,
+    style: str,
+):
     async with DatabaseConnector() as connector:
         user_data = await connector.get_user_features(user)
 
@@ -13,12 +21,15 @@ async def suggest_outfits_for_user(user: str, query: str, size: str, color: str,
 
     color_type = user_data.get("color_type")
     body_shape = user_data.get("body_type")
+    sex = user_data.get("sex")
 
     data = {
         "query": query,
         "size": size,
-        "color": color,
-        "material": material,
+        "price_min": price_min,
+        "price_max": price_max,
+        "extra_info": extra_info,
+        "sex": sex,
         "style": style,
         "color_type": color_type,
         "body_shape": body_shape,
@@ -33,4 +44,4 @@ async def suggest_outfits_for_user(user: str, query: str, size: str, color: str,
     if response.status_code != 200:
         raise HTTPException(status_code=response.status_code, detail="Failed to get response from parser")
 
-    return response.text
+    return response.json()

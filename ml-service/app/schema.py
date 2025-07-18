@@ -5,6 +5,7 @@ class BodyParams(BaseModel):
     waist: float
     hips: float
     height: float
+    sex: str
 
 class PredictionResult(BaseModel):
     body_type: str

@@ -41,11 +41,20 @@ class DatabaseConnector:
         return user
 
     async def add_user_parameters(self, user_id: int, **kwargs):
-        self.db.add(UserParameters(user_id=user_id, **kwargs))
-        await self.db.commit()
+        result = await self.db.execute(
+            select(UserParameters)
+            .where(UserParameters.user_id == user_id)
+            .order_by(UserParameters.id.desc())
+            .limit(1)
+        )
+        existing = result.scalar_one_or_none()
 
-    async def set_color_type(self, user_id: int, color_type: str):
-        self.db.add(UserParameters(user_id=user_id, color_type=color_type))
+        if existing:
+            for key, value in kwargs.items():
+                setattr(existing, key, value)
+        else:
+            self.db.add(UserParameters(user_id=user_id, **kwargs))
+
         await self.db.commit()
 
     async def add_feedback(self, action_type: str, feedback_type: str):
@@ -102,8 +111,12 @@ class DatabaseConnector:
         params = params_list[-1]
 
         return {
-            "color_type": params.color_type,
+            "sex": params.sex,
+            "height": params.height,
             "body_type": params.body_type,
+            "body_type_recommendation": params.body_type_recommendation,
+            "color_type": params.color_type,
+            "color_type_recommendation": params.color_type_recommendation,
         }
 
     async def save_user_photo(self, username: str, file_path: str):

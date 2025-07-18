@@ -1,53 +1,62 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import arrow from '../assets/arrowBlack.png';
 import { registerUser } from '../services/api';
-import { AuthContext } from './AuthContext';
 
 function Register() {
+  const { t } = useTranslation();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!username || !password) {
-      alert('Пожалуйста, введите имя пользователя и пароль.');
+      alert(t('register.fillFields'));
       return;
     }
 
     setIsLoading(true);
     try {
-      const response = await registerUser({ username, password });
-      const token = response.access_token;
-      login(token); // сохранить токен в контекст
-      alert('Регистрация прошла успешно!');
-      navigate('/'); // переход на главную
+      await registerUser({ username, password });
+      alert(t('register.success'));
+      navigate('/login');
     } catch (error) {
-      console.error('Ошибка при регистрации:', error);
-      alert('Пользователь с таким именем уже существует или произошла ошибка.');
+      console.error('Registration error:', error);
+      alert(t('register.error'));
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <section id="register" className="flex justify-center items-center py-16 px-4">
-      <div className="bg-[#eaeaea] p-10 rounded-xl w-full max-w-md shadow-md">
-        <h2 className="text-6xl font-comfortaa text-center mb-4 tracking-widest">
-          STYLE<span className="text-[#aaa]">U</span>
-        </h2>
-        <p className="text-xs text-gray-500 text-center mb-2">
-          Уже есть аккаунт?{' '}
-          <Link to="/login" className="text-black font-semibold">Войдите</Link>
-        </p>
+    <section id="register" className="flex justify-center items-center py-16 px-4 min-h-screen">
+      <div className="bg-[#eaeaea] p-10 rounded-xl w-full max-w-md shadow-lg border border-gray-200 relative">
 
-        <form className="flex flex-col space-y-4 mt-4" onSubmit={handleSubmit}>
+        {/* Exit button */}
+        <button
+          onClick={() => navigate('/')}
+          className="absolute top-4 right-4 text-sm text-gray-500 hover:text-black"
+        >
+          {t('register.exit')}
+        </button>
+
+        <h2 className="text-4xl font-comfortaa text-center mb-2 tracking-widest">
+          {t('register.title')}
+        </h2>
+        {/* <p className="text-xs text-gray-400 text-center mb-4">
+          {t('register.haveAccount')}{' '}
+          <Link to="/login" className="text-black font-semibold">
+            {t('register.loginLink')}
+          </Link>
+        </p> */}
+
+        <form className="flex flex-col space-y-4" onSubmit={handleSubmit}>
           <input
             type="text"
-            placeholder="имя пользователя"
+            placeholder={t('register.username')}
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             className="py-2 px-4 rounded-full border border-gray-300 text-sm outline-none"
@@ -55,18 +64,19 @@ function Register() {
           />
           <input
             type="password"
-            placeholder="пароль"
+            placeholder={t('register.password')}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="py-2 px-4 rounded-full border border-gray-300 text-sm outline-none"
             disabled={isLoading}
           />
+
           <button
             type="submit"
             disabled={isLoading}
-            className="ml-auto w-10 h-10 flex items-center justify-center bg-white border border-black rounded-full hover:bg-gray-100 transition"
+            className="ml-auto w-10 h-10 flex items-center justify-center bg-black border border-black rounded-full hover:opacity-80 transition"
           >
-            <img src={arrow} alt="Зарегистрироваться" className="w-4 h-4 transform -rotate-180" />
+            <img src={arrow} alt={t('register.registerBtn')} className="w-4 h-4 rotate-180 invert" />
           </button>
         </form>
       </div>

@@ -14,13 +14,11 @@ async def root():
 
 @app.post("/recommend")
 def recommend_outfit(req: BodyTypeRequest):
-    result = get_recommendation(req.body_type)
+    result = get_recommendation(req.body_type, req.sex)
     # Если пришла ошибка, возвращаем в формате JSON
-    if result.startswith("LLM не ответил:"):
-        # Вернем ошибку в корректной структуре, либо выбросим HTTPException
-        from fastapi import HTTPException
-        raise HTTPException(status_code=500, detail=result)
-    return result  # Оборачиваем строку в модель
+    if isinstance(result, dict) and "error" in result:
+        raise HTTPException(status_code=500, detail=result["error"])
+    return result
 
 @app.post("/recommend_by_color_type")
 def recommend_by_color_type(req: ColorTypeRequest):

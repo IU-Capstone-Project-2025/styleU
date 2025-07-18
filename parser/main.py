@@ -51,8 +51,8 @@ COLOR_SYNONYMS = {
     "оранжевый": ["оранжевый", "янтарный", "мандариновый", "персиковый"],
     "фиолетовый": ["фиолетовый", "лавандовый", "баклажан", "лиловый", "сиреневый"],
     "коричневый": ["коричневый", "шоколадный", "кофейный", "каштановый", "бронзовый"],
-    "серебристый": ["серебристый", "металлик", "серебро", "silver"],
-    "золотой": ["золотой", "gold", "золотистый", "metallic", "металлик"],
+    "серебристый": ["серебристый", "серебро", "silver"],
+    "золотой": ["золотой", "gold", "золотистый", "золото","позолото"],
 }
 
 
@@ -60,11 +60,12 @@ COLOR_SYNONYMS = {
 client = Together(api_key="d6c15ee0b57f97707f05b2661455333de5db0666fcd25b4cfdb2832e55648d27")
 
 # LLM generating query for search
-def llm_refine_query(user_input: str, size: str, price_min: str, price_max: str, extra_info: str, style: str, color_type: str, body_shape: str) -> list:
+def llm_refine_query(user_input: str, size: str, price_min: str, price_max: str, extra_info: str, sex: str, style: str, color_type: str, body_shape: str) -> list:
     prompt = (
         f"Пользователь хочет образ: {user_input}\n"
+        f"Убедись, что аксессуары соответствуют событию и полу, упомянутым в запросе пользователя. Например, если пользователь просит 'женское платье на выпускной', аксессуары должны быть женскими и подходить для выпускного.\n"
         f"... Убедись, что цвет из запроса пользователя (если он есть) включен в поле query каждой вещи."
-        f"Размер: {size}, Цена: {price_min}-{price_max}, Дополнительная информация: {extra_info}, Стиль: {style}, Цветотип: {color_type}, Фигура: {body_shape}\n\n"
+        f"Размер: {size}, Цена: {price_min}-{price_max}, Дополнительная информация: {extra_info}, Пол: {sex},Стиль: {style}, Цветотип: {color_type}, Фигура: {body_shape}\n\n"
         f"Собери **3 разных полноценных образа** (варианта луков) для пользователя. Каждый образ должен быть JSON-объектом с полями:\n"
         f"- items: список вещей (3-6 элементов)\n"
         f"- totalReason: пояснение почему лук хорош для пользователя с его параметрами (форма тела и цветотип)\n"
@@ -270,7 +271,7 @@ def get_products(search_query: str, size_filter: str, extra_info_filter: str, st
     except:
         max_price = None
 
-    max_pages = 5
+    max_pages = 1
     all_products = []
     headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
@@ -309,7 +310,7 @@ def get_products(search_query: str, size_filter: str, extra_info_filter: str, st
                 continue
 
             if category == "main":
-               if not (size_matches(size_filter, sizes) or matches_extra_info(description, extra_info_filter) or matches_style(description, style_filter, STYLE_KEYWORDS)):
+               if not (size_matches(size_filter, sizes) or ( matches_extra_info(description, extra_info_filter) or matches_style(description, style_filter, STYLE_KEYWORDS))):
                     continue
 
             rating = float(product.get("reviewRating", 0))
@@ -368,19 +369,21 @@ async def search(
         price_min: str = Form(...),
         price_max: str = Form(...),
         extra_info: str = Form(...),
+        sex: str = Form(...),
         style: str = Form(...),
         color_type: str = Form(...),
         body_shape: str = Form(...),
 ):
     # заглушка
+    # sex = "женский"
     # style = "повседневный"
     # color_type = "весна"
     # body_shape = "прямоугольник"
 
     print(f" Запрос пользователя: {query}")
-    print(f"Размер: {size}, Дополнительная информация: {extra_info}, Стиль: {style}, Цветотип: {color_type}, Фигура: {body_shape}")
+    print(f"Размер: {size}, Дополнительная информация: {extra_info}, Пол: {sex}, Стиль: {style}, Цветотип: {color_type}, Фигура: {body_shape}")
 
-    outfit_variants = llm_refine_query(query, size,price_min, price_max, extra_info, style, color_type, body_shape)
+    outfit_variants = llm_refine_query(query, size,price_min, price_max, extra_info, sex, style, color_type, body_shape)
 
     print(" Результат от LLM:")
     print(json.dumps(outfit_variants, ensure_ascii=False, indent=2))
@@ -400,6 +403,7 @@ async def search(
             "totalReason": outfit.get("totalReason", "Образ составлен с учетом всех параметров"),
             "totalReason_en": outfit.get("totalReason_en", "The outfit is composed with all parameters"),
         }
+        has_main = False
 
         for item_idx, item in enumerate(outfit.get("items", [])):
 
@@ -419,6 +423,8 @@ async def search(
 
             if products:
                 best_product = max(products, key=lambda x: x['rating'])
+                if item.get("category") and has_main:
+                    has_main = True
 
                 complete_look["items"].append({
                     "image": best_product["image"],
@@ -431,4 +437,4 @@ async def search(
         if complete_look["items"]:
             outfits.append(complete_look) 
 
-    return JSONResponse(content={"outfits": outfits})
+    return {"outfits": outfits}
