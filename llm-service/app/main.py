@@ -14,7 +14,7 @@ async def root():
 
 @app.post("/recommend")
 def recommend_outfit(req: BodyTypeRequest):
-    result = get_recommendation(req.body_type)
+    result = get_recommendation(req.body_type, req.sex)
     # Если пришла ошибка, возвращаем в формате JSON
     if isinstance(result, dict) and "error" in result:
         raise HTTPException(status_code=500, detail=result["error"])

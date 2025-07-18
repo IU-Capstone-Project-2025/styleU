@@ -15,9 +15,9 @@ client = Together(api_key=TOGETHER_API_KEY)
 
 MODEL_NAME = "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free"
 
-def get_recommendation(body_type: str) -> dict:
+def get_recommendation(body_type: str, sex: str) -> dict:
     prompt = f"""
-Ты профессиональный стилист. Клиент имеет тип фигуры: {body_type}.
+Ты профессиональный стилист. Клиент имеет пол {sex} и тип фигуры: {body_type}.
 Сформируй ответ строго в JSON следующей структуры:
 
 {{

@@ -20,7 +20,7 @@ async def analyze_body_type(sex, height, bust, waist, hips, username=None):
             ml_response.raise_for_status()
             body_type = ml_response.json()["body_type"]
 
-            llm_response = await client.post(PREDICT_BODY_TYPE_LLM_URL, json={"body_type": body_type})
+            llm_response = await client.post(PREDICT_BODY_TYPE_LLM_URL, json={"body_type": body_type, "sex": sex})
             llm_response.raise_for_status()
             recommendation = llm_response.json()
 
