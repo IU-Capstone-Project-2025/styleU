@@ -15,7 +15,7 @@ async def analyze_body_type(sex, height, bust, waist, hips, username=None):
     try:
         async with httpx.AsyncClient(timeout=60.0) as client:
             ml_response = await client.post(PREDICT_BODY_TYPE_ML_URL, json={
-                "bust": bust, "waist": waist, "hips": hips, "height": height,
+                "bust": bust, "waist": waist, "hips": hips, "height": height, "sex": sex,
             })
             ml_response.raise_for_status()
             body_type = ml_response.json()["body_type"]
