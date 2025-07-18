@@ -270,7 +270,7 @@ def get_products(search_query: str, size_filter: str, extra_info_filter: str, st
     except:
         max_price = None
 
-    max_pages = 5
+    max_pages = 3
     all_products = []
     headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",

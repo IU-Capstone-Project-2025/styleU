@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import OutfitCarousel from './OutfitCarousel';
-import Avatar from './Avatar';
 import like from '../assets/like.png';
 import dislike from '../assets/dislike.png';
 import { useTranslation } from 'react-i18next';
@@ -19,6 +18,7 @@ function Shop() {
   const [feedback, setFeedback] = useState(null);
   const [outfits, setOutfits] = useState(null);
   const [messages, setMessages] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const resultRef = useRef(null);
   const queryRef = useRef(null);
@@ -47,6 +47,7 @@ function Shop() {
     setSubmitted(true);
     if (!isFilled) return;
 
+    setIsLoading(true);
     try {
       const formData = {
         query: String(query),
@@ -66,6 +67,8 @@ function Shop() {
       }, 300);
     } catch (err) {
       console.error('Error suggesting outfits:', err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -103,9 +106,7 @@ function Shop() {
           <h2 className="text-3xl md:text-5xl font-comfortaa font-normal mb-4 tracking-wider">
             {t('shop.title')}
           </h2>
-          <p className="text-base md:text-2xl opacity-25">
-            {t('shop.subtitle')}
-          </p>
+          <p className="text-base md:text-2xl opacity-25">{t('shop.subtitle')}</p>
         </div>
 
         <div className="max-w-6xl mx-auto flex flex-wrap justify-center items-start gap-3">
@@ -208,9 +209,36 @@ function Shop() {
           <div className="flex-shrink-0 w-32 h-[48px] mt-1">
             <button
               onClick={handleSubmit}
-              className="bg-black text-white text-sm w-full h-full rounded-2xl hover:opacity-90 transition"
+              disabled={isLoading}
+              className="bg-black text-white text-sm w-full h-full rounded-2xl hover:opacity-90 transition flex items-center justify-center"
             >
-              {t('shop.search')}
+              {isLoading ? (
+                <>
+                  <svg
+                    className="animate-spin -ml-1 mr-2 h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                    ></path>
+                  </svg>
+                  {t('shop.searching')}
+                </>
+              ) : (
+                t('shop.search')
+              )}
             </button>
           </div>
         </div>

@@ -17,6 +17,7 @@ from validation import FigureRequest, OutfitRequest
 from services.style_service import (
     analyze_body_type,
     analyze_color_type,
+    get_user_features,
 )
 from services.statistic import like_action, get_all_statistics
 from services.user_service import generate_avatar_from_saved_photo
@@ -85,6 +86,7 @@ def connect():
         Analyzes the user's body type based on physical parameters.
 
         Request Body (JSON)
+        - sex: Male or female (string)
         - height: Height in centimeters, e.g. 170 (float, range: 0–300)
         - bust: Chest circumference in centimeters (float, range: 0–300)
         - waist: Waist circumference in centimeters (float, range: 0–300)
@@ -105,6 +107,7 @@ async def analyze_figure(
 ):
     try:
         result = await analyze_body_type(
+            sex = request.sex,
             height=request.height,
             bust=request.bust,
             waist=request.waist,
@@ -149,23 +152,59 @@ async def analyze_color(
 
 
 @app.post(
+    "/get_user_parameters",
+    tags=["Style Service"],
+    summary="Get user features",
+    description="""
+        Returns the user's saved body type, color type and recommendations.
+
+        **Requires authorization**.
+
+        Response (200 OK)
+        ```json
+        {
+            "sex": "male",  // or "female",
+            "height": 170.0,
+            "body_type": "hourglass",  // or other body types,
+            "body_type_reccommendation": "ML specific response structure",
+            "color_type": "spring",  // or "summer", "autumn", "winter"
+            "color_type_reccommendation": "ML specific response structure",
+        }
+        ```
+    """,
+)
+@log_endpoint
+async def get_user_parameters(
+    user: str = Depends(get_current_user),
+):
+    try:
+        features = await get_user_features(username=user)
+        return JSONResponse(content=features)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка при получении параметров пользователя: {str(e)}")
+
+
+@app.post(
     "/suggest_outfits",
     tags=["Outfit Service"],
     summary="Suggest outfits",
     description="""
-        Подбирает образы на основе введенного запроса, предпочтений пользователя (размер, стиль, цвет, материал), а также его сохраненных color_type и body_type.
+        Selects outfits based on the entered query, the user's preferences 
+        (size, style, color, material), as well as his saved color_type and body_type.
 
-        **Требуется авторизация**.
+        **Requires authorization**.
 
-        Параметры формы (multipart/form-data):
-        - query: Желаемый образ, например "летний образ на прогулку"
-        - size: Размер пользователя (например, "S", "M", "44", "46-48")
-        - price_min: Минимальная цена
-        - price_max: Маскимальная цена
-        - extra_info: Дополнительная информация
-        - style: Предпочтительный стиль
+        Form parameters (multipart/form-data):
+        - query: The desired outfit
+        - size: The size of the user (for example, "S", "M", "44", "46-48")
+        - price_min: Minimum price
+        - price_max: Maximum price
+        - extra_info: Additional information
+        - style: Preferred style
 
-        Ответ:
+        Response (200 OK)
         ```json
         {
         ML specific response structure
