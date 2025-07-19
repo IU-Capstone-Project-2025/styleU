@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import OutfitCarousel from './OutfitCarousel';
-import Avatar from './Avatar';
 import like from '../assets/like.png';
 import dislike from '../assets/dislike.png';
 import { useTranslation } from 'react-i18next';
@@ -275,12 +274,8 @@ function Shop() {
         </div>
       </section>
 
-      {/* <div>
-        <Avatar />
-      </div> */}
-
       <div ref={resultRef}>
-        <OutfitCarousel outfits={outfits} messages={messages} />
+        <OutfitCarousel outfits={outfits} messages={messages} carousel3StyleOnly={true} />
       </div>
     </>
   );

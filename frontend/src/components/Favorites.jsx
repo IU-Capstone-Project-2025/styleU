@@ -24,7 +24,6 @@ export default function Favorites() {
     fetchFavorites();
   }, []);
 
-  // Имитация удаления из избранного (удаляет из локального состояния)
   const handleRemoveFavorite = (outfit, idx) => {
     setFavorites((prev) => prev.filter((_, i) => i !== idx));
   };

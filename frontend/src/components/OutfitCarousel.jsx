@@ -320,6 +320,35 @@ export default function OutfitCarousel({ outfits = [], messages, showTitle = tru
           </button>
         </div>
       )}
+
+      {/* Навигация для обычного режима (Shop) — стрелки и пагинация-кружки */}
+      {!carousel3 && outfits && outfits.length > 1 && (
+        <div className="flex items-center justify-center gap-3 mt-6">
+          <button
+            onClick={prevOutfit}
+            className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center hover:scale-110 transition"
+            aria-label="Предыдущий образ"
+          >
+            <img src={arrow} alt="left" className="w-2.5 h-2.5" />
+          </button>
+          {outfits.map((_, i) => (
+            <div
+              key={i}
+              className={`h-2 rounded-full transition-all duration-300 ${outfitIndex === i ? 'bg-black w-5' : 'bg-gray-400 w-2'}`}
+              onClick={() => setOutfitIndex(i)}
+              style={{ cursor: 'pointer' }}
+            ></div>
+          ))}
+          <button
+            onClick={nextOutfit}
+            className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center hover:scale-110 transition"
+            aria-label="Следующий образ"
+          >
+            <img src={arrow} alt="right" className="w-2.5 h-2.5 transform rotate-180" />
+          </button>
+        </div>
+      )}
+
     </section>
   );
 }
