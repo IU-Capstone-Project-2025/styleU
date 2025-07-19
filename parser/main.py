@@ -10,51 +10,65 @@ templates = Jinja2Templates(directory="templates")
 
 from together import Together
 
-STYLE_KEYWORDS = {
-    "офисный": ["офисная","школьная", "офис", "деловой", "карандаш", "строгий", "классический", "прямой", "формальный"],
-    "повседневный": ["повседневный", "удобный", "на каждый день", "повседневка"],
-    "спортивный": ["спорт", "трикотаж", "удобный", "активный"],
-    "романтичный": ["воздушный", "кружево", "плиссе", "летящий", "нежный", "женственный"],
-    "вечерний": ["вечерний", "элегантный", "нарядный", "праздничный", "шикарный"],
-    "минимализм":["однотонный", "простой", "минималистичный", "без логотипов", "классика", "old money"]
-}
-MATERIAL_SYNONYMS = {
-    "хлопок": ["хлопок", "cotton", "100% хлопка", "хлопковый", "коттон"],
-    "лен": ["лён", "льняной", "linen"],
-    "шерсть": ["шерсть", "шерстяной", "wool", "woolen"],
-    "вискоза": ["вискоза", "вискозный", "viscose"],
-    "полиэстер": ["полиэстер", "полиэстровый", "polyester"],
-    "шелк": ["шёлк", "шелк", "шелковый", "silk"],
-    "джинса": ["джинса", "деним", "джинсовый", "denim"],
-    "трикотаж": ["трикотаж", "трикотажный", "knit", "jersey"],
-    "кожа": ["кожа", "кожаный", "leather"],
-    "эко-кожа": ["эко-кожа", "экокожа", "искусственная кожа", "eco-leather", "faux leather"],
-    "замша": ["замша", "замшевый", "suede"],
-    "акрил": ["акрил", "акриловый", "acrylic"],
-    "нейлон": ["нейлон", "нейлоновый", "nylon"],
-    "эластан": ["эластан", "spandex", "elastane"],
-    "лайкра": ["лайкра", "lycra"],
-    "мех": ["мех", "меховой", "fur", "искусственный мех", "натуральный мех"],
+COLOR_IDS = {
+    "бежевый": 16119260,
+    "голубой": 11393254,
+    "жёлтый": 16776960,
+    "белый": 16777215,
+    "чёрный": 0,
+    "коричневый": 10824234,
+    "оранжевый": 16753920,
+    "розовый": 16761035,
+    "зелёный": 3_327_680,
+    "красный": 16_711_680,
+    "серый": 8_421_504,
+    "синий": 255,
+    "фиолетовый": 15_631_086
 }
 
+MATERIAL_IDS = {
+    "акрил": 15000418,
+    "вискоза": 15000820,
+    "джинса": 15015099,
+    "замша": 15000485,
+    "лен": 15000909,
+    "полиэстер": 31468069,
+    "хлопок": 15000517,
+    "шерсть": 15000911,
+    "эластан": 15001448,
+    "бархат":15028957,
+    "вельвет":32031531,
+    "велюр":46748907,
+    "искуственная кожа":15000417,
+    "натуральная кожа":15001662,
+    "нейлон":15026431,
+    "шелк искусственный":15001833,
+    "шелк натуральный":15000413,
+    "шифон":15028957,
+    "штапель":15000583,
+    "экокожа":15046579
 
-COLOR_SYNONYMS = {
-    "белый": ["белый", "молочный", "айвори", "экрю", "слоновая кость"],
-    "черный": ["чёрный", "черный", "графит", "антрацит", "смоль"],
-    "красный": ["красный", "бордовый", "алый", "вишнёвый", "терракотовый"],
-    "синий": ["синий", "тёмно-синий", "голубой", "индиго", "васильковый", "лазурный", "джинсовый"],
-    "зелёный": ["зелёный", "оливковый", "хаки", "мятный", "салатовый", "изумрудный", "лайм"],
-    "розовый": ["розовый", "пудровый", "коралловый", "фуксия", "неоново-розовый"],
-    "бежевый": ["бежевый", "нюд", "песочный", "карамельный", "какао", "кафе латте"],
-    "серый": ["серый", "пепельный", "графитовый", "стальной"],
-    "желтый": ["жёлтый", "горчичный", "соломенный", "лимонный", "золотой"],
-    "оранжевый": ["оранжевый", "янтарный", "мандариновый", "персиковый"],
-    "фиолетовый": ["фиолетовый", "лавандовый", "баклажан", "лиловый", "сиреневый"],
-    "коричневый": ["коричневый", "шоколадный", "кофейный", "каштановый", "бронзовый"],
-    "серебристый": ["серебристый", "серебро", "silver"],
-    "золотой": ["золотой", "gold", "золотистый", "золото","позолото"],
 }
 
+SIZE_IDS = {
+    "38":-1000000191,
+    "40": -1000000192,
+    "42": -1000000193,
+    "44": -1000000194,
+    "46": -1000000195,
+    "48": -1000000196,
+    "50": -1000000197,
+    "52": -1000000198,
+    "54": -1000000199
+}
+
+GENDER_FILTERS = {
+    "женский": "2",
+    "мужской": "1",
+    "девочка": "5",
+    "мальчик": "6",
+    "детский": "3"
+}
 
 # Deepseek API key
 client = Together(api_key="d6c15ee0b57f97707f05b2661455333de5db0666fcd25b4cfdb2832e55648d27")
@@ -66,7 +80,7 @@ def llm_refine_query(user_input: str, size: str, price_min: str, price_max: str,
         f"Убедись, что аксессуары соответствуют событию и полу, упомянутым в запросе пользователя. Например, если пользователь просит 'женское платье на выпускной', аксессуары должны быть женскими и подходить для выпускного.\n"
         f"... Убедись, что цвет из запроса пользователя (если он есть) включен в поле query каждой вещи."
         f"Размер: {size}, Цена: {price_min}-{price_max}, Дополнительная информация: {extra_info}, Пол: {sex},Стиль: {style}, Цветотип: {color_type}, Фигура: {body_shape}\n\n"
-        f"Собери **3 разных полноценных образа** (варианта луков) для пользователя. Каждый образ должен быть JSON-объектом с полями:\n"
+        f"Собери **3 разных полноценных образа** (варианта луков) для пользователя, где ГЛАВНЫЙ предмет (платье/костюм) должен быть ИСКЛЮЧИТЕЛЬНО из {extra_info}.. Каждый образ должен быть JSON-объектом с полями:\n"
         f"- items: список вещей (3-6 элементов)\n"
         f"- totalReason: пояснение почему лук хорош для пользователя с его параметрами (форма тела и цветотип)\n"
         f"- totalReason_en: an explanation of why a bow is good for a user with its parameters (body shape and color type)\n"
@@ -97,7 +111,7 @@ def llm_refine_query(user_input: str, size: str, price_min: str, price_max: str,
                         "Учитывай текущие тренды этого года, стиль, фигуру, цветотип."
                         "Убедись, что вещи внутри одного образа подходят друг к другу."
                         "Учитывай: 0) Всегда возвращай JSON строго в блоке ```json ... ```,1) фасон вещи должен соответствовать фигуре, 2) оттенки цвета — цветотипу, "
-                        "3) включай материал, 4) не упоминай напрямую фигуру или цветотип, "
+                        "3) включай обязательно всегда материал, 4) не упоминай напрямую фигуру или цветотип, "
                         "а адаптируй фасон и цвет под них, 5) всегда указывай тип вещи (юбка, платье и т.п.)."
                     )
                 },
@@ -130,52 +144,9 @@ def llm_refine_query(user_input: str, size: str, price_min: str, price_max: str,
     except Exception as e:
         print("Error in llm_refine_query:", e)
         return [[{"item": "платье", "query": "платье на выпускной", "category": "main"}]]
+    
+from urllib.parse import quote_plus
 
-
-# Check if product matches user material and styel preferences
-def matches_style(description, value, synonym_dict):
-    synonyms = synonym_dict.get(value.lower(), [value.lower()])
-    return any(syn in description.lower() for syn in synonyms)
-
-# Check if product has user extra info
-def matches_extra_info(description: str, extra_info: str) -> bool:
-    description = description.lower()
-    words = extra_info.lower().split()
-
-    combined_synonyms = {}
-    combined_synonyms.update(MATERIAL_SYNONYMS)
-    combined_synonyms.update(COLOR_SYNONYMS)
-
-    for word in words:
-        synonyms = combined_synonyms.get(word, [word])
-        if any(syn in description for syn in synonyms):
-            return True
-    return False
-
-
-# Check if product has user size
-def size_matches(size_filter, sizes):
-    size_filter = size_filter.upper()
-    for s in sizes:
-        s = s.upper()
-        if size_filter == s:
-            return True
-        if '-' in s:
-            parts = s.split('-')
-            try:
-                start = int(parts[0])
-                end = int(parts[-1])
-                size_int = int(size_filter)
-                if start <= size_int <= end:
-                    return True
-            except ValueError:
-                continue
-    return False
-
-def match_query_words(product_name: str, query: str) -> bool:
-    name_words = set(product_name.lower().split())
-    query_words = set(query.lower().split())
-    return bool(name_words & query_words)  # есть хотя бы одно общее слово
 
 def extract_price(product: dict) -> int | None:
     try:
@@ -257,125 +228,157 @@ def build_wb_image_url(product_id):
         basket = '28'
     return f"https://basket-{basket}.wbbasket.ru/vol{short_id}/part{part}/{product_id}/images/big/1.webp"
 
+# Сборка ссылки на WB по запросу и фильтрам
+def build_wb_search_link(query: str, size: str,sex: str, price_min: str, price_max: str, is_main=False, color="", material="") -> str:
+    base_url = "https://www.wildberries.ru/catalog/0/search.aspx?"
 
-# Get products from WB API and filter by user preferences
-def get_products(search_query: str, size_filter: str, extra_info_filter: str, style_filter: str, category: str = "" ,min_price=None, max_price=None):
-        # Приведение типов
+    params = {
+        "search": query,
+        "sort": "popular"
+    }
+
+    if price_min and price_max:
+        try:
+            min_p = int(price_min) * 100
+            max_p = int(price_max) * 100
+            params["priceU"] = f"{min_p};{max_p}"
+        except ValueError:
+            print("Ошибка преобразования цены")
+
+    if is_main and size in SIZE_IDS:
+        params["f1000000006"] = SIZE_IDS[size]
+
+    if sex and sex.lower() in GENDER_FILTERS:
+            params["fkind"] = GENDER_FILTERS[sex.lower()]  
+
+    # Заккоментировано, так как в запросе уже есть цвет
+    # if color in COLOR_IDS:
+    #     params["fcolor"] = COLOR_IDS[color]
+    
+
+    if is_main and material in MATERIAL_IDS:
+        params["f14177450"] = MATERIAL_IDS[material]
+
+    return base_url + "&".join(f"{key}={quote_plus(str(value))}" for key, value in params.items())
+
+
+
+from urllib.parse import unquote_plus
+from urllib.parse import urlparse, parse_qs
+from urllib.parse import unquote_plus, urlparse, parse_qs, urlencode, urlunparse
+
+# Функция для извлечения текста запроса и фильтров
+def parse_wb_url(wb_url):
+    parsed = urlparse(wb_url)
+    query_dict = parse_qs(parsed.query)
+
+    search_text = unquote_plus(query_dict.get("search", [""])[0])
+
+    # Извлекаем фильтры (в виде словаря)
+    filters = {}
+    for key, value in query_dict.items():
+        if key.startswith("f") or key == "priceU":
+            filters[key] = value[0]
+
+    return search_text, filters
+
+# Запрос к WB API и извлечение первого продукта с его информацией
+import httpx
+import time
+async def get_first_product_info(wb_url: str):
     try:
-        min_price = int(min_price) if min_price else None
-    except:
-        min_price = None
+        search_text, filters = parse_wb_url(wb_url)
+        url = "https://search.wb.ru/exactmatch/ru/common/v5/search"
 
-    try:
-        max_price = int(max_price) if max_price else None
-    except:
-        max_price = None
-
-    max_pages = 1
-    all_products = []
-    headers = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-    "Accept": "application/json"
-}
-
-    for page in range(max_pages):
         params = {
             'appType': '1',
             'curr': 'rub',
             'dest': '-1257786',
-            'query': search_query,
+            'query': search_text,
             'resultset': 'catalog',
             'sort': 'popular',
             'spp': '30',
             'uclusters': '0',
-            'page': page
+            'page': 1
+        }
+        
+        
+        params.update(filters)
+
+        headers = {
+            "User-Agent": "Mozilla/5.0",
+            "Accept": "application/json"
         }
 
-        url = "https://search.wb.ru/exactmatch/ru/common/v5/search"
+        print("Запрос к WB API:", url)
+        print("Параметры запроса:", params)
+
+        start_time = time.perf_counter()
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.get(url, params=params, headers=headers)
+        duration = time.perf_counter() - start_time
+        print(f"⏱️ Время запроса к WB API: {duration:.2f} секунд")
+
+        response = requests.get(url, params=params, headers=headers)
+        if response.status_code != 200:
+            print(f"Ошибка запроса: {response.status_code}")
+            return None
+
+        print("Код ответа WB API:", response.status_code)
+        print("Текст ответа:", response.text[:1000])  
+
         try:
-            response = requests.get(url, params=params, headers=headers)
             data = response.json()
-            print(f"📨 Ответ от WB (стр. {page+1}):", json.dumps(data, ensure_ascii=False, indent=2))
-        except Exception as e:
-            print("❌ Ошибка запроса:", e)
-            continue
-        
+        except json.JSONDecodeError:
+            print("Ошибка парсинга JSON")
+            return None
+
         products = data.get('data', {}).get('products', [])
+        if not products:
+            print("Нет продуктов в ответе.")
+            return {"link": wb_url, "image": "", "price": ""}
 
-        for product in products:
-            sizes = [s['name'] for s in product.get('sizes', []) if 'name' in s]
-            description = product.get('name', '').lower()
+        # Извлекаем первый продукт и извлекаем его цену  и ссылку и картинку
+        product = products[0]
+        price = extract_price(product)
+        if price is None:
+            print("Не удалось извлечь цену из продукта.")
+            return {"link": wb_url, "image": "", "price": ""}
 
-            if not match_query_words(description, search_query):
-                continue
+        return {
+            "link": f"https://www.wildberries.ru/catalog/{product.get('id')}/detail.aspx",
+            "image": build_wb_image_url(product.get('id')),
+            "price": str(price)
+        }
 
-            if category == "main":
-               if not (size_matches(size_filter, sizes) or ( matches_extra_info(description, extra_info_filter) or matches_style(description, style_filter, STYLE_KEYWORDS))):
-                    continue
+    except Exception as e:
+        print("❌ Ошибка при запросе get_first_product_info:", e)
+        return {"link": wb_url, "image": "", "price": ""}
 
-            rating = float(product.get("reviewRating", 0))
-            feedbacks = int(product.get("feedbacks", 0))
-
-            if feedbacks < 5:
-                continue
-
-            score = rating * math.log1p(feedbacks)
-
-             # Получаем цену товара
-            price = extract_price(product)
-            if price is None:
-                continue  # Пропускаем если не удалось получить цену
-
-            if min_price or max_price:
-                price = extract_price(product)
-                if price:
-                    if min_price and price < min_price:
-                        continue
-                    if max_price and price > max_price:
-                        continue
-            
-                product_data = {
-                    'title': product.get('name', ''),
-                    'price': extract_price(product) or 0,  
-                    'image': build_wb_image_url(product.get('id', 0)),
-                    'link': f"https://www.wildberries.ru/catalog/{product.get('id', '')}/detail.aspx",
-                    'sizes': sizes,
-                    'rating': rating,
-                    'feedbacks': feedbacks,
-                    'score': score
-                }
-                if product_data['price'] is not None: 
-                    all_products.append(product_data)
-
-
-    # Взвешенная оценка: количество отзывов * рейтинг
-    all_products.sort(key=lambda x: x['score'], reverse=True)
-
-
-    return all_products[:15]  # Возвращаем топ-15 отсортированных
+# Функция для извлечения цвета и материала
+def extract_color_material(extra_info: str):
+    words = extra_info.lower().split()
+    found_color = next((w for w in words if w in COLOR_IDS), "")
+    found_material = next((w for w in words if w in MATERIAL_IDS), "")
+    return found_color, found_material
 
 from fastapi.responses import JSONResponse
 
-# Define FastAPI app
-@app.get("/", response_class=HTMLResponse)
-async def home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request, "products": None})
-
 @app.post("/parser", response_class=JSONResponse)
 async def search(
-        request: Request,
-        query: str = Form(...),
-        size: str = Form(...),
-        price_min: str = Form(...),
-        price_max: str = Form(...),
-        extra_info: str = Form(...),
-        sex: str = Form(...),
-        style: str = Form(...),
-        color_type: str = Form(...),
-        body_shape: str = Form(...),
+    request: Request,
+    query: str = Form(...),
+    size: str = Form(...),
+    price_min: str = Form(...),
+    price_max: str = Form(...),
+    extra_info: str = Form(...),
+    sex: str = Form(...),
+    style: str = Form(...),
+    color_type: str = Form(...),
+    body_shape: str = Form(...)
 ):
-    # заглушка
-    # sex = "женский"
+     # заглушка
+    # sex = "мужской"
     # style = "повседневный"
     # color_type = "весна"
     # body_shape = "прямоугольник"
@@ -383,18 +386,19 @@ async def search(
     print(f" Запрос пользователя: {query}")
     print(f"Размер: {size}, Дополнительная информация: {extra_info}, Пол: {sex}, Стиль: {style}, Цветотип: {color_type}, Фигура: {body_shape}")
 
-    outfit_variants = llm_refine_query(query, size,price_min, price_max, extra_info, sex, style, color_type, body_shape)
+    outfit_variants = llm_refine_query(query, size, price_min, price_max, extra_info, sex, style, color_type, body_shape)
 
     print(" Результат от LLM:")
     print(json.dumps(outfit_variants, ensure_ascii=False, indent=2))
 
     outfits = []
 
+    found_color, found_material = extract_color_material(extra_info)
+
     def shorten_query(query: str, max_words: int = 3) -> str:
         return " ".join(query.split()[:max_words])
 
     for idx, outfit in enumerate(outfit_variants):
-
         if not isinstance(outfit, dict):
             continue
 
@@ -403,38 +407,45 @@ async def search(
             "totalReason": outfit.get("totalReason", "Образ составлен с учетом всех параметров"),
             "totalReason_en": outfit.get("totalReason_en", "The outfit is composed with all parameters"),
         }
+
         has_main = False
 
-        for item_idx, item in enumerate(outfit.get("items", [])):
-
+        for item in outfit.get("items", []):
             if not isinstance(item, dict):
                 continue
 
-            query = item.get("query", "")
+            item_query = item.get("query", "")
             category = item.get("category", "")
+            item_type = item.get("item", "Товар")
 
-            products = get_products(query, size, extra_info, style, category,  price_min, price_max)
+            # Только один раз применим фильтр размера — если категория главная
+            is_main = False
+            if not has_main and category:
+                is_main = True
+                has_main = True
 
-            # 🔁 fallback: упрощение запроса при отсутствии результатов
-            if not products and " " in query:
-                simplified_query = shorten_query(query)
-                products = get_products(simplified_query, size, extra_info, style, category, price_min, price_max)
+            wb_url = build_wb_search_link(
+                query=item_query,
+                size=size,
+                sex=sex,
+                price_min=price_min,
+                price_max=price_max,
+                is_main=is_main,
+                color=found_color,
+                material=found_material
+            )
+            product = await get_first_product_info(wb_url)
 
+            complete_look["items"].append({
+                "image": product["image"],
+                "link": product["link"],
+                "price": product["price"],
+                "marketplace": "Wildberries",
+                "reason": f"{item_type}: {item_query}"
+            })
 
-            if products:
-                best_product = max(products, key=lambda x: x['rating'])
-                if item.get("category") and has_main:
-                    has_main = True
-
-                complete_look["items"].append({
-                    "image": best_product["image"],
-                    "link": best_product["link"],
-                    "price": best_product["price"],
-                    "marketplace": "Wildberries",
-                    "reason": f"{item.get('item', 'Товар')}: {best_product['title']} (рейтинг: {best_product['rating']})"
-                })
 
         if complete_look["items"]:
-            outfits.append(complete_look) 
+            outfits.append(complete_look)
 
     return {"outfits": outfits}
