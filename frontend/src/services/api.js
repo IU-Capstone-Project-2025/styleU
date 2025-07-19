@@ -110,3 +110,26 @@ export const getUserParameters = async (token) => {
   });
   return response.data;
 };
+
+// Добавить аутфит в избранное (POST /add_to_favorites)
+export const addToFavorites = async (data, token) => {
+  if (!token) throw new Error('Token is required');
+  const response = await axios.post(`${BASE_URL}/add_to_favorites`, data, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+  });
+  return response.data;
+};
+
+// Получить избранные аутфиты (GET /get_favorites)
+export const getFavorites = async (token) => {
+  if (!token) throw new Error('Token is required');
+  const response = await axios.get(`${BASE_URL}/get_favorites`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+  return response.data;
+};

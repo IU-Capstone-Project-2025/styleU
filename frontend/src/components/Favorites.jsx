@@ -1,38 +1,54 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { getFavorites } from '../services/api';
+import OutfitCarousel from './OutfitCarousel';
 
 export default function Favorites() {
-  // Пример данных (заменить на реальные из контекста или API)
-  const favorites = [
-    {
-      id: 1,
-      image: 'https://images.wbstatic.net/big/new/2000/01/01/0000000001-1.jpg',
-      title: 'Черные мюли',
-      marketplace: 'wildberries',
-      price: 2000,
-    },
-  ];
+  const [favorites, setFavorites] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchFavorites = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const token = localStorage.getItem('token');
+        const res = await getFavorites(token);
+        setFavorites(res || []);
+      } catch (err) {
+        setError('Ошибка загрузки избранного');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchFavorites();
+  }, []);
+
+  // Имитация удаления из избранного (удаляет из локального состояния)
+  const handleRemoveFavorite = (outfit, idx) => {
+    setFavorites((prev) => prev.filter((_, i) => i !== idx));
+  };
 
   return (
-    <section className="min-h-screen px-4 pb-12 font-noto font-light pt-32">
-      <div className="text-center mb-10">
-        <h2 className="text-3xl md:text-5xl font-comfortaa font-normal mb-4 tracking-wider">
-          Избранные товары
-        </h2>
-      </div>
-      <div className="max-w-6xl mx-auto flex flex-wrap justify-center items-start gap-3">
-        {favorites.length === 0 ? (
-          <div className="text-gray-400 text-xl mt-20">Нет избранных товаров</div>
-        ) : (
-          favorites.map((item) => (
-            <div key={item.id} className="bg-[#ededed] rounded-2xl p-8 flex flex-col items-center w-[340px] min-h-[340px] shadow-md">
-              <img src={item.image} alt={item.title} className="w-40 h-40 object-cover rounded-xl mb-6" />
-              <div className="text-lg font-noto font-light mb-2">{item.title}</div>
-              <div className="text-gray-500 text-sm mb-1">Market: {item.marketplace}</div>
-              <div className="text-gray-500 text-sm mb-1">Price: {item.price} ₽</div>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-white px-4 mt-24">
+      <h2 className="text-3xl md:text-5xl font-comfortaa font-normal mb-10 tracking-wider text-center w-full">
+        Избранные товары
+      </h2>
+      <div className="relative w-full max-w-5xl bg-[#f3f3f3] rounded-xl p-16 pt-14 pb-32 shadow-2xl font-noto font-light mt-4">
+        <div className="flex flex-col items-center w-full">
+          {loading ? (
+            <div className="text-gray-400 text-xl mt-20">Загрузка...</div>
+          ) : error ? (
+            <div className="text-red-500 text-xl mt-20">{error}</div>
+          ) : favorites.length === 0 ? (
+            <div className="text-gray-400 text-xl mt-20">Нет избранных товаров</div>
+          ) : (
+            <div className="w-full flex flex-col items-center">
+              <OutfitCarousel outfits={favorites} showTitle={false} hideReason={true} isFavorites={true} onRemoveFavorite={handleRemoveFavorite} carousel3={true} />
             </div>
-          ))
-        )}
+          )}
+        </div>
       </div>
-    </section>
+    </div>
   );
 } 
