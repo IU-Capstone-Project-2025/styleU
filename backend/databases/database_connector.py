@@ -160,3 +160,20 @@ class DatabaseConnector:
         )
         favorites = result.scalars().all()
         return [f.outfit for f in favorites]
+
+    async def remove_favorite_outfit(self, user_id: int, outfit: dict):
+        stmt = (
+            select(FavoriteOutfit)
+            .where(FavoriteOutfit.user_id == user_id)
+        )
+        result = await self.db.execute(stmt)
+        favorites = result.scalars().all()
+
+        for fav in favorites:
+            if fav.outfit == outfit:
+                await self.db.delete(fav)
+                await self.db.commit()
+                return
+
+        raise ValueError("Outfit not found in favorites")
+

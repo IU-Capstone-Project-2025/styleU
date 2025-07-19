@@ -25,6 +25,7 @@ from services.outfit_service import (
     suggest_outfits_for_user,
     add_favorite_outfit,
     get_favorite_outfits,
+    remove_favorite_outfit
 )
 from authorization.dependencies import get_current_user_optional, get_current_user
 from authorization.routes import router as auth_router
@@ -339,6 +340,64 @@ async def get_favorites(
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ошибка при получении избранных образов: {str(e)}")
+
+
+from fastapi import Body
+
+@app.post(
+    "/remove_from_favorites",
+    tags=["Outfit Service"],
+    summary="Remove outfit from favorites",
+    description="""
+        Removes a selected outfit from the user's favorites.
+
+        **Requires authorization**.
+
+        Request Body (JSON):
+        ```json
+        {
+        "items": [
+            {
+            "image": "https://example.com/image1.jpg",
+            "link": "https://marketplace.com/item/123",
+            "price": 2499,
+            "marketplace": "Wildberries",
+            "reason": "Подходит для вашего цветотипа"
+            },
+            {
+            "image": "https://example.com/image2.jpg",
+            "link": "https://marketplace.com/item/456",
+            "price": 3199,
+            "marketplace": "Lamoda",
+            "reason": "Выделяет талию"
+            }
+        ],
+        "totalReason": "Образ подчеркивает фигуру и соответствует вашему стилю",
+        "totalReason_en": "The outfit highlights your body shape and fits your style"
+        }
+        ```
+
+        Response (200 OK)
+        ```json
+        {
+            "message": "Outfit removed from favorites"
+        }
+        ```
+    """,
+)
+@log_endpoint
+async def remove_from_favorites(
+    outfit: FavoriteOutfitRequest,
+    user: str = Depends(get_current_user),
+):
+    try:
+        response = await remove_favorite_outfit(user=user, outfit=outfit.model_dump())
+        return JSONResponse(content=response)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка при удалении образа из избранного: {str(e)}")
+
 
 
 

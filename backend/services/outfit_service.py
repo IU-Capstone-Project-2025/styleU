@@ -70,3 +70,16 @@ async def get_favorite_outfits(user: str):
     outfits = await connector.get_favorite_outfits(user_data.id)
 
     return outfits
+
+
+async def remove_favorite_outfit(user: str, outfit: dict):
+    async with DatabaseConnector() as connector:
+        user_data = await connector.get_user_by_username(user)
+
+    if not user_data:
+        raise ValueError("User not found")
+
+    async with DatabaseConnector() as connector:
+        await connector.remove_favorite_outfit(user_data.id, outfit)
+
+    return {"message": "Outfit removed from favorites"}
