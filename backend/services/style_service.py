@@ -62,7 +62,6 @@ async def analyze_color_type(file: UploadFile, username=None):
             color_type = response.json()["color_type"]
 
             llm_response = await client.post(PREDICT_COLOR_TYPE_LLM_URL, json={"color_type": color_type})
-            print(llm_response)
             llm_response.raise_for_status()
             recommendation = llm_response.json()
 
