@@ -1,12 +1,14 @@
 from fastapi import FastAPI, UploadFile, File
+from typing import List
 from app.schema import BodyParams, PredictionResult, ImagePath, PredictionColorResult
 from app.model import predict_body_type
 from app.colortype_model import get_features_from_image, predict_color_types
-from app.faceid_adapter.faceid_adapter_run import generate_stylized_avatar
+from app.avatar_generator.avatar_generator_run import generate_stylized_avatar_with_clothes
 from pathlib import Path
 import shutil
 from fastapi.responses import StreamingResponse
 from io import BytesIO
+import io
 
 app = FastAPI()
 
@@ -33,3 +35,18 @@ async def generate_avatar(image: UploadFile = File(...)):
     return StreamingResponse(BytesIO(generated_image_bytes), media_type="image/jpeg", headers={
         "Content-Disposition": f"attachment; filename=avatar.jpg"
     })
+    
+    
+@app.post("/generate-avatar_leonardo")
+async def generate_avatar(
+    face: UploadFile = File(...),
+    clothing: List[UploadFile] = File(...)
+):
+    if len(clothing) != 3:
+        return {"error": "Требуется ровно 3 файла одежды"}
+
+    face_bytes = await face.read()
+    clothing_bytes = [await f.read() for f in clothing]
+
+    result = generate_stylized_avatar_with_clothes(face_bytes, clothing_bytes)
+    return StreamingResponse(io.BytesIO(result), media_type="image/jpeg")
