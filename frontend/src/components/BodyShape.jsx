@@ -80,7 +80,9 @@ export default function BodyShape() {
         hips: parseFloat(inputs.hips),
       };
 
-      const res = await analyzeFigure(bodyData);
+      // Получаем токен из localStorage
+      const token = localStorage.getItem('token');
+      const res = await analyzeFigure(bodyData, token);
       const langKey = i18n.language === 'ru' ? 'rus' : 'eng';
       const data = res.recommendation?.[langKey] || {};
 

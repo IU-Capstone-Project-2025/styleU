@@ -98,3 +98,15 @@ export const checkServer = async () => {
   const response = await axios.get(`${BASE_URL}/api/hello`);
   return response.data;
 };
+
+// Получить параметры пользователя (POST /get_user_parameters)
+export const getUserParameters = async (token) => {
+  if (!token) throw new Error('Token is required');
+  const response = await axios.post(`${BASE_URL}/get_user_parameters`, null, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+  });
+  return response.data;
+};

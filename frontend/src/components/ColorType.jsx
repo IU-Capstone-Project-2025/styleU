@@ -44,7 +44,9 @@ export default function ColorType() {
     if (!imageFile) return;
     setLoading(true);
     try {
-      const result = await analyzeColor(imageFile);
+      // Получаем токен из localStorage
+      const token = localStorage.getItem('token');
+      const result = await analyzeColor(imageFile, token);
       const langKey = i18n.language === 'ru' ? 'rus' : 'eng';
       const data = result.recommendation?.[langKey] || {};
       const rec = data.recommendation || {};
