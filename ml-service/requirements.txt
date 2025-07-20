@@ -10,3 +10,5 @@ gradio_client
 python-dotenv
 httpx
 python-multipart
+torch
+torchvision

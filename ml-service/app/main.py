@@ -1,7 +1,8 @@
 from fastapi import FastAPI, UploadFile, File
 from app.schema import BodyParams, PredictionResult, ImagePath, PredictionColorResult
 from app.model import predict_body_type
-from app.colortype_model import get_features_from_image, predict_color_types
+# from app.colortype_model import get_features_from_image, predict_color_types
+from app.resnet_colortype import predict_color_type 
 from app.faceid_adapter.faceid_adapter_run import generate_stylized_avatar
 from pathlib import Path
 import shutil
@@ -20,11 +21,16 @@ def predict(params: BodyParams):
     body_type = predict_body_type(features)
     return {"body_type": body_type}
 
-@app.post("/predict_color_type",response_model=PredictionColorResult)
+# @app.post("/predict_color_type",response_model=PredictionColorResult)
+# def predict_color_type(params: ImagePath):
+#     features = get_features_from_image(params.path)
+#     color_type = predict_color_types(features)
+#     return {"color_type": color_type}
+
+@app.post("/predict_colortype",response_model=PredictionColorResult)
 def predict_color_type(params: ImagePath):
-    features = get_features_from_image(params.path)
-    color_type = predict_color_types(features)
-    return {"color_type": color_type}
+    colortype = predict_color_type(params.path)
+    return {"body_type": colortype}
 
 @app.post("/generate-avatar")
 async def generate_avatar(image: UploadFile = File(...)):
