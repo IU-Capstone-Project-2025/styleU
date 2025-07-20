@@ -123,6 +123,17 @@ export const addToFavorites = async (data, token) => {
   return response.data;
 };
 
+export const removeFavorite = async (data, token) => {
+  if (!token) throw new Error('Token is required');
+  const response = await axios.post(`${BASE_URL}/remove_from_favorites`, data, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+  });
+  return response.data;
+};
+
 // Получить избранные аутфиты (GET /get_favorites)
 export const getFavorites = async (token) => {
   if (!token) throw new Error('Token is required');

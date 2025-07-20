@@ -109,7 +109,8 @@
     "overallReason": "Why this outfit",
     "price": "Price",
     "marketplace": "Shop",
-    "reason": "Why this item"
+    "reason": "Why this item",
+    "noOtherOutfitFound": "No other outfit found"
   },
   "login": {
     "noAccount": "No account?",
@@ -134,7 +135,8 @@
     "color": "Color type",
     "shape": "Body shape",
     "findOut": "Find out!",
-    "create": "Create avatar"
+    "create": "Create avatar",
+    "avatar": "Create avatar"
   },
   "register": {
     "title": "Create Account",

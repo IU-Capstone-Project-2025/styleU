@@ -16,7 +16,7 @@ function Shop() {
   const [hoveringPrice, setHoveringPrice] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [feedback, setFeedback] = useState(null);
-  const [outfits, setOutfits] = useState(null);
+  const [outfits, setOutfits] = useState([]);
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -25,13 +25,9 @@ function Shop() {
   const extraInfoRef = useRef(null);
 
   const isFilled =
-    query.trim() &&
-    size &&
-    style &&
-    priceRange[0] &&
-    priceRange[1] &&
-    extraInfo.trim();
+    query.trim() && size && style && priceRange[0] && priceRange[1] && extraInfo.trim();
 
+  // Auto-resize textareas
   useEffect(() => {
     if (queryRef.current) {
       queryRef.current.style.height = 'auto';
@@ -43,25 +39,36 @@ function Shop() {
     }
   }, [query, extraInfo]);
 
+  // Load saved outfits from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('outfits');
+    if (saved) {
+      setOutfits(JSON.parse(saved));
+    }
+  }, []);
+
   const handleSubmit = async () => {
     setSubmitted(true);
     if (!isFilled) return;
-
     setIsLoading(true);
     try {
       const formData = {
-        query: String(query),
-        size: String(size),
-        price_min: String(priceRange[0]),
-        price_max: String(priceRange[1]),
-        extra_info: String(extraInfo),
-        style: String(style),
+        query,
+        size,
+        price_min: priceRange[0],
+        price_max: priceRange[1],
+        extra_info: extraInfo,
+        style,
       };
 
       const token = localStorage.getItem('token');
       const res = await suggestOutfits(formData, token);
-      setOutfits(res.outfits || []);
-      setMessages(res.messages || []);
+      const newOutfits = res.outfits || [];
+      const newMessages = res.messages || [];
+
+      setOutfits(newOutfits);
+      setMessages(newMessages);
+      localStorage.setItem('outfits', JSON.stringify(newOutfits));
       setTimeout(() => {
         resultRef.current?.scrollIntoView({ behavior: 'smooth' });
       }, 300);
@@ -102,6 +109,7 @@ function Shop() {
   return (
     <>
       <section className="min-h-screen px-4 pb-12 font-noto font-light pt-32">
+        {/* Input fields */}
         <div className="text-center mb-10">
           <h2 className="text-3xl md:text-5xl font-comfortaa font-normal mb-4 tracking-wider">
             {t('shop.title')}
@@ -109,8 +117,9 @@ function Shop() {
           <p className="text-base md:text-2xl opacity-25">{t('shop.subtitle')}</p>
         </div>
 
+        {/* Form layout */}
         <div className="max-w-6xl mx-auto flex flex-wrap justify-center items-start gap-3">
-          {/* Query */}
+          {/* Query field */}
           <div className="flex-shrink-0 w-52">
             <textarea
               ref={queryRef}
@@ -123,7 +132,7 @@ function Shop() {
             {submitted && !query && <p className={errorText}>{t('shop.fillField')}</p>}
           </div>
 
-          {/* Size */}
+          {/* Size select */}
           <div className="flex-shrink-0 w-52">
             <select
               value={size}
@@ -131,14 +140,14 @@ function Shop() {
               className={`${sharedSelectStyle} ${submitted && !size ? errorField : ''}`}
             >
               <option value="">{t('shop.size')}</option>
-              {['XS', 'S', 'M', 'L', 'XL', '44', '46', '48', '50'].map((sz) => (
+              {['36', '38', '40','42', '44', '46', '48', '50', '52', '54'].map((sz) => (
                 <option key={sz} value={sz}>{sz}</option>
               ))}
             </select>
             {submitted && !size && <p className={errorText}>{t('shop.fillField')}</p>}
           </div>
 
-          {/* Style */}
+          {/* Style select */}
           <div className="flex-shrink-0 w-52">
             <select
               value={style}
@@ -146,14 +155,14 @@ function Shop() {
               className={`${sharedSelectStyle} ${submitted && !style ? errorField : ''}`}
             >
               <option value="">{t('shop.style')}</option>
-              {['casual', 'office', 'sporty', 'romantic', 'edgy'].map((s) => (
+              {['casual', 'office', 'sporty', 'romantic', 'edgy', 'formal'].map((s) => (
                 <option key={s} value={s}>{s}</option>
               ))}
             </select>
             {submitted && !style && <p className={errorText}>{t('shop.fillField')}</p>}
           </div>
 
-          {/* Price Dropdown */}
+          {/* Price dropdown */}
           <div
             className="flex-shrink-0 w-52 relative"
             onMouseEnter={() => setHoveringPrice(true)}
@@ -192,7 +201,7 @@ function Shop() {
             )}
           </div>
 
-          {/* Extra Info */}
+          {/* Extra info */}
           <div className="flex-shrink-0 w-52">
             <textarea
               ref={extraInfoRef}
@@ -205,7 +214,7 @@ function Shop() {
             {submitted && !extraInfo && <p className={errorText}>{t('shop.fillField')}</p>}
           </div>
 
-          {/* Submit Button */}
+          {/* Submit button */}
           <div className="flex-shrink-0 w-32 h-[48px] mt-1">
             <button
               onClick={handleSubmit}
@@ -243,25 +252,15 @@ function Shop() {
           </div>
         </div>
 
-        {/* Feedback Section */}
+        {/* Feedback section */}
         <div className="mt-12 flex justify-center">
           <div className="border border-gray-300 rounded-xl px-6 py-5 bg-white shadow-md w-full max-w-sm text-center transition-all">
             <p className="mb-4 text-sm font-medium text-black">{t('shop.feedbackQ')}</p>
             <div className="flex justify-center gap-5">
-              <button
-                onClick={handleLike}
-                className={`w-11 h-11 rounded-full border flex items-center justify-center transition ${
-                  feedback === 'like' ? 'border-gray-400 ring-2 ring-gray-300 bg-white shadow-md' : 'hover:bg-gray-100 border-gray-300'
-                }`}
-              >
+              <button onClick={handleLike} className="w-11 h-11 rounded-full border flex items-center justify-center transition hover:bg-gray-100 border-gray-300">
                 <img src={like} alt="Like" className="w-5 h-5" />
               </button>
-              <button
-                onClick={handleDislike}
-                className={`w-11 h-11 rounded-full border flex items-center justify-center transition ${
-                  feedback === 'dislike' ? 'border-gray-400 ring-2 ring-gray-300 bg-white shadow-md' : 'hover:bg-gray-100 border-gray-300'
-                }`}
-              >
+              <button onClick={handleDislike} className="w-11 h-11 rounded-full border flex items-center justify-center transition hover:bg-gray-100 border-gray-300">
                 <img src={dislike} alt="Dislike" className="w-5 h-5" />
               </button>
             </div>
@@ -274,9 +273,12 @@ function Shop() {
         </div>
       </section>
 
-      <div ref={resultRef}>
-        <OutfitCarousel outfits={outfits} messages={messages} carousel3StyleOnly={true} />
-      </div>
+      {/* Outfits Result */}
+      {outfits.length > 0 && (
+        <div ref={resultRef}>
+          <OutfitCarousel outfits={outfits} messages={messages} carousel3StyleOnly={true} />
+        </div>
+      )}
     </>
   );
 }
