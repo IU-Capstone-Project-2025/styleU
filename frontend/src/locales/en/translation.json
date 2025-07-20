@@ -133,7 +133,8 @@
     "height": "Height",
     "color": "Color type",
     "shape": "Body shape",
-    "findOut": "Find out!"
+    "findOut": "Find out!",
+    "create": "Create avatar"
   },
   "register": {
     "title": "Create Account",
@@ -169,6 +170,14 @@
     "winter": "winter",
     "autumn": "autumn",
     "spring": "spring"
+  },
+  "avatar": {
+    "title": "Create your avatar",
+    "description": "To create your avatar, you need to analyze your color type first",
+    "analyze": "Generate",
+    "analyzing": "Generating...",
+    "feedbackQ": "How do you like this feature?",
+    "generated": "Your generated avatar"
   }
 
 }

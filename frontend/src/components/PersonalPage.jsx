@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { AuthContext } from './AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { getUserParameters } from '../services/api';
+import { UserIcon } from 'lucide-react';
 
 function PersonalPage() {
   const { t, i18n } = useTranslation();
@@ -12,6 +13,7 @@ function PersonalPage() {
   const [userParams, setUserParams] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [profilePhoto, setProfilePhoto] = useState(null);
 
   const handleLogout = () => {
     logout();
@@ -27,6 +29,18 @@ function PersonalPage() {
         if (!token) throw new Error('No token');
         const params = await getUserParameters(token);
         setUserParams(params);
+        // Загружаем аватар
+        try {
+          const blob = await import('../services/api').then(m => m.generateAvatar(token));
+          if (blob && blob.size > 100) { // если аватар реально сгенерирован
+            const url = URL.createObjectURL(blob);
+            setProfilePhoto(url);
+          } else {
+            setProfilePhoto(null);
+          }
+        } catch (e) {
+          setProfilePhoto(null);
+        }
       } catch (err) {
         if (err?.response && [400, 404, 422].includes(err.response.status)) {
           setUserParams({});
@@ -95,6 +109,25 @@ function PersonalPage() {
     <div className="flex flex-col items-center justify-center min-h-screen bg-white px-4">
       <div className="relative w-full max-w-5xl bg-[#f3f3f3] rounded-xl p-16 pt-14 pb-32 shadow-2xl font-noto font-light">
         <div className="flex flex-row items-start w-full">
+          {/* Левая колонка: аватар и кнопка */}
+          <div className="flex flex-col items-center mr-12 min-w-[180px]">
+            <div className="w-44 h-44 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden shadow border border-gray-300">
+              {profilePhoto ? (
+                <img src={profilePhoto} alt="avatar" className="w-full h-full object-cover" />
+              ) : (
+                <UserIcon className="w-24 h-24 text-gray-400" />
+              )}
+            </div>
+            {!profilePhoto && (
+              <button
+                className="mt-6 px-6 py-2 bg-gray-300 text-black rounded-full shadow-md hover:bg-gray-400 transition text-base font-medium"
+                style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
+                onClick={() => navigate('/avatar')}
+              >
+                Создать аватар
+              </button>
+            )}
+          </div>
           <div className="flex-1 flex flex-col items-start mx-auto">
             <h1 className="text-5xl font-comfortaa font-semibold mb-14 mt-2 text-center w-full tracking-tight text-gray-800">
               {t('personal.welcome')},{' '}
