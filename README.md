@@ -26,16 +26,12 @@ Six containers will be launched in Docker:
 
 - Parser
 
-- Ollama
-
 Databases:
 
 - PostgreSQL
 
 - MongoDB
 
-
-⚠️ During the first launch, Ollama may take a few minutes to load — this is normal, just wait.
 
 ## interaction with the interface
 
