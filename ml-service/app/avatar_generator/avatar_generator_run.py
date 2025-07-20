@@ -128,7 +128,7 @@ def poll_generation(generation_id):
 
 
 
-def generate_stylized_avatar_with_clothes(face_image: bytes) -> bytes:
+def generate_stylized_avatar(face_image: bytes) -> bytes:
     """Главная функция: принимает 1 лицо + 3 одежды, возвращает байты сгенерированного образа"""
     face_id = upload_image_to_leonardo(face_image)
 
