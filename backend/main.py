@@ -8,12 +8,12 @@ logging.basicConfig(
 import uvicorn
 from functools import wraps
 from fastapi import FastAPI, UploadFile, File, HTTPException, Depends, Request, status
-from typing import Optional
+from typing import Optional, List
 from contextlib import asynccontextmanager
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
-from validation import FigureRequest, OutfitRequest
+from validation import FigureRequest, OutfitRequest, FavoriteOutfitRequest
 from services.style_service import (
     analyze_body_type,
     analyze_color_type,
@@ -21,7 +21,12 @@ from services.style_service import (
 )
 from services.statistic import like_action, get_all_statistics
 from services.user_service import generate_avatar_from_saved_photo
-from services.outfit_service import suggest_outfits_for_user
+from services.outfit_service import (
+    suggest_outfits_for_user,
+    add_favorite_outfit,
+    get_favorite_outfits,
+    remove_favorite_outfit
+)
 from authorization.dependencies import get_current_user_optional, get_current_user
 from authorization.routes import router as auth_router
 from databases.relational_db import init_models
@@ -234,11 +239,176 @@ async def suggest_outfits(
         raise HTTPException(status_code=500, detail=f"Ошибка при подборе образов: {str(e)}")
 
 
+@app.post(
+    "/add_to_favorites",
+    tags=["Outfit Service"],
+    summary="Add outfit to favorites",
+    description="""
+        Adds the selected outfit to the user's favorites.
+        
+        **Requires authorization**.
+
+        Request Body (JSON):
+        ```json
+        {
+        "items": [
+            {
+            "image": "https://example.com/image1.jpg",
+            "link": "https://marketplace.com/item/123",
+            "price": 2499,
+            "marketplace": "Wildberries",
+            "reason": "Подходит для вашего цветотипа"
+            },
+            {
+            "image": "https://example.com/image2.jpg",
+            "link": "https://marketplace.com/item/456",
+            "price": 3199,
+            "marketplace": "Lamoda",
+            "reason": "Выделяет талию"
+            }
+        ],
+        "totalReason": "Образ подчеркивает фигуру и соответствует вашему стилю",
+        "totalReason_en": "The outfit highlights your body shape and fits your style"
+        }
+        ```
+
+        Response (200 OK)
+        ```json
+        {
+            "message": "Outfit added to favorites"
+        }
+        ```
+    """,
+)
+
+@log_endpoint
+async def add_to_favorites(
+    outfit: FavoriteOutfitRequest,
+    user: str = Depends(get_current_user),
+):
+    try:
+        response = await add_favorite_outfit(user=user, outfit=outfit.model_dump())
+        return JSONResponse(content=response)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка при добавлении образа в избранное: {str(e)}")
+
+
+@app.get(
+    "/get_favorites",
+    tags=["Outfit Service"],
+    summary="Get favorite outfits",
+    description="""
+        Returns the user's favorite outfits.
+
+        **Requires authorization**.
+
+        Response (200 OK)
+        ```json
+        {
+        "items": [
+            {
+            "image": "https://example.com/image1.jpg",
+            "link": "https://marketplace.com/item/123",
+            "price": 2499,
+            "marketplace": "Wildberries",
+            "reason": "Подходит для вашего цветотипа"
+            },
+            {
+            "image": "https://example.com/image2.jpg",
+            "link": "https://marketplace.com/item/456",
+            "price": 3199,
+            "marketplace": "Lamoda",
+            "reason": "Выделяет талию"
+            }
+        ],
+        "totalReason": "Образ подчеркивает фигуру и соответствует вашему стилю",
+        "totalReason_en": "The outfit highlights your body shape and fits your style"
+        }
+        ```
+    """,
+)
+@log_endpoint
+async def get_favorites(
+    user: str = Depends(get_current_user),
+):
+    try:
+        outfits = await get_favorite_outfits(user=user)
+        return JSONResponse(content=outfits)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка при получении избранных образов: {str(e)}")
+
+
+from fastapi import Body
+
+@app.post(
+    "/remove_from_favorites",
+    tags=["Outfit Service"],
+    summary="Remove outfit from favorites",
+    description="""
+        Removes a selected outfit from the user's favorites.
+
+        **Requires authorization**.
+
+        Request Body (JSON):
+        ```json
+        {
+        "items": [
+            {
+            "image": "https://example.com/image1.jpg",
+            "link": "https://marketplace.com/item/123",
+            "price": 2499,
+            "marketplace": "Wildberries",
+            "reason": "Подходит для вашего цветотипа"
+            },
+            {
+            "image": "https://example.com/image2.jpg",
+            "link": "https://marketplace.com/item/456",
+            "price": 3199,
+            "marketplace": "Lamoda",
+            "reason": "Выделяет талию"
+            }
+        ],
+        "totalReason": "Образ подчеркивает фигуру и соответствует вашему стилю",
+        "totalReason_en": "The outfit highlights your body shape and fits your style"
+        }
+        ```
+
+        Response (200 OK)
+        ```json
+        {
+            "message": "Outfit removed from favorites"
+        }
+        ```
+    """,
+)
+@log_endpoint
+async def remove_from_favorites(
+    outfit: FavoriteOutfitRequest,
+    user: str = Depends(get_current_user),
+):
+    try:
+        response = await remove_favorite_outfit(user=user, outfit=outfit.model_dump())
+        return JSONResponse(content=response)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка при удалении образа из избранного: {str(e)}")
+
+
+
+
 @app.post("/generate_avatar")
 @log_endpoint
-async def generate_avatar(user: str = Depends(get_current_user)):
+async def generate_avatar(
+    clothing: List[UploadFile] = File(...),
+    user: str = Depends(get_current_user),
+):
     try:
-        return await generate_avatar_from_saved_photo(user)
+        return await generate_avatar_from_saved_photo(clothing, user)
     except ValueError as e:
         raise HTTPException(status_code=400, detail="Сначала пройдите определение цветотипа.")
     except Exception as e:

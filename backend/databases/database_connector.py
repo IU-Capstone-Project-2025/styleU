@@ -1,4 +1,4 @@
-from databases.models import User, UserParameters, Feedback
+from databases.models import User, UserParameters, Feedback, FavoriteOutfit
 from databases.relational_db import SessionLocal
 from sqlalchemy.future import select
 from sqlalchemy import update, insert
@@ -149,3 +149,31 @@ class DatabaseConnector:
 
     async def delete_avatar(self, username: str):
         await self.mongo_db.avatars.delete_one({"username": username})
+
+    async def add_favorite_outfit(self, user_id: int, outfit: dict):
+        self.db.add(FavoriteOutfit(user_id=user_id, outfit=outfit))
+        await self.db.commit()
+
+    async def get_favorite_outfits(self, user_id: int) -> list[dict]:
+        result = await self.db.execute(
+            select(FavoriteOutfit).where(FavoriteOutfit.user_id == user_id)
+        )
+        favorites = result.scalars().all()
+        return [f.outfit for f in favorites]
+
+    async def remove_favorite_outfit(self, user_id: int, outfit: dict):
+        stmt = (
+            select(FavoriteOutfit)
+            .where(FavoriteOutfit.user_id == user_id)
+        )
+        result = await self.db.execute(stmt)
+        favorites = result.scalars().all()
+
+        for fav in favorites:
+            if fav.outfit == outfit:
+                await self.db.delete(fav)
+                await self.db.commit()
+                return
+
+        raise ValueError("Outfit not found in favorites")
+

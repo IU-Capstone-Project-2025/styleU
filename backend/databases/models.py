@@ -12,6 +12,7 @@ class User(Base):
     hashed_password = Column(String)
 
     parameters = relationship("UserParameters", back_populates="owner")
+    favorites = relationship("FavoriteOutfit", back_populates="user")
 
 
 class UserParameters(Base):
@@ -40,3 +41,13 @@ class Feedback(Base):
     action_type = Column(String, index=True)
     feedback_type = Column(String, index=True)
     count = Column(Integer, default=1)
+
+
+class FavoriteOutfit(Base):
+    __tablename__ = "favorite_outfits"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    outfit = Column(JSON)
+
+    user = relationship("User", back_populates="favorites")
