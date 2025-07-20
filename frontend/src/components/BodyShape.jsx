@@ -194,6 +194,44 @@ export default function BodyShape() {
                 ) : t('bodyShape.analyze')}
               </button>
             </div>
+
+            {/* Feedback section */}
+            <div className="mt-6 w-full flex justify-center">
+              <div className="border border-gray-300 rounded-xl px-4 md:px-6 py-4 md:py-5 bg-white shadow-md w-full max-w-sm text-center transition-all">
+                <p className="mb-4 text-sm md:text-[15px] font-medium text-black">
+                  {t('bodyShape.feedbackQ')}
+                </p>
+                <div className="flex justify-center gap-5">
+                  <button
+                    onClick={() => sendFeedback('like')}
+                    className={`w-10 h-10 md:w-11 md:h-11 rounded-full border flex items-center justify-center transition duration-300 ${
+                      feedback === 'like'
+                        ? 'border-gray-400 ring-2 ring-gray-300 bg-white shadow-md'
+                        : 'hover:bg-gray-100 border-gray-300'
+                    }`}
+                    aria-label="Like"
+                  >
+                    <img src={like} alt="Like" className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => sendFeedback('dislike')}
+                    className={`w-10 h-10 md:w-11 md:h-11 rounded-full border flex items-center justify-center transition duration-300 ${
+                      feedback === 'dislike'
+                        ? 'border-gray-400 ring-2 ring-gray-300 bg-white shadow-md'
+                        : 'hover:bg-gray-100 border-gray-300'
+                    }`}
+                    aria-label="Dislike"
+                  >
+                    <img src={dislike} alt="Dislike" className="w-5 h-5" />
+                  </button>
+                </div>
+                {feedback && (
+                  <p className="mt-3 text-xs md:text-sm text-gray-600 italic transition-opacity duration-300">
+                    {feedback === 'like' ? t('bodyShape.likeResp') : t('bodyShape.dislikeResp')}
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Right Column */}

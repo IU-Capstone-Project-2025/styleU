@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { getUserParameters } from '../services/api';
 
 function PersonalPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user: authUser, logout } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -13,32 +13,82 @@ function PersonalPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
   useEffect(() => {
     const fetchUserParams = async () => {
       setLoading(true);
       setError(null);
       try {
         const token = localStorage.getItem('token');
-        if (!token) throw new Error('Нет токена');
+        if (!token) throw new Error('No token');
         const params = await getUserParameters(token);
         setUserParams(params);
       } catch (err) {
-        // Если ошибка связана с отсутствием данных (404, 422), показываем дефолтную карточку
-        if (err?.response && (err.response.status === 404 || err.response.status === 422 || err.response.status === 400)) {
+        if (err?.response && [400, 404, 422].includes(err.response.status)) {
           setUserParams({});
         } else {
-          setError('Ошибка загрузки данных пользователя');
+          setError(t('personal.error'));
         }
       } finally {
         setLoading(false);
       }
     };
     fetchUserParams();
-  }, []);
+  }, [t]);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
+  const getSexLabel = (sex) => {
+    if (!sex) return '';
+    return sex === 'male' ? t('personal.male') : t('personal.female');
+  };
+
+  // Dictionary: Russian to English ENUM
+  const RUS_TO_EN_ENUM = {
+    'песочные часы': 'HOURGLASS',
+    'груша': 'PEAR',
+    'перевёрнутый треугольник': 'INVERTED_TRIANGLE',
+    'перевернутый треугольник': 'INVERTED_TRIANGLE',
+    'яблоко': 'APPLE',
+    'прямоугольник': 'RECTANGLE',
+    'неопределённый тип': 'UNKNOWN',
+    'трапеция': 'TRAPEZOID',
+    'треугольник': 'TRIANGLE',
+    'овал': 'OVAL',
+  };
+
+  const SHAPE_TRANSLATION = {
+    HOURGLASS: t('shapes.HOURGLASS'),
+    PEAR: t('shapes.PEAR'),
+    INVERTED_TRIANGLE: t('shapes.INVERTED_TRIANGLE'),
+    APPLE: t('shapes.APPLE'),
+    RECTANGLE: t('shapes.RECTANGLE'),
+    UNKNOWN: t('shapes.UNKNOWN'),
+    TRAPEZOID: t('shapes.TRAPEZOID'),
+    TRIANGLE: t('shapes.TRIANGLE'),
+    OVAL: t('shapes.OVAL'),
+  };
+
+  const COLOR_TRANSLATION = {
+    summer: t('colors.summer'),
+    winter: t('colors.winter'),
+    autumn: t('colors.autumn'),
+    spring: t('colors.spring'),
+  };
+
+  const normalizeShape = (value) => {
+    if (!value) return '';
+    const upper = value.toUpperCase();
+    if (SHAPE_TRANSLATION[upper]) return SHAPE_TRANSLATION[upper];
+    const mapped = RUS_TO_EN_ENUM[value.toLowerCase()];
+    return mapped ? SHAPE_TRANSLATION[mapped] : value;
+  };
+
+  const normalizeColor = (value) => {
+    if (!value) return '';
+    return COLOR_TRANSLATION[value.toLowerCase()] || value;
   };
 
   return (
@@ -47,11 +97,16 @@ function PersonalPage() {
         <div className="flex flex-row items-start w-full">
           <div className="flex-1 flex flex-col items-start mx-auto">
             <h1 className="text-5xl font-comfortaa font-semibold mb-14 mt-2 text-center w-full tracking-tight text-gray-800">
-              {t('personal.welcome')}, <span className="font-comfortaa font-semibold text-primary-700">{authUser?.username || t('personal.user')}</span>
+              {t('personal.welcome')},{' '}
+              <span className="font-comfortaa font-semibold text-primary-700">
+                {authUser?.username || t('personal.user')}
+              </span>
             </h1>
 
             {loading ? (
-              <div className="text-xl text-gray-500 text-center w-full my-10">Загрузка...</div>
+              <div className="text-xl text-gray-500 text-center w-full my-10">
+                {t('personal.loading')}
+              </div>
             ) : error ? (
               <div className="text-xl text-red-500 text-center w-full my-10">{error}</div>
             ) : (
@@ -59,8 +114,8 @@ function PersonalPage() {
                 <div className="flex justify-between w-full max-w-2xl text-center mx-auto text-2xl">
                   <div className="pl-4">
                     <div className="text-gray-500 text-lg font-noto font-light mb-1">{t('personal.sex')}</div>
-                    <div className="font-bold">
-                      {userParams?.sex ? (userParams.sex === 'male' ? 'Мужской' : 'Женский') : <span className="inline-block w-10 border-b border-gray-300 text-gray-300">&nbsp;</span>}
+                    <div className="font-bold uppercase">
+                      {userParams?.sex ? getSexLabel(userParams.sex) : <span className="inline-block w-10 border-b border-gray-300 text-gray-300">&nbsp;</span>}
                     </div>
                   </div>
                   <div className="pr-4">
@@ -75,37 +130,40 @@ function PersonalPage() {
 
                 <div className="flex flex-col gap-8 w-full max-w-2xl mx-auto mt-10 text-2xl">
                   <div className="flex items-center gap-6 w-full">
-                    <div className="text-gray-600 min-w-[120px] text-xl font-noto font-light">Цветотип</div>
+                    <div className="text-gray-600 min-w-[120px] text-xl font-noto font-light">{t('personal.color')}</div>
                     {userParams?.color_type ? (
-                      <div className="text-2xl font-bold ml-auto text-primary-700">{userParams.color_type}</div>
+                      <div className="text-2xl uppercase font-medium ml-auto text-primary-700">
+                        <b>{normalizeColor(userParams.color_type)}</b>
+                      </div>
                     ) : (
                       <button
                         className="px-12 py-3 bg-gray-200 text-black rounded-full shadow-md hover:bg-gray-300 transition text-xl ml-auto font-medium"
                         style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}
                         onClick={() => navigate('/color')}
                       >
-                        Узнать!
+                        {t('personal.findOut')}
                       </button>
                     )}
                   </div>
                   <div className="flex items-center gap-6 w-full">
-                    <div className="text-gray-600 min-w-[120px] text-xl font-noto font-light">Тип фигуры</div>
+                    <div className="text-gray-600 min-w-[120px] text-xl font-noto font-light">{t('personal.shape')}</div>
                     {userParams?.body_type ? (
-                      <div className="text-2xl font-bold ml-auto text-primary-700">{userParams.body_type}</div>
+                      <div className="text-2xl uppercase font-medium ml-auto text-primary-700">
+                        <b>{normalizeShape(userParams.body_type)}</b>
+                      </div>
                     ) : (
                       <button
                         className="px-12 py-3 bg-gray-200 text-black rounded-full shadow-md hover:bg-gray-300 transition text-xl ml-auto font-medium"
                         style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}
                         onClick={() => navigate('/shape')}
                       >
-                        Узнать!
+                        {t('personal.findOut')}
                       </button>
                     )}
                   </div>
                 </div>
               </>
             )}
-            {/* Кнопка выхода в правом нижнем углу карточки */}
             <button
               onClick={handleLogout}
               className="absolute right-8 bottom-8 px-6 py-2 bg-gray-300 text-gray-700 rounded-full shadow hover:bg-gray-400 transition text-base font-normal z-20 border border-gray-400"

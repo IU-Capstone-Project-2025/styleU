@@ -124,13 +124,15 @@
   "personal": {
     "welcome": "Welcome",
     "user": "User",
-    "logout": "Logout",
-    "photoAlt": "Profile Photo",
+    "loading": "Loading...",
+    "error": "Error loading user data",
+    "logout": "Log out",
     "sex": "Sex",
-    "weight": "Weight",
+    "male": "Male",
+    "female": "Female",
     "height": "Height",
-    "colorType": "Color Type",
-    "bodyShape": "Body Shape",
+    "color": "Color type",
+    "shape": "Body shape",
     "findOut": "Find out!"
   },
   "register": {
@@ -144,6 +146,29 @@
     "haveAccount": "Already have an account?",
     "loginLink": "Log in",
     "exit": "← Exit"
+  },
+  "favorites": {
+    "title": "Favorite Outfits",
+    "loading": "Loading...",
+    "error": "Failed to load favorites",
+    "empty": "No favorite outfits found"
+  },
+  "shapes": {
+    "HOURGLASS": "Hourglass",
+    "PEAR": "Pear",
+    "INVERTED_TRIANGLE": "Inverted Triangle",
+    "APPLE": "Apple",
+    "RECTANGLE": "Rectangle",
+    "UNKNOWN": "Unknown",
+    "TRAPEZOID": "Trapezoid",
+    "TRIANGLE": "Triangle",
+    "OVAL": "Oval"
+  },
+  "colors": {
+    "summer": "summer",
+    "winter": "winter",
+    "autumn": "autumn",
+    "spring": "spring"
   }
 
 }
