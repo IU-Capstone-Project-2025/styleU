@@ -13,7 +13,7 @@ export default function OutfitCarousel({
   isFavorites = false,
   onRemoveFavorite,
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [itemIndices, setItemIndices] = useState([]);
   const [favoriteStatus, setFavoriteStatus] = useState([]);
   const [cardMessages, setCardMessages] = useState([]);
@@ -90,7 +90,7 @@ export default function OutfitCarousel({
           {t('carousel.title')}
         </h2>
       )}
-      <div className="flex gap-8 flex-wrap justify-center transition-all duration-500">
+      <div className="flex gap-4 flex-wrap justify-center transition-all duration-500">
         {outfits.slice(0, 3).map((outfit, idx) => {
           if (!outfit || !Array.isArray(outfit.items)) return null;
 
@@ -125,7 +125,10 @@ export default function OutfitCarousel({
                     <p><span className="text-black font-semibold">{t('carousel.totalPrice')}:</span> {totalPrice} ₽</p>
                     <p><span className="text-black font-semibold">{t('carousel.marketplaces')}:</span> {marketplaces}</p>
                     {!hideReason && (
-                      <p><span className="text-black font-semibold">{t('carousel.overallReason')}:</span> {outfit.totalReason}</p>
+                      <p>
+                        <span className="text-black font-semibold">{t('carousel.overallReason')}:</span>{' '}
+                        {i18n.language === 'ru' ? outfit.totalReason : outfit.totalReason_en}
+                      </p>
                     )}
                   </div>
                 </>
