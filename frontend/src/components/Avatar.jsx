@@ -17,9 +17,10 @@ function AvatarSection() {
       const blob = await generateAvatar(token);
       const url = URL.createObjectURL(blob);
       setAvatarUrl(url);
+      localStorage.setItem('hasAvatar', 'true');
     } catch (error) {
       console.error(error);
-      alert('Не удалось сгенерировать аватар. Убедитесь, что вы авторизованы и прошли предыдущие этапы.');
+      alert(t('avatar.error'));
     } finally {
       setLoading(false);
     }

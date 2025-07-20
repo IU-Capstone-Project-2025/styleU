@@ -29,16 +29,20 @@ function PersonalPage() {
         if (!token) throw new Error('No token');
         const params = await getUserParameters(token);
         setUserParams(params);
-        // Загружаем аватар
-        try {
-          const blob = await import('../services/api').then(m => m.generateAvatar(token));
-          if (blob && blob.size > 100) { // если аватар реально сгенерирован
-            const url = URL.createObjectURL(blob);
-            setProfilePhoto(url);
-          } else {
+        // Загружаем аватар только если был создан
+        if (localStorage.getItem('hasAvatar')) {
+          try {
+            const blob = await import('../services/api').then(m => m.generateAvatar(token));
+            if (blob && blob.size > 100) {
+              const url = URL.createObjectURL(blob);
+              setProfilePhoto(url);
+            } else {
+              setProfilePhoto(null);
+            }
+          } catch (e) {
             setProfilePhoto(null);
           }
-        } catch (e) {
+        } else {
           setProfilePhoto(null);
         }
       } catch (err) {
