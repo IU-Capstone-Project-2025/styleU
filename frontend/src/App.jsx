@@ -22,6 +22,7 @@ import PersonalPage from './components/PersonalPage';
 import Shop from './components/Shop';
 import Footer from './components/Footer';
 import Favorites from './components/Favorites';
+import Avatar from './components/Avatar';
 
 import { AuthContext, AuthProvider } from './components/AuthContext';
 
@@ -144,6 +145,7 @@ function AppRoutes() {
         <Route path="/color" element={<SectionWrapper><ColorType /></SectionWrapper>} />
         <Route path="/shape" element={<SectionWrapper><BodyShape /></SectionWrapper>} />
         <Route path="/favorites" element={<Favorites />} />
+        <Route path="/avatar" element={<SectionWrapper><Avatar /></SectionWrapper>} />
       </Routes>
       <Footer />
     </ScrollNavbarWrapper>

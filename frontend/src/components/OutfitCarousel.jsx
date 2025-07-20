@@ -134,9 +134,9 @@ export default function OutfitCarousel({ outfits = [], messages, showTitle = tru
   return (
     <section className="flex flex-col items-center justify-center pt-24 pb-10 px-4 font-noto transition-all duration-500">
       {showTitle && (
-        <h2 className="text-center text-xl md:text-3xl font-light mb-8 font-comfortaa">
-          {t('carousel.title')}
-        </h2>
+      <h2 className="text-center text-xl md:text-3xl font-light mb-8 font-comfortaa">
+        {t('carousel.title')}
+      </h2>
       )}
 
       <div className={`flex ${carousel3 ? 'gap-8' : 'gap-6'} flex-wrap justify-center transition-all duration-500`}>
@@ -228,67 +228,67 @@ export default function OutfitCarousel({ outfits = [], messages, showTitle = tru
             );
           })
         ) : (
-          <div className="w-[320px] min-h-[420px] bg-white/60 backdrop-blur-xl border border-white/30 rounded-2xl shadow-md transition-all duration-700 ease-out flex flex-col items-center justify-between p-5 relative">
-            {isOverview ? (
-              <>
-                <div className="w-full flex justify-center items-center mb-3 gap-3 flex-wrap">
-                  {currentOutfit.items.map((item, i) => (
-                    <a key={i} href={item.link} target="_blank" rel="noopener noreferrer">
-                      <img
-                        src={item.image}
-                        alt={`Item ${i}`}
-                        className="w-16 h-16 object-cover rounded-md transition duration-300"
-                      />
-                    </a>
-                  ))}
-                </div>
-
-                <div className="text-sm text-gray-700 w-full mb-4 space-y-1">
-                  <p><span className="text-black font-semibold">{t('carousel.totalPrice')}:</span> {totalPrice} ₽</p>
-                  <p><span className="text-black font-semibold">{t('carousel.marketplaces')}:</span> {marketplaces}</p>
-                  {!hideReason && (
-                    <p><span className="text-black font-semibold">{t('carousel.overallReason')}:</span> {currentOutfit.totalReason}</p>
-                  )}
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="w-full flex justify-center items-center mb-3">
-                  <a href={currentItem.link} target="_blank" rel="noopener noreferrer">
+        <div className="w-[320px] min-h-[420px] bg-white/60 backdrop-blur-xl border border-white/30 rounded-2xl shadow-md transition-all duration-700 ease-out flex flex-col items-center justify-between p-5 relative">
+          {isOverview ? (
+            <>
+              <div className="w-full flex justify-center items-center mb-3 gap-3 flex-wrap">
+                {currentOutfit.items.map((item, i) => (
+                  <a key={i} href={item.link} target="_blank" rel="noopener noreferrer">
                     <img
-                      src={currentItem.image}
-                      alt="item"
-                      className="rounded-xl w-48 h-60 object-cover transition duration-300"
+                      src={item.image}
+                      alt={`Item ${i}`}
+                      className="w-16 h-16 object-cover rounded-md transition duration-300"
                     />
                   </a>
-                </div>
+                ))}
+              </div>
 
-                <div className="text-sm text-gray-700 w-full mb-4 space-y-1">
-                  <p><span className="text-black font-semibold">{t('carousel.price')}:</span> {currentItem.price} ₽</p>
-                  <p><span className="text-black font-semibold">{t('carousel.marketplace')}:</span> {currentItem.marketplace}</p>
-                  <p><span className="text-black font-semibold">{t('carousel.reason')}:</span> {currentItem.reason}</p>
-                </div>
-              </>
-            )}
+              <div className="text-sm text-gray-700 w-full mb-4 space-y-1">
+                <p><span className="text-black font-semibold">{t('carousel.totalPrice')}:</span> {totalPrice} ₽</p>
+                <p><span className="text-black font-semibold">{t('carousel.marketplaces')}:</span> {marketplaces}</p>
+                  {!hideReason && (
+                <p><span className="text-black font-semibold">{t('carousel.overallReason')}:</span> {currentOutfit.totalReason}</p>
+                  )}
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="w-full flex justify-center items-center mb-3">
+                <a href={currentItem.link} target="_blank" rel="noopener noreferrer">
+                  <img
+                    src={currentItem.image}
+                    alt="item"
+                    className="rounded-xl w-48 h-60 object-cover transition duration-300"
+                  />
+                </a>
+              </div>
 
-            <div className="flex justify-between w-full mt-auto px-4">
-              <button onClick={prevItem} className="hover:scale-110 transition">
-                <img src={arrow} className="w-3 h-3" alt="prev item" />
-              </button>
-              <button onClick={nextItem} className="hover:scale-110 transition">
-                <img src={arrow} className="w-3 h-3 transform rotate-180" alt="next item" />
-              </button>
-            </div>
+              <div className="text-sm text-gray-700 w-full mb-4 space-y-1">
+                <p><span className="text-black font-semibold">{t('carousel.price')}:</span> {currentItem.price} ₽</p>
+                <p><span className="text-black font-semibold">{t('carousel.marketplace')}:</span> {currentItem.marketplace}</p>
+                <p><span className="text-black font-semibold">{t('carousel.reason')}:</span> {currentItem.reason}</p>
+              </div>
+            </>
+          )}
 
-            <button
+          <div className="flex justify-between w-full mt-auto px-4">
+            <button onClick={prevItem} className="hover:scale-110 transition">
+              <img src={arrow} className="w-3 h-3" alt="prev item" />
+            </button>
+            <button onClick={nextItem} className="hover:scale-110 transition">
+              <img src={arrow} className="w-3 h-3 transform rotate-180" alt="next item" />
+            </button>
+          </div>
+
+          <button
               onClick={isFavorites ? handleRemoveFavorite : handleAddToFavorites}
-              className="absolute bottom-3 left-1/2 transform -translate-x-1/2 hover:scale-110 transition"
-            >
-              <img
+            className="absolute bottom-3 left-1/2 transform -translate-x-1/2 hover:scale-110 transition"
+          >
+            <img
                 src={isFavorites ? heartFilled : (favoriteStatus[outfitIndex] ? heartFilled : heartEmpty)}
-                alt="heart"
-                className="w-5 h-5"
-              />
+              alt="heart"
+              className="w-5 h-5"
+            />
             </button>
             {message && (
               <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 bg-white px-4 py-2 rounded shadow text-sm text-black border border-gray-200 z-10">
@@ -323,30 +323,30 @@ export default function OutfitCarousel({ outfits = [], messages, showTitle = tru
 
       {/* Навигация для обычного режима (Shop) — стрелки и пагинация-кружки */}
       {!carousel3 && outfits && outfits.length > 1 && (
-        <div className="flex items-center justify-center gap-3 mt-6">
-          <button
-            onClick={prevOutfit}
-            className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center hover:scale-110 transition"
+      <div className="flex items-center justify-center gap-3 mt-6">
+        <button
+          onClick={prevOutfit}
+          className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center hover:scale-110 transition"
             aria-label="Предыдущий образ"
-          >
-            <img src={arrow} alt="left" className="w-2.5 h-2.5" />
-          </button>
-          {outfits.map((_, i) => (
-            <div
-              key={i}
+        >
+          <img src={arrow} alt="left" className="w-2.5 h-2.5" />
+        </button>
+        {outfits.map((_, i) => (
+          <div
+            key={i}
               className={`h-2 rounded-full transition-all duration-300 ${outfitIndex === i ? 'bg-black w-5' : 'bg-gray-400 w-2'}`}
               onClick={() => setOutfitIndex(i)}
               style={{ cursor: 'pointer' }}
-            ></div>
-          ))}
-          <button
-            onClick={nextOutfit}
-            className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center hover:scale-110 transition"
+          ></div>
+        ))}
+        <button
+          onClick={nextOutfit}
+          className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center hover:scale-110 transition"
             aria-label="Следующий образ"
-          >
-            <img src={arrow} alt="right" className="w-2.5 h-2.5 transform rotate-180" />
-          </button>
-        </div>
+        >
+          <img src={arrow} alt="right" className="w-2.5 h-2.5 transform rotate-180" />
+        </button>
+      </div>
       )}
 
     </section>
