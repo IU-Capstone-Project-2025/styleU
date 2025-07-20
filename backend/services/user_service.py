@@ -1,4 +1,6 @@
 from fastapi.responses import StreamingResponse
+from fastapi import UploadFile
+from typing import List
 from databases.database_connector import DatabaseConnector
 from io import BytesIO
 import httpx
@@ -16,7 +18,7 @@ async def generate_avatar_from_saved_photo(username: str):
     async with httpx.AsyncClient(timeout=60.0) as client:
         response = await client.post(
             GENERATE_AVATAR_URL,
-            files={"image": ("photo.jpg", BytesIO(photo_bytes), "image/jpeg")},
+            files={"face": ("photo.jpg", BytesIO(photo_bytes), "image/jpeg")},
         )
         response.raise_for_status()
         avatar_bytes = await response.aread()

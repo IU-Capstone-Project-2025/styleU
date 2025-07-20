@@ -8,7 +8,7 @@ logging.basicConfig(
 import uvicorn
 from functools import wraps
 from fastapi import FastAPI, UploadFile, File, HTTPException, Depends, Request, status
-from typing import Optional
+from typing import Optional, List
 from contextlib import asynccontextmanager
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -401,9 +401,24 @@ async def remove_from_favorites(
 
 
 
-@app.post("/generate_avatar")
+@app.post(
+    "/generate_avatar",
+    tags=["Avatar Service"],
+    summary="Generate avatar",
+    description="""
+        Generates a personalized avatar based on the user's saved photo.
+
+        **Requires authorization**.
+
+        Response (200 OK)
+        Returns the generated avatar image as a JPEG file.
+        The image will be returned as a streaming response with the appropriate headers.
+    """,
+)
 @log_endpoint
-async def generate_avatar(user: str = Depends(get_current_user)):
+async def generate_avatar(
+    user: str = Depends(get_current_user),
+):
     try:
         return await generate_avatar_from_saved_photo(user)
     except ValueError as e:
