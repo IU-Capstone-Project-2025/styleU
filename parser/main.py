@@ -42,8 +42,7 @@ MATERIAL_IDS = {
     "искуственная кожа":15000417,
     "натуральная кожа":15001662,
     "нейлон":15026431,
-    "шелк искусственный":15001833,
-    "шелк натуральный":15000413,
+    "шелк":46748907,
     "шифон":15028957,
     "штапель":15000583,
     "экокожа":15046579
@@ -71,7 +70,7 @@ GENDER_FILTERS = {
 }
 
 # Deepseek API key
-client = Together(api_key="d6c15ee0b57f97707f05b2661455333de5db0666fcd25b4cfdb2832e55648d27")
+client = Together(api_key="tgp_v1_cMOiV0hrCTdUr9bJxc1Dn4i6S8BizFsWSDFyPpm834Q")
 
 # LLM generating query for search
 def llm_refine_query(user_input: str, size: str, price_min: str, price_max: str, extra_info: str, sex: str, style: str, color_type: str, body_shape: str) -> list:
@@ -80,7 +79,7 @@ def llm_refine_query(user_input: str, size: str, price_min: str, price_max: str,
         f"Убедись, что аксессуары соответствуют событию и полу, упомянутым в запросе пользователя. Например, если пользователь просит 'женское платье на выпускной', аксессуары должны быть женскими и подходить для выпускного.\n"
         f"... Убедись, что цвет из запроса пользователя (если он есть) включен в поле query каждой вещи."
         f"Размер: {size}, Цена: {price_min}-{price_max}, Дополнительная информация: {extra_info}, Пол: {sex},Стиль: {style}, Цветотип: {color_type}, Фигура: {body_shape}\n\n"
-        f"Собери **3 разных полноценных образа** (варианта луков) для пользователя, где ГЛАВНЫЙ предмет (платье/костюм) должен быть ИСКЛЮЧИТЕЛЬНО из {extra_info}.. Каждый образ должен быть JSON-объектом с полями:\n"
+        f"Собери **3 разных полноценных образа** (варианта луков) для пользователя, где ГЛАВНЫЙ предмет (платье/костюм) должен быть ИСКЛЮЧИТЕЛЬНО из {extra_info}.Важно: каждый из 3 образов должен иметь уникальный поисковый запрос (query) для ГЛАВНОГО товара, чтобы избежать одинаковых товаров. Каждый образ должен быть JSON-объектом с полями:\n"
         f"- items: список вещей (3-6 элементов)\n"
         f"- totalReason: пояснение почему лук хорош для пользователя с его параметрами (форма тела и цветотип)\n"
         f"- totalReason_en: an explanation of why a bow is good for a user with its parameters (body shape and color type)\n"
@@ -101,8 +100,10 @@ def llm_refine_query(user_input: str, size: str, price_min: str, price_max: str,
         f"]"
     )
     try:
+        
         response = client.chat.completions.create(
-            model="deepseek-ai/DeepSeek-V3",
+            model="meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
+            
             messages=[
                 {
                     "role": "system",
@@ -121,7 +122,9 @@ def llm_refine_query(user_input: str, size: str, price_min: str, price_max: str,
                 }
             ],
             stream=False
+            
         )
+        
         raw_content = response.choices[0].message.content.strip()
 
         try:
@@ -378,7 +381,7 @@ async def search(
     body_shape: str = Form(...)
 ):
      # заглушка
-    # sex = "мужской"
+    # sex = "женский"
     # style = "повседневный"
     # color_type = "весна"
     # body_shape = "прямоугольник"
@@ -409,6 +412,7 @@ async def search(
         }
 
         has_main = False
+        main_item_valid = False  # Добавляем флаг, валиден ли главный товар
 
         for item in outfit.get("items", []):
             if not isinstance(item, dict):
@@ -418,9 +422,8 @@ async def search(
             category = item.get("category", "")
             item_type = item.get("item", "Товар")
 
-            # Только один раз применим фильтр размера — если категория главная
             is_main = False
-            if not has_main and category:
+            if not has_main and category == "main":
                 is_main = True
                 has_main = True
 
@@ -436,6 +439,13 @@ async def search(
             )
             product = await get_first_product_info(wb_url)
 
+            # Проверяем, есть ли ссылка — если нет и это главный товар, пропускаем весь образ
+            if is_main and (not product.get("link") or "catalog" not in product["link"]):
+                main_item_valid = False
+                break
+            if is_main:
+                main_item_valid = True
+
             complete_look["items"].append({
                 "image": product["image"],
                 "link": product["link"],
@@ -444,8 +454,9 @@ async def search(
                 "reason": f"{item_type}: {item_query}"
             })
 
-
-        if complete_look["items"]:
+        # Добавляем образ, только если главный товар валиден и есть хотя бы 1 вещь
+        if main_item_valid and complete_look["items"]:
             outfits.append(complete_look)
+
 
     return {"outfits": outfits}
