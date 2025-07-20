@@ -39,14 +39,10 @@ async def generate_avatar(image: UploadFile = File(...)):
     
 @app.post("/generate-avatar_leonardo")
 async def generate_avatar(
-    face: UploadFile = File(...),
-    clothing: List[UploadFile] = File(...)
+    face: UploadFile = File(...)
 ):
-    if len(clothing) != 3:
-        return {"error": "Требуется ровно 3 файла одежды"}
 
     face_bytes = await face.read()
-    clothing_bytes = [await f.read() for f in clothing]
 
-    result = generate_stylized_avatar_with_clothes(face_bytes, clothing_bytes)
+    result = generate_stylized_avatar_with_clothes(face_bytes)
     return StreamingResponse(io.BytesIO(result), media_type="image/jpeg")

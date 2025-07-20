@@ -49,47 +49,50 @@ def upload_image_to_leonardo(image_bytes: bytes, extension="png") -> str:
     return image_id
 
 
-def generate_avatar_with_refs(character_img_id: str, clothing_img_ids: list[str]) -> str:
-    
+def generate_avatar_with_refs(character_img_id: str) -> str:
+    import requests
+
     url = "https://cloud.leonardo.ai/api/rest/v1/generations"
 
+    # Главный образ - лицо
     controlnets = [
         {
             "initImageId": character_img_id,
             "initImageType": "UPLOADED",
-            "preprocessorId": 133,
+            "preprocessorId": 133,  # Common face/pose control
             "strengthType": "High",
-            "influence": 0.5
+            "influence": 0.85  # Держим близко к оригиналу
         }
     ]
 
-    for cloth_id in clothing_img_ids:
-        controlnets.append({
-            "initImageId": cloth_id,
-            "initImageType": "UPLOADED",
-            "preprocessorId": 67,
-            "strengthType": "High",
-            "influence": 1.0
-        })
+    # 📌 Универсальный промпт для мужских и женских лиц
+    prompt = (
+            "anime-style avatar of a person, upper body and full head visible, "
+            "clean soft facial features, stylized proportions, expressive eyes, "
+            "cel shading, smooth skin, soft lighting, colorful hair, visible hairstyle, "
+            "digital painting, looking directly at viewer, plain background, high quality, pixar-anime inspired"
+            )
 
     payload = {
-        "prompt": 
-        "Full body Bratz doll, standing pose, photorealistic face from reference image, "
-        "wearing the exact clothes from the style reference images, "
-        "sharp textures, doll in studio light, plain background"
-        ,
-        # "negativePrompt": "blurry, cropped, multiple people, watermark, logo, back view, doll cut off",
-        "modelId": "6b645e3a-d64f-4341-a6d8-7a3690fbf042",
+        "prompt": prompt,
+        "modelId": "aa77f04e-3eec-4034-9c07-d0f619684628",
         "width": 512,
         "height": 768,
         "num_images": 1,
+        "presetStyle": "PORTRAIT",
         "alchemy": True,
         "controlnets": controlnets
     }
 
     resp = requests.post(url, headers=HEADERS, json=payload, proxies=PROXIES)
     resp.raise_for_status()
+
+    # ⚠️ DEBUG: если что-то пойдёт не так
+    print("Response status:", resp.status_code)
+    print("Response text:", resp.text)
+
     return resp.json()['sdGenerationJob']['generationId']
+
 
 
 def poll_generation(generation_id):
@@ -103,6 +106,7 @@ def poll_generation(generation_id):
         except Exception:
             raise RuntimeError(f"Invalid JSON response: {response.text}")
 
+        # ✅ Правильное обращение к нужному полю
         gen_data = data.get("generations_by_pk")
         if not gen_data:
             raise RuntimeError(f"Missing 'generations_by_pk' in response: {data}")
@@ -124,13 +128,11 @@ def poll_generation(generation_id):
 
 
 
-
-def generate_stylized_avatar_with_clothes(face_image: bytes, clothing_images: list[bytes]) -> bytes:
+def generate_stylized_avatar_with_clothes(face_image: bytes) -> bytes:
     """Главная функция: принимает 1 лицо + 3 одежды, возвращает байты сгенерированного образа"""
     face_id = upload_image_to_leonardo(face_image)
-    clothing_ids = [upload_image_to_leonardo(img) for img in clothing_images]
 
-    generation_id = generate_avatar_with_refs(face_id, clothing_ids)
+    generation_id = generate_avatar_with_refs(face_id)
     final_url = poll_generation(generation_id)
 
     # Скачивание готовой картинки
