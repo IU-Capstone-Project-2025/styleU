@@ -1,6 +1,5 @@
 from fastapi.responses import StreamingResponse
-from fastapi import UploadFile
-from typing import List
+
 from databases.database_connector import DatabaseConnector
 from io import BytesIO
 import httpx
