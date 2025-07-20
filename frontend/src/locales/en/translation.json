@@ -1,7 +1,7 @@
 {
   "smartFashion": "Smart fashion that adapts to you",
   "tryFree": "Try it for free",
-  "login": "Login",
+  "loginbtn": "Login",
 
   "about": {
     "header": "The perfect wardrobe in just a few steps.",
@@ -32,5 +32,152 @@
         "subtext": "Please log in to use this feature."
       }
     ]
+  },
+
+  "colorType": {
+    "title": "Find your color type!",
+    "description": "Upload a photo of your face, click 'Analyze', and we'll determine your color type!",
+    "selectFile": "SELECT FILE",
+    "analyze": "Analyze",
+    "analyzing": "Analyzing...",
+    "feedbackQuestion": "How do you like this feature?",
+    "likeResponse": "Thanks for your feedback!",
+    "dislikeResponse": "Sorry it didn’t meet your expectations",
+    "yourType": "Your color type:",
+    "meaning": "What does it mean?",
+    "suitable": "Which colors suit you?",
+    "unsuitable": "Which colors don't suit you?",
+    "noImageMsg": "Upload a photo and click 'Analyze'",
+    "analyzeMsg": "Click 'Analyze' to get results",
+    "notDefined": "NOT DEFINED",
+    "errorMessage": "Failed to analyze the image. Please try again."
+  },
+  "bodyShape": {
+    "title": "Find your body shape!",
+    "subtitle": "Enter your measurements and click 'Analyze' — we’ll determine your shape!",
+    "sex": "Sex",
+    "height": "Height",
+    "weight": "Weight",
+    "waist": "Waist",
+    "chest": "Chest",
+    "hip": "Hips",
+    "rangeErr": "Value must be 1‑300 cm",
+    "analyze": "Analyze",
+    "analyzing": "Analyzing...",
+    "yourType": "Your body shape:",
+    "meaning": "What does it mean?",
+    "clothes": "Which clothes suit you?",
+    "prompt": "Fill in the measurements and click 'Analyze'",
+    "notDefined": "NOT DEFINED",
+    "error": "Figure analysis failed. Please try again.",
+    "feedbackQ": "How do you like this feature?",
+    "likeResp": "Thanks for your feedback!",
+    "dislikeResp": "Sorry it didn’t meet your expectations"
+  },
+  "footer": {
+    "rights": "All rights reserved."
+  },
+  "navbar": {
+    "shop": "Shop",
+    "color": "Color Type",
+    "shape": "Body Shape",
+    "profile": "Profile",
+    "logout": "Logout",
+    "login": "Login",
+    "about": "About"
+  },
+  "shop": {
+    "title": "StyleU Shop",
+    "subtitle": "Make sure you know your colortype and bodyshape first!!!",
+    "query": "What are you looking for?",
+    "size": "Choose size",
+    "style": "Choose style",
+    "extra": "Extra info",
+    "min": "Min price (₽)",
+    "max": "Max price (₽)",
+    "search": "Search!",
+    "fillField": "Please fill out this field",
+    "feedbackQ": "Did you like this feature?",
+    "likeResp": "Thanks for your feedback!",
+    "dislikeResp": "Sorry to hear that!",
+    "searching": "Searching..."
+  },
+  "carousel": {
+    "title": "Outfits selected just for your request",
+    "totalPrice": "Total price",
+    "marketplaces": "Shops",
+    "overallReason": "Why this outfit",
+    "price": "Price",
+    "marketplace": "Shop",
+    "reason": "Why this item"
+  },
+  "login": {
+    "noAccount": "No account?",
+    "register": "Register",
+    "username": "username",
+    "password": "password",
+    "login": "Login",
+    "enterCredentials": "Please enter username and password.",
+    "success": "You have successfully logged in!",
+    "error": "Invalid username or password. Please try again."
+  },
+  "personal": {
+    "welcome": "Welcome",
+    "user": "User",
+    "loading": "Loading...",
+    "error": "Error loading user data",
+    "logout": "Log out",
+    "sex": "Sex",
+    "male": "Male",
+    "female": "Female",
+    "height": "Height",
+    "color": "Color type",
+    "shape": "Body shape",
+    "findOut": "Find out!",
+    "create": "Create avatar"
+  },
+  "register": {
+    "title": "Create Account",
+    "username": "Username",
+    "password": "Password",
+    "registerBtn": "Register",
+    "success": "Registration successful!",
+    "error": "Registration failed. Try a different username.",
+    "fillFields": "Please fill in all fields.",
+    "haveAccount": "Already have an account?",
+    "loginLink": "Log in",
+    "exit": "← Exit"
+  },
+  "favorites": {
+    "title": "Favorite Outfits",
+    "loading": "Loading...",
+    "error": "Failed to load favorites",
+    "empty": "No favorite outfits found"
+  },
+  "shapes": {
+    "HOURGLASS": "Hourglass",
+    "PEAR": "Pear",
+    "INVERTED_TRIANGLE": "Inverted Triangle",
+    "APPLE": "Apple",
+    "RECTANGLE": "Rectangle",
+    "UNKNOWN": "Unknown",
+    "TRAPEZOID": "Trapezoid",
+    "TRIANGLE": "Triangle",
+    "OVAL": "Oval"
+  },
+  "colors": {
+    "summer": "summer",
+    "winter": "winter",
+    "autumn": "autumn",
+    "spring": "spring"
+  },
+  "avatar": {
+    "title": "Create your avatar",
+    "description": "To create your avatar, you need to analyze your color type first",
+    "analyze": "Generate",
+    "analyzing": "Generating...",
+    "feedbackQ": "How do you like this feature?",
+    "generated": "Your generated avatar"
   }
+
 }

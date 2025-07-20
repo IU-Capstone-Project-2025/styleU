@@ -21,6 +21,7 @@ async def suggest_outfits_for_user(
 
     color_type = user_data.get("color_type")
     body_shape = user_data.get("body_type")
+    sex = user_data.get("sex")
 
     data = {
         "query": query,
@@ -28,6 +29,7 @@ async def suggest_outfits_for_user(
         "price_min": price_min,
         "price_max": price_max,
         "extra_info": extra_info,
+        "sex": sex,
         "style": style,
         "color_type": color_type,
         "body_shape": body_shape,
@@ -43,3 +45,41 @@ async def suggest_outfits_for_user(
         raise HTTPException(status_code=response.status_code, detail="Failed to get response from parser")
 
     return response.json()
+
+
+async def add_favorite_outfit(user: str, outfit: dict):
+    async with DatabaseConnector() as connector:
+        user_data = await connector.get_user_by_username(user)
+
+    if not user_data:
+        raise ValueError("User not found")
+
+    async with DatabaseConnector() as connector:
+        await connector.add_favorite_outfit(user_data.id, outfit)
+
+    return {"message": "Outfit added to favorites"}
+
+
+async def get_favorite_outfits(user: str):
+    async with DatabaseConnector() as connector:
+        user_data = await connector.get_user_by_username(user)
+
+    if not user_data:
+        raise ValueError("User not found")
+
+    outfits = await connector.get_favorite_outfits(user_data.id)
+
+    return outfits
+
+
+async def remove_favorite_outfit(user: str, outfit: dict):
+    async with DatabaseConnector() as connector:
+        user_data = await connector.get_user_by_username(user)
+
+    if not user_data:
+        raise ValueError("User not found")
+
+    async with DatabaseConnector() as connector:
+        await connector.remove_favorite_outfit(user_data.id, outfit)
+
+    return {"message": "Outfit removed from favorites"}

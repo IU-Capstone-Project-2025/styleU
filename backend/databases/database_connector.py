@@ -1,4 +1,4 @@
-from databases.models import User, UserParameters, Feedback
+from databases.models import User, UserParameters, Feedback, FavoriteOutfit
 from databases.relational_db import SessionLocal
 from sqlalchemy.future import select
 from sqlalchemy import update, insert
@@ -41,11 +41,20 @@ class DatabaseConnector:
         return user
 
     async def add_user_parameters(self, user_id: int, **kwargs):
-        self.db.add(UserParameters(user_id=user_id, **kwargs))
-        await self.db.commit()
+        result = await self.db.execute(
+            select(UserParameters)
+            .where(UserParameters.user_id == user_id)
+            .order_by(UserParameters.id.desc())
+            .limit(1)
+        )
+        existing = result.scalar_one_or_none()
 
-    async def set_color_type(self, user_id: int, color_type: str):
-        self.db.add(UserParameters(user_id=user_id, color_type=color_type))
+        if existing:
+            for key, value in kwargs.items():
+                setattr(existing, key, value)
+        else:
+            self.db.add(UserParameters(user_id=user_id, **kwargs))
+
         await self.db.commit()
 
     async def add_feedback(self, action_type: str, feedback_type: str):
@@ -102,8 +111,12 @@ class DatabaseConnector:
         params = params_list[-1]
 
         return {
-            "color_type": params.color_type,
+            "sex": params.sex,
+            "height": params.height,
             "body_type": params.body_type,
+            "body_type_recommendation": params.body_type_recommendation,
+            "color_type": params.color_type,
+            "color_type_recommendation": params.color_type_recommendation,
         }
 
     async def save_user_photo(self, username: str, file_path: str):
@@ -136,3 +149,31 @@ class DatabaseConnector:
 
     async def delete_avatar(self, username: str):
         await self.mongo_db.avatars.delete_one({"username": username})
+
+    async def add_favorite_outfit(self, user_id: int, outfit: dict):
+        self.db.add(FavoriteOutfit(user_id=user_id, outfit=outfit))
+        await self.db.commit()
+
+    async def get_favorite_outfits(self, user_id: int) -> list[dict]:
+        result = await self.db.execute(
+            select(FavoriteOutfit).where(FavoriteOutfit.user_id == user_id)
+        )
+        favorites = result.scalars().all()
+        return [f.outfit for f in favorites]
+
+    async def remove_favorite_outfit(self, user_id: int, outfit: dict):
+        stmt = (
+            select(FavoriteOutfit)
+            .where(FavoriteOutfit.user_id == user_id)
+        )
+        result = await self.db.execute(stmt)
+        favorites = result.scalars().all()
+
+        for fav in favorites:
+            if fav.outfit == outfit:
+                await self.db.delete(fav)
+                await self.db.commit()
+                return
+
+        raise ValueError("Outfit not found in favorites")
+

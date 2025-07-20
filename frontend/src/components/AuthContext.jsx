@@ -24,6 +24,9 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = (token, userData) => {
+    if (!userData || !userData.username) {
+      throw new Error('userData with username is required');
+    }
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(userData));
     setIsAuthenticated(true);
